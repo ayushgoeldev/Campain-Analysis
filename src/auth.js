@@ -21,11 +21,11 @@ function constantTimeEqual(a, b) {
 }
 
 function cookieOptions(req) {
-  const secure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  const secure = req.secure || req.headers['x-forwarded-proto'] === 'https' || process.env.VERCEL === '1';
   return {
     httpOnly: true,
-    sameSite: 'lax',
-    secure,
+    sameSite: 'none',
+    secure: true,
     maxAge: SESSION_TTL_MS,
     path: '/',
   };
