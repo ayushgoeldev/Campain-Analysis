@@ -23,6 +23,12 @@ router.get('/health', wrap(async (_req, res) => {
   await query('SELECT 1');
   res.json({ ok: true });
 }));
+router.get('/debug-env', (req, res) => {
+  res.json({
+    hasUsername: !!process.env.APP_USERNAME,
+    hasPassword: !!process.env.APP_PASSWORD,
+  });
+});
 
 // --- Settings --------------------------------------------------------------
 router.get('/settings', wrap(async (_req, res) => {
@@ -308,5 +314,6 @@ router.post('/mappings/:type/upload', upload.single('file'), wrap(async (req, re
     fs.unlink(req.file.path, () => {});
   }
 }));
+
 
 export default router;
