@@ -17,6 +17,11 @@ function fmtMonth(ym) {
   return `${MONTH_NAMES[Number(m[2]) - 1] || '?'} ${m[1]}`;
 }
 
+$("#logoutBtn")?.addEventListener("click", async () => {
+  await fetch("/api/auth/logout", { method: "POST" });
+  window.location.href = "/login.html";
+});
+
 // ---- Tab navigation -------------------------------------------------------
 $$('.tab').forEach((btn) => btn.addEventListener('click', () => {
   $$('.tab').forEach((b) => b.classList.remove('is-active'));
@@ -169,8 +174,8 @@ document.addEventListener('blur', async (e) => {
 }, true);
 
 $('#downloadPdf')?.addEventListener('click', () => {
-  $$('#reportBody .card.collapsed').forEach((c) => c.classList.remove('collapsed'));
-  setTimeout(() => window.print(), 60);
+  // Print as-is: collapsed drawers are excluded from the PDF (see print CSS).
+  window.print();
 });
 $('#downloadXlsx')?.addEventListener('click', () => { window.location.href = '/api/report.xlsx'; });
 $('#expandAll')?.addEventListener('click', () => $$('#reportBody .card').forEach((c) => c.classList.remove('collapsed')));

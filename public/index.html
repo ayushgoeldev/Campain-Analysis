@@ -9,7 +9,10 @@
 </head>
 <body>
   <header class="topbar">
-    <h1>Lead&nbsp;Report</h1>
+    <div class="brand">
+      <img class="brand-logo" src="/logo.svg" alt="Lead Report logo" />
+      <h1>Lead&nbsp;Report</h1>
+    </div>
     <nav class="tabs">
       <button class="tab is-active" data-view="report">Report</button>
       <button class="tab" data-view="data">Data</button>
@@ -31,6 +34,7 @@
       </div>
     </div>
     <div class="dataset-pill" id="datasetPill">No dataset</div>
+    <button class="btn ghost sm logout-btn" id="logoutBtn" type="button">Logout</button>
   </header>
 
   <main>

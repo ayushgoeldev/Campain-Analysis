@@ -47,10 +47,9 @@ h3 { font-size: 13.5px; margin: 0 0 10px; font-weight: 700; letter-spacing: .2px
   border-bottom: 1px solid var(--line);
   padding: 13px 24px; position: sticky; top: 0; z-index: 20;
 }
+.brand { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.brand-logo { width: 42px; height: 42px; display: block; }
 .topbar h1 { color: #f3f6fc; }
-.topbar h1::before {
-  content: "◆"; color: var(--accent); font-size: 12px; margin-right: 8px; vertical-align: 1px;
-}
 .tabs { display: flex; gap: 4px; }
 .tab {
   border: 0; background: transparent; color: var(--muted);
@@ -63,6 +62,7 @@ h3 { font-size: 13.5px; margin: 0 0 10px; font-weight: 700; letter-spacing: .2px
   font-size: 12px; color: var(--ink-dim);
   background: var(--panel-2); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--line);
 }
+.logout-btn { flex: 0 0 auto; }
 
 /* Client picker */
 .client-picker { position: relative; margin-left: auto; }
@@ -272,7 +272,8 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
   .report-toolbar { margin-bottom: 8px; }
   .report-toolbar h2, .report-toolbar .muted { color: #000 !important; }
   .card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; background: #fff !important; margin-bottom: 10px; }
-  .card.collapsed .drawer-body { display: block !important; }
+  /* A collapsed drawer is left out of the PDF entirely. */
+  .card.collapsed { display: none !important; }
   .drawer-toggle { color: #000 !important; }
   .chev { display: none; }
   /* Fit wide tables to the page: compact font, wrap numeric cells tightly. */
