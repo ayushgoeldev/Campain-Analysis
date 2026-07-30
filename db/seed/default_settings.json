@@ -1,0 +1,31 @@
+{
+  "report_title": "",
+  "target": 50,
+  "deal_type": "CPA",
+  "record_key_column": "Name",
+  "lead_source_column": "Campaign",
+  "lead_code_delimiter": "/",
+  "lead_code_token": 2,
+  "course_column": "Mobile Verification Status",
+  "city_column": "City",
+  "form_initiated_column": "Registration Device",
+  "application_column": "Course",
+  "admission_column": "Lead Stage",
+  "lead_stage_column": "Lead Stage",
+  "date_column": "Instance Date",
+  "date_format": "auto",
+  "instance_column": "Instance",
+  "instance_filter": "Primary",
+  "lead_origin_column": "Lead Origin",
+  "application_values": [
+    "1"
+  ],
+  "admission_values": [
+    "Submitted"
+  ],
+  "form_initiated_values": [
+    "1",
+    "2"
+  ],
+  "top_n": 15
+}

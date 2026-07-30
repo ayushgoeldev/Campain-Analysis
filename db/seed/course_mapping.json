@@ -1,0 +1,6978 @@
+[
+{
+"course": "PGDM",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Design (B.DES)",
+"kapp": "B.Des"
+},
+{
+"course": "Master of Design (M.DES)",
+"kapp": "M.Des"
+},
+{
+"course": "Master of Planning (M.Plan)",
+"kapp": "M.Plan"
+},
+{
+"course": "Bachelor of Architecture (B.Arch)",
+"kapp": "B.Arch"
+},
+{
+"course": "M.Des",
+"kapp": "M.Des"
+},
+{
+"course": "MA",
+"kapp": "M.A."
+},
+{
+"course": "Advanced PGDM",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BA",
+"kapp": "B.A."
+},
+{
+"course": "Diploma",
+"kapp": "Diploma"
+},
+{
+"course": "Bachelor of Arts(BA)",
+"kapp": "B.A."
+},
+{
+"course": "B.Tech CSE AI/ML with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "Bcom LLB",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "MSc Cardiovascular Technology",
+"kapp": "M.Sc."
+},
+{
+"course": "BTech Electronics(VLSI Technologies) with L&T",
+"kapp": "B.Tech"
+},
+{
+"course": "Lateral Entry BSC Paramedical Any Branches",
+"kapp": "B.Sc."
+},
+{
+"course": "BBA Regular",
+"kapp": "BBA"
+},
+{
+"course": "BTech Electrical ( Sustaintable Power Systems) with L&T ( PAP )",
+"kapp": "B.Tech"
+},
+{
+"course": "Diploma in Hotel Management",
+"kapp": "BHM"
+},
+{
+"course": "Diploma in Engineering Computer Science COPA",
+"kapp": "Diploma"
+},
+{
+"course": "BCA with Specializations with Lernern (PAP)",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc Medical/Non-Medical",
+"kapp": "B.Sc."
+},
+{
+"course": "BCA Regular",
+"kapp": "BCA"
+},
+{
+"course": "Diploma in Gastronomy( Guest relationship) and German Skills( experience required)",
+"kapp": "Diploma"
+},
+{
+"course": "MCA Specializations(PAP)",
+"kapp": "MCA"
+},
+{
+"course": "Bachelor of Physical Education and Sports",
+"kapp": "B.P.Ed"
+},
+{
+"course": "Diploma in Logistics and German Skills",
+"kapp": "Diploma"
+},
+{
+"course": "Bachelor in Design ( Hons) Specialization in Interior Design with Orane International",
+"kapp": "B.Des"
+},
+{
+"course": "Diploma in Engineering Mechanical",
+"kapp": "Diploma"
+},
+{
+"course": "BTech Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "BTech CSE Cyber Security with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA with Specializations with Lernern (PAP)",
+"kapp": "BBA"
+},
+{
+"course": "BPharma",
+"kapp": "B.Pharma"
+},
+{
+"course": "Bsc Hotel Management",
+"kapp": "BHM"
+},
+{
+"course": "Btech CSE with Minor in AI from IIT Mandi",
+"kapp": "B.Tech"
+},
+{
+"course": "MSc Medical Laboratory Technology",
+"kapp": "M.Sc Allied Health Sciences"
+},
+{
+"course": "BSc Mass Communication (Digital Platforms)",
+"kapp": "B.J.M.C."
+},
+{
+"course": "Dpharma ( Pharmacy)",
+"kapp": "D.Pharma"
+},
+{
+"course": "Diploma in Medical Laboratory Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "BTech CSE with L&T ( PAP)",
+"kapp": "B.Tech"
+},
+{
+"course": "BA LLB",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "Bachelor of Physiotherapy( BPT)",
+"kapp": "BPT"
+},
+{
+"course": "Master of Physiotherapy ( MPT)",
+"kapp": "MPT"
+},
+{
+"course": "MBA Banking and Finance",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BSc Radiology & Imaging Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "Lateral Entry Btech Computer Science Engineering with L&T",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc Agriculture",
+"kapp": "M.Sc Agriculture"
+},
+{
+"course": "BSc Operation Theatre & Anaesthesia Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "PGDCA",
+"kapp": "MCA"
+},
+{
+"course": "DCA for Working Professional",
+"kapp": "BCA"
+},
+{
+"course": "Lateral Entry Btech Mechanical ( Digital Manufacturing using AI & CPS) with L&T",
+"kapp": "B.Tech"
+},
+{
+"course": "Mcom",
+"kapp": "M.Com"
+},
+{
+"course": "M.Tech CSE",
+"kapp": "M.Tech"
+},
+{
+"course": "BCOM Regular",
+"kapp": "B.Com"
+},
+{
+"course": "MBA Specializations Business Analytics and Digital Marketing (PAP)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "ANM/GNM/Nursing",
+"kapp": "ANM"
+},
+{
+"course": "Pharmacy",
+"kapp": "B.Pharma"
+},
+{
+"course": "Computer Applications",
+"kapp": "BCA"
+},
+{
+"course": "M.A.",
+"kapp": "M.A."
+},
+{
+"course": "B.Tech.",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc.",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. (Hons.)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Pharm.",
+"kapp": "B.Pharma"
+},
+{
+"course": "BPES",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech. (Hons.)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Design",
+"kapp": "B.Des"
+},
+{
+"course": "Ph.D.",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Pharm.",
+"kapp": "M.Pharma"
+},
+{
+"course": "M.Tech.",
+"kapp": "M.Tech"
+},
+{
+"course": "B.A. - LLB (Hons.)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "BCA",
+"kapp": "BCA"
+},
+{
+"course": "BBA",
+"kapp": "BBA"
+},
+{
+"course": "MCA",
+"kapp": "MCA"
+},
+{
+"course": "MPT",
+"kapp": "MPT"
+},
+{
+"course": "B. Arch.",
+"kapp": "B.Arch"
+},
+{
+"course": "B.A.",
+"kapp": "B.A."
+},
+{
+"course": "B.Com.",
+"kapp": "B.Com"
+},
+{
+"course": "LL.M.",
+"kapp": "LL.M."
+},
+{
+"course": "M.Sc.",
+"kapp": "M.Sc."
+},
+{
+"course": "BPT",
+"kapp": "BPT"
+},
+{
+"course": "Integrated B.Tech. - MBA",
+"kapp": "B.Tech"
+},
+{
+"course": "Integrated B.Tech. - M.Tech.",
+"kapp": "B.Tech"
+},
+{
+"course": "Integrated B.Sc. - B.Ed.",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA (Hons.)",
+"kapp": "BCA"
+},
+{
+"course": "Integrated BBA - MBA",
+"kapp": "BBA"
+},
+{
+"course": "LL.B.",
+"kapp": "LL.B."
+},
+{
+"course": "B.P.Ed.",
+"kapp": "B.P.Ed"
+},
+{
+"course": "B.Tech - CSE",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com. (Hons.)",
+"kapp": "B.Com"
+},
+{
+"course": "BPT (Physiotherapy)",
+"kapp": "BPT"
+},
+{
+"course": "Bachelor of Technology - (Computer Science and Engineering) AI and ML - NVIDIA Deep Learning Institute (DLI)",
+"kapp": "B.Tech"
+},
+{
+"course": "Professional Diploma in Clinical Psychology specialization",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Business Administration",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Tech. - (Bachelor of Technology) - CSE- NVIDIA",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com. - Hons. (Bachelor of Commerce - Honors) in association with ACCA",
+"kapp": "B.Com"
+},
+{
+"course": "M. Pharmacy (Masters of Pharmacy) in Pharmacology",
+"kapp": "M.Pharma"
+},
+{
+"course": "Master of Technology in Environmental Engineering Specialisation ESG and Sustainability Engineering (Part Time)",
+"kapp": "M.Tech"
+},
+{
+"course": "BBA (Bachelor of Business Administration)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Business Administration - Hospitality Management",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Arts (H) - Culinary Arts",
+"kapp": "BHM"
+},
+{
+"course": "B.Tech CSE (AI & DS)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (IoT)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Bio Technology)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech CSE (AI & ML) with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech ECE (DS & AI) with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (AI & ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA (Business Analytics)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Physiotherapy",
+"kapp": "BPT"
+},
+{
+"course": "B.Tech CE",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (Cyber Security)",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA (AI & DS)",
+"kapp": "BCA"
+},
+{
+"course": "B.Tech CSE (Quantum Computing) with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (DS & AI) with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA (Operations Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA (Marketing)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BBA LLB",
+"kapp": "BBA LL.B."
+},
+{
+"course": "B.Tech CSE (AI & ML) with EY",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA (Business Analytics)",
+"kapp": "BBA"
+},
+{
+"course": "BCA (Data Science) with EY",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc. (Graphics & Web Designing)",
+"kapp": "B.Des"
+},
+{
+"course": "B.Tech CSE (Cloud Computing)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Cybersecurity (Leet)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (Robotics & AI)",
+"kapp": "B.Tech"
+},
+{
+"course": "MCA (DS) with IBM",
+"kapp": "MCA"
+},
+{
+"course": "B.Tech- CSE",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Hons.) Microbiology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech ME",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com (Hons.) Accounting, Auditing & Taxation",
+"kapp": "B.Com"
+},
+{
+"course": "B.Tech CSE (Hons.) with specialization in AI & DS",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (Hons.) with specialization in AI & ML",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Aerospace Engineering with specialization in Space Technology",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA with specialization in AI & DS",
+"kapp": "BBA"
+},
+{
+"course": "BBA LLB (Hons.)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "B.Tech CSE AI & DS",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech ME with minor specialization in Computer Science",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE AI & ML",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (Hons.) with specialization in Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA with specialization in Aviation Management",
+"kapp": "BBA Aviation"
+},
+{
+"course": "B.Des User Experience & Interaction Design",
+"kapp": "B.Des"
+},
+{
+"course": "MBA IMPACT",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Sc (Hons.) Computer Science",
+"kapp": "BCA"
+},
+{
+"course": "BCA (Hons.) AI & DS",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc (Hons.) Biotechnology",
+"kapp": "B.Sc."
+},
+{
+"course": "BBA International Finance and Accounting with ACCA",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech Biotechnology",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA Cyber Security",
+"kapp": "BCA"
+},
+{
+"course": "BTECH",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA (HRM, Finance & Marketing Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BBA (Banking & Finance)",
+"kapp": "BBA"
+},
+{
+"course": "B.Sc. (Hons.) Agriculture",
+"kapp": "B.Agri"
+},
+{
+"course": "BBA.LL. B. (Hons.)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "B.Sc. Nursing",
+"kapp": "B.Sc Nursing"
+},
+{
+"course": "B.Tech. (Hons.) CSE in AI & ML",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Computer Science & Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Aerospace Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc Forensic Science",
+"kapp": "M.Sc. Forensic Science"
+},
+{
+"course": "B.Sc Forensic Science(Honours With Research)",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B.Sc. Forensic Science & Criminology",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B.Sc Forensic Science",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B.Sc. Cyber Law & Forensic science",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "Certificate in Crime Scene Management & Investigation",
+"kapp": "Certificate"
+},
+{
+"course": "B.Sc. Hons. Forensic science",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B.Sc. Criminology",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "M.Sc. Forensic Science with Digital Forensic",
+"kapp": "M.Sc. Forensic Science"
+},
+{
+"course": "M.Sc. Forensic Science & Criminology",
+"kapp": "M.Sc. Forensic Science"
+},
+{
+"course": "M.Sc. Forensic Science with Forensic Chemistry and Toxicology",
+"kapp": "M.Sc. Forensic Science"
+},
+{
+"course": "PG Diploma in Forensic Science & Criminology",
+"kapp": "Diploma"
+},
+{
+"course": "B.Sc. (Research) Forensic Science",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B.Sc. + M.Sc. (Forensic Science) Integrated Dual Degree",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "M.Sc. Forensic Science with Forensic Criminology and Forensic Psychology",
+"kapp": "M.Sc. Forensic Science"
+},
+{
+"course": "M.Sc. Forensic Science with Forensic Biology, Serology and DNA",
+"kapp": "M.Sc. Forensic Science"
+},
+{
+"course": "Certificate in Handwriting, Signature & Questioned Document Examination",
+"kapp": "Certificate"
+},
+{
+"course": "Certificate in Cyber Security",
+"kapp": "Certificate"
+},
+{
+"course": "B.Sc Cyber Security & Digital Forensic",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "PG Diploma in Forensic Science",
+"kapp": "Diploma"
+},
+{
+"course": "M.Sc Digital and Cyber Forensic Science",
+"kapp": "M.Sc. Forensic Science"
+},
+{
+"course": "Certificate in Fingerprinting",
+"kapp": "Certificate"
+},
+{
+"course": "Certificate in Cyber Forensics",
+"kapp": "Certificate"
+},
+{
+"course": "BA LL.B (Hons.)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "B.A. LLB",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "B.A.LLB (Hons)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "LL.B",
+"kapp": "LL.B."
+},
+{
+"course": "B.Com LLB",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.A",
+"kapp": "B.A."
+},
+{
+"course": "B.Com (Hons) Specialization in E- Commerce",
+"kapp": "B.Com"
+},
+{
+"course": "B.Sc (Paramedic)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "BBA (Dual Specialisation)",
+"kapp": "BBA"
+},
+{
+"course": "M.Sc (Pharmacovigilance)",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Tech CSE (Cyber Security & Ethical Hacking)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor in Anaesthesia and Operation Theatre Technology (B.AOTT)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Tech (AI & ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "LL.M",
+"kapp": "LL.M."
+},
+{
+"course": "B.Sc (Agriculture - Hons)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Physiotherapy (BPT)",
+"kapp": "BPT"
+},
+{
+"course": "B.Ed",
+"kapp": "B.Ed"
+},
+{
+"course": "B.Tech CSE (AI & ML) - Nextgen",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Hons) Zoology",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor in Anesthesia and Operation Theatre Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "LLB",
+"kapp": "LL.B."
+},
+{
+"course": "BBA (HR)",
+"kapp": "BBA"
+},
+{
+"course": "Master of Technology - Renewable Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Science (Honors) - Biotechnology",
+"kapp": "B.Sc."
+},
+{
+"course": "Summer School",
+"kapp": "Diploma"
+},
+{
+"course": "BCA \u2013 Artificial Intelligence & Machine Learning",
+"kapp": "BCA"
+},
+{
+"course": "Master of Arts in Psychology",
+"kapp": "M.A."
+},
+{
+"course": "PHD Part Time",
+"kapp": "Ph.D."
+},
+{
+"course": "MBA in Agriculture Business Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Summer School Programme for Young Scholars",
+"kapp": "Diploma"
+},
+{
+"course": "Pharma D (Doctor of Pharmacy)",
+"kapp": "Ph.D."
+},
+{
+"course": "Master of Business Administration - FINTECH",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Ph.D in Psychology Full Time",
+"kapp": "Pharm.D"
+},
+{
+"course": "Professional Diploma in Clinical Psychology (RCI Approved)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Technology - Aerospace Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology - Electronics and Communication Engineering (Internet of things) - BOSCH",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Medical Radiology and Imaging Technology",
+"kapp": "B.Tech"
+},
+{
+"course": "PhD. Humanities & Sciences Full Time",
+"kapp": "Ph.D."
+},
+{
+"course": "Master of Public Health",
+"kapp": "MPH"
+},
+{
+"course": "B. Pharmacy",
+"kapp": "B.Pharma"
+},
+{
+"course": "LL.B (Honors) Bachelor of Laws (Honors)",
+"kapp": "LL.B."
+},
+{
+"course": "Bachelor of Technology - (Computer Science and Engineering) Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc. - Master of Science Agriculture",
+"kapp": "M.Sc Agriculture"
+},
+{
+"course": "MA Political Science (with specialization in Public Policy & International Relations)",
+"kapp": "M.A."
+},
+{
+"course": "Bachelor of Arts (Hons.)",
+"kapp": "B.A."
+},
+{
+"course": "PHD Full Time",
+"kapp": "Ph.D."
+},
+{
+"course": "Bachelor of Science - Nursing (Basic)",
+"kapp": "B.Sc Nursing"
+},
+{
+"course": "B.Tech CSE.",
+"kapp": "B.Tech"
+},
+{
+"course": "BA in Digital Media & Mass Communication",
+"kapp": "B.J.M.C."
+},
+{
+"course": "B.Pharmacy",
+"kapp": "B.Pharma"
+},
+{
+"course": "BA (Sociology)",
+"kapp": "B.A."
+},
+{
+"course": "B. Tech Computer Science and Engineering (with Minors in OpenwithSource Programming) with OSwithOSI",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (MLS)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech ECE with optional specialization in Embedded Sytems and Robotics (ESR)",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc Food Technology",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Sc Clinical Psychology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc Nursing",
+"kapp": "B.Sc Nursing"
+},
+{
+"course": "BBA (Hons.) with specialization in E-Commerce and Digital Marketing",
+"kapp": "BBA"
+},
+{
+"course": "BCA Online",
+"kapp": "BCA"
+},
+{
+"course": "BBA (Hons.)",
+"kapp": "BBA"
+},
+{
+"course": "B.Sc Food Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "BCA Online",
+"kapp": "Online BCA"
+},
+{
+"course": "B.E. or B.Tech (4-Years)",
+"kapp": "B.Tech"
+},
+{
+"course": "Diploma",
+"kapp": "B.Tech"
+},
+{
+"course": "ME/MTech - Regular (2 years)",
+"kapp": "B.Tech"
+},
+{
+"course": "BE/B.Tech Lateral Entry ( B.Tech LEET )",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Mechanical Engineering (ME)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Civil Engineering (CE)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Computer Science and Engineering (CSE)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Biomedical Engineering (BME)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Electrical & Electronic Engineering (EEE)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Computer Science & Engineering with specialization in Cloud Engineering and DevOps Automation (in association with Xebia)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech.- Computer Science & Engineering with specialization in Artificial Intelligence & Machine Learning (AI & ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "M.B.A.",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Tech.- Computer Science & Engineering with specialization in Artificial Intelligence & Data Science (AI & DS)",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc. Biotechnology",
+"kapp": "M.Sc."
+},
+{
+"course": "B.B.A. with specialization in Business Analytics",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech. Computer Science & Engineering with specialization in Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "B.A. Psychology (Hons.)",
+"kapp": "B.A."
+},
+{
+"course": "B.Tech. Computer Science and Engineering (AI and ML) with academic support of IBM & powered by Microsoft Certifications",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. Computer Science and Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA LL.B. (Hons.)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "BBA (Hons. / Hons. with Research) (Business Intelligence & Analytics) with academic support of Ernst & Young (EY)",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech. Computer Science and Engineering (Data Science) with academic support of IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. (Hons.) Computer Science with academic support of IBM",
+"kapp": "BCA"
+},
+{
+"course": "B.Tech. Computer Science and Engineering (Cyber Security) with academic support of EC-Council and IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. Agriculture (Honors)",
+"kapp": "B.Agri"
+},
+{
+"course": "BBA - Entrepreneurship",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech - CS and Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Hons) Psychology",
+"kapp": "B.A."
+},
+{
+"course": "B.A.LL.B.(Hons.)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "B.Sc. Biotechnology (Hons.)",
+"kapp": "B.Sc."
+},
+{
+"course": "M.Tech. Production Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech. Computer Science and Engineering ( Big Data Analytics )",
+"kapp": "M.Tech"
+},
+{
+"course": "B.Sc. Agriculture Science (Hons.)",
+"kapp": "B.Agri"
+},
+{
+"course": "LL.B. (Hons.)",
+"kapp": "LL.B."
+},
+{
+"course": "M.Tech. Electronics & Communication (Microelectronics and VLSI Design )",
+"kapp": "M.Tech"
+},
+{
+"course": "Ph.D. Biotechnology",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Sc. Food Technology (Hons.)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. Psychology (Hons.)",
+"kapp": "B.A."
+},
+{
+"course": "B.Tech (Honors) - Computer Science and Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Diploma LEET",
+"kapp": "Diploma"
+},
+{
+"course": "M.Tech",
+"kapp": "M.Tech"
+},
+{
+"course": "B.Tech-LEET",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (Honors) - Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com",
+"kapp": "B.Com"
+},
+{
+"course": "LL.M. (1 Year)",
+"kapp": "LL.M."
+},
+{
+"course": "Integrated LL.B",
+"kapp": "LL.B."
+},
+{
+"course": "MBA (with University of Toledo)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BSc Speciliazation in AI Automation with ByteXL",
+"kapp": "B.Sc."
+},
+{
+"course": "Bsc Dialysis Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "Bachelor of Physical Education and Sports",
+"kapp": "B.A."
+},
+{
+"course": "Diploma in Engineering Electrical",
+"kapp": "Diploma"
+},
+{
+"course": "B.Tech CSE/ME/EE/Civil Engineering Lateral Entry WIP",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "BBA with ByteXL in coloberation with KPMG",
+"kapp": "BBA"
+},
+{
+"course": "Lateral Entry Btech Computer Science Engineering with L&T",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "B.Sc (Hons) in BIoTechnology",
+"kapp": "B.Sc."
+},
+{
+"course": "MBA - Human Resource",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BCA (AI & ML) - IBM",
+"kapp": "BCA"
+},
+{
+"course": "B.Pharmacy (Lateral Entry)",
+"kapp": "B.Pharma (Lateral)"
+},
+{
+"course": "B.Tech CSE Lateral Entry",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "M.Tech - CSE with Specialization in AI",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Pharmacy(Phamacology)",
+"kapp": "M.Pharma"
+},
+{
+"course": "BBA - Event Management",
+"kapp": "BBA"
+},
+{
+"course": "Ph.D (Pharmaceutical Sciences)",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD Hotel Management",
+"kapp": "Ph.D."
+},
+{
+"course": "MBA Dual Specialisation (Marketing)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.A.LL.B (Hons.)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "B.B.A. LLB (Hons)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "BBA/BBA (hons)",
+"kapp": "BBA"
+},
+{
+"course": "B.B.A.",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech. Robotics and Automation",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. Agriculture Science (Hons.)",
+"kapp": "B.Sc."
+},
+{
+"course": "M.Tech. Computer Science and Engineering ( Big Data Analytics )",
+"kapp": "B.Tech"
+},
+{
+"course": "B.C.A.",
+"kapp": "BCA"
+},
+{
+"course": "D.Pharma",
+"kapp": "D.Pharma"
+},
+{
+"course": "B.Sc (Hons) Psychology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Design in Interior and Spatial Design",
+"kapp": "B.Des"
+},
+{
+"course": "B.A. (Hons.) Psychology",
+"kapp": "B.A."
+},
+{
+"course": "MBA with specialization in Logistics and Supply Chain Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Des Graphic & Visual Communication Design",
+"kapp": "B.Des"
+},
+{
+"course": "B.Com (Hons.) International Finance and Accounting with ACCA, UK",
+"kapp": "B.Com"
+},
+{
+"course": "B.Tech CSE (Hons.) with specialization in Generative AI",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com (Hons.) with research",
+"kapp": "B.Com"
+},
+{
+"course": "BBA (Hons.) with specialization in AI & DS",
+"kapp": "BBA"
+},
+{
+"course": "BCA (Bachelor of Computer Applications)",
+"kapp": "BCA"
+},
+{
+"course": "D.Pharm (Pharmacy)",
+"kapp": "D.Pharma"
+},
+{
+"course": "LLM (Master of Law)",
+"kapp": "LL.M."
+},
+{
+"course": "B.Tech. (Computer Science Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "BA B.Ed (Bachelor of Art & Education)",
+"kapp": "B.A. B.Ed"
+},
+{
+"course": "B.Tech. (Artificial Intelligence)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.A. Psychology",
+"kapp": "B.A."
+},
+{
+"course": "Ph. D. in Aerospace Engineering (Part-Time)",
+"kapp": "Ph.D."
+},
+{
+"course": "B.A.LL. B. (Hons.)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "MBA (Executive)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Ph.D. in Law",
+"kapp": "Ph.D."
+},
+{
+"course": "BCA (Cyber Security)",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc. Biotechnology",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Arts (B.A.)",
+"kapp": "B.A."
+},
+{
+"course": "MBA (Logistics & Supply Chain Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Medical Laboratory Technology (BMLT)",
+"kapp": "BMLT"
+},
+{
+"course": "B.Pharm. (Lateral Entry)",
+"kapp": "B.Pharma"
+},
+{
+"course": "B.Tech. Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "M.A. English",
+"kapp": "M.A."
+},
+{
+"course": "Ph.D. in Food Technology (Part-Time)",
+"kapp": "Ph.D."
+},
+{
+"course": "MCA (Cloud Computing)",
+"kapp": "MCA"
+},
+{
+"course": "MBA (Digital Marketing)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BCA (Data Analytics)",
+"kapp": "BCA"
+},
+{
+"course": "Ph.D. in Management (Marketing) Part-Time",
+"kapp": "Ph.D."
+},
+{
+"course": "B.A. Journalism & Mass Communication",
+"kapp": "B.J.M.C."
+},
+{
+"course": "B.Tech. Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "D.Pharm.",
+"kapp": "D.Pharma"
+},
+{
+"course": "M.Sc. Food Nutrition & Dietetics",
+"kapp": "M.Sc."
+},
+{
+"course": "Executive M. Tech (Energy Management and Sustainability)",
+"kapp": "M.Tech"
+},
+{
+"course": "B.Tech. (Hons.) CSE in Cloud Computing",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. Mathematics",
+"kapp": "B.Sc."
+},
+{
+"course": "MBA (Information Technology)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Com. with CMA Certification",
+"kapp": "B.Com"
+},
+{
+"course": "BBA (Human Resource Management)",
+"kapp": "BBA"
+},
+{
+"course": "BBA (Aviation Management)",
+"kapp": "BBA Aviation"
+},
+{
+"course": "B.Sc. Data Science",
+"kapp": "B.Sc."
+},
+{
+"course": "BBA (Tourism & Event Management)",
+"kapp": "BBA"
+},
+{
+"course": "B.Sc. Food Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech. (Hons.) CSE in Big Data Analytics",
+"kapp": "B.Tech"
+},
+{
+"course": "BA -Public Policy & Development studies",
+"kapp": "B.A."
+},
+{
+"course": "BA - English",
+"kapp": "B.A."
+},
+{
+"course": "BA - Psychology",
+"kapp": "B.A."
+},
+{
+"course": "BCA -Artificial Intelligence & Data Science",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor In Occupational Therapy (BOT)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Tech - Artificial Intelligence & Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "MPT Cardio",
+"kapp": "MPT"
+},
+{
+"course": "B.Tech LEEP (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA - Cloud Computing & Full stack",
+"kapp": "BCA"
+},
+{
+"course": "BBA - International Business",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech - Computer Science & Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA- International Business",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA General",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Sc. - Maths",
+"kapp": "M.Sc."
+},
+{
+"course": "BBA General",
+"kapp": "BBA"
+},
+{
+"course": "MBA- Finance",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Ph.D in Applied Science",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Sc.- Forensic Science",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "UG DSAI",
+"kapp": "B.Tech"
+},
+{
+"course": "UG TBM",
+"kapp": "B.Tech"
+},
+{
+"course": "PG Programme in Applied AI & Agentic Systems",
+"kapp": "MCA"
+},
+{
+"course": "PGP UI/UX",
+"kapp": "M.Des"
+},
+{
+"course": "PG Programme in Sustainability & Business Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Sc Cardiovascular Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Sc (Fashion Design)",
+"kapp": "B.Des"
+},
+{
+"course": "BBA - Fintech with Artificial Intelligence",
+"kapp": "BBA"
+},
+{
+"course": "MBA - Finance",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BCA (Cyber Security) - NextGen",
+"kapp": "BCA"
+},
+{
+"course": "Diploma in Yoga Beauty and Body fitness",
+"kapp": "Diploma"
+},
+{
+"course": "MBA Specializations Finance & Capital Market (PAP)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Sc(Optometry)",
+"kapp": "BOPTM"
+},
+{
+"course": "BBA/B.Com (CFA) Powered by Sanjay Saraf",
+"kapp": "BBA"
+},
+{
+"course": "BCA (Data Science and AI) - IBM",
+"kapp": "BCA"
+},
+{
+"course": "Certificate Course in Multimedia and Animation",
+"kapp": "B.Des"
+},
+{
+"course": "M.Pharmacy (Pharmaceutics)",
+"kapp": "M.Pharma"
+},
+{
+"course": "Bachelor in Medical Laboratory Sciences",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Tech - CSE with Specialization in Artificial Intelligence & Machine Learning - Grazitti",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Anthropology)",
+"kapp": "B.Sc."
+},
+{
+"course": "Course Not Available",
+"kapp": "B.Tech"
+},
+{
+"course": "BTech Mechanical ( Digital Manufacturing with AI CPS) with L&T ( PAP )",
+"kapp": "B.Tech"
+},
+{
+"course": "BA LLB",
+"kapp": "LL.B."
+},
+{
+"course": "B.Tech CSE/ME/EE/Civil Engineering Lateral Entry WIP",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Hons.) Forensic Science",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "BBA with Business Analytics",
+"kapp": "BBA"
+},
+{
+"course": "M.Pharmacy(Pharmaceutics)",
+"kapp": "M.Pharma"
+},
+{
+"course": "Bachelor in Medical Radiology and Imaging Technology (BMRIT) Lateral Entry",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "LLM",
+"kapp": "LL.M."
+},
+{
+"course": "LLB (Bachelor of Law)",
+"kapp": "LL.B."
+},
+{
+"course": "BBA.LL.B (Honors) Bachelor of Business Administration with Bachelor of Law (Honors)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "Bachelor of Technology - Fire and Safety Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Hons) in Chemistry",
+"kapp": "B.Sc."
+},
+{
+"course": "B.SC. Medical Laboratory Technology (BMLT)",
+"kapp": "BMLT"
+},
+{
+"course": "B.Tech ECE with optional specialization in Internet of Things (IoT)",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA with specialization in Hospital Administration",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech ECE (Working Professionals)",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA with specialization in Business Analytics",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BCA Industry Integrated",
+"kapp": "BCA"
+},
+{
+"course": "PG Programme in Applied AI & Agentic Systems",
+"kapp": "Certificate"
+},
+{
+"course": "B.Tech. Electronics & Communication Engineering (ECE)",
+"kapp": "B.Tech"
+},
+{
+"course": "School of Allied and Healthcare",
+"kapp": "BPT"
+},
+{
+"course": "MCA (Master in Computer Applications)",
+"kapp": "MCA"
+},
+{
+"course": "B.Com (Hons)",
+"kapp": "B.Com"
+},
+{
+"course": "BBA (H) in Digital Marketing.",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech CSE (Bachelor of Technology - Computer Science and Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "BPT (Bachelor of Physiotherapy)",
+"kapp": "BPT"
+},
+{
+"course": "BCA Hons. (Bachelor of Computer Applications - Honours)",
+"kapp": "BCA"
+},
+{
+"course": "B.Tech Computer Science and Engineering in AI/ML with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech ECE (Bachelor of Technology - Electronics and Communication Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Artificial Intelligence and Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Robotics & Artificial Intelligence",
+"kapp": "B.Tech"
+},
+{
+"course": "Computer Science and Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Computer Science and Design",
+"kapp": "B.Tech"
+},
+{
+"course": "Mechanical and Automation Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Artificial Intelligence and Machine Learning",
+"kapp": "B.Tech"
+},
+{
+"course": "Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Agriculture Enginerring",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Aerospace Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Computer Science Engineering (Cyber Security)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Artificial Intelligence & Machine Learning",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Robotics and Artificial Intelligence",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Electronics & Communication Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - CSE (Data Science)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - CSE (I.O.T. & Cyber Sec. Including Blockchain)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. Artificial Intelligence & Machine Learning",
+"kapp": "BCA"
+},
+{
+"course": "M. Pharma Ceutics",
+"kapp": "M.Pharma"
+},
+{
+"course": "B.Tech Computer Science Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Artificial Intelligence",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Com Finance & Accounting",
+"kapp": "B.Com"
+},
+{
+"course": "B.Tech Electronics & Communication Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Global BBA (2+1) with University of Essex, UK",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech Electronics Engineering & Computing",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (Electronics & Communication Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "M.A. Mass Communication",
+"kapp": "M.J.M.C."
+},
+{
+"course": "PG Diploma TV and Digital Journalism",
+"kapp": "M.A."
+},
+{
+"course": "B.A. (Hons.) Economics",
+"kapp": "B.A."
+},
+{
+"course": "B. Tech (Computer Science Engineering) AI Techniques and ML Algorithms powered by L and T EduTech",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Com International Accounting & Finance - Integrated with ACCA",
+"kapp": "B.Com"
+},
+{
+"course": "Integ. BBA LL.B (Hons)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "Integ. BA LL.B (Hons)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "BA Mass Communication",
+"kapp": "B.J.M.C."
+},
+{
+"course": "B.Sc. (Artificial Intelligence)",
+"kapp": "BCA"
+},
+{
+"course": "B. Tech CSE - Global",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (Mechanical Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech CSE Global - 3 Country",
+"kapp": "B.Tech"
+},
+{
+"course": "BA Liberal Arts",
+"kapp": "B.A."
+},
+{
+"course": "B.A. (Hons.) Sociology",
+"kapp": "B.A."
+},
+{
+"course": "B.Tech CSE Specialization in Agentic AI with ByteXL in collaboration with Microsoft",
+"kapp": "B.Tech"
+},
+{
+"course": "BCom with Specializations with ICA(PAP)",
+"kapp": "B.Com"
+},
+{
+"course": "M.Sc (Information Technology)",
+"kapp": "MCA"
+},
+{
+"course": "BCA (AI)",
+"kapp": "BCA"
+},
+{
+"course": "School of Engineering and Technology",
+"kapp": "BCA"
+},
+{
+"course": "School of Allied and Healthcare",
+"kapp": "M.Optom."
+},
+{
+"course": "MCA (Master of Computer Applications)",
+"kapp": "MCA"
+},
+{
+"course": "Degree Not Available",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech ME (Hons.) with specialization in Automobile",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc. Chemistry",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Tech. (Hons.) CSE in Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA with (AI/ML)",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc. (IT)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.tech CSE- IOT and cyber security",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech CSE- Artificial intelligence and machine learning",
+"kapp": "B.Tech"
+},
+{
+"course": "MCA-Artificial Intelligence & Data Science",
+"kapp": "MCA"
+},
+{
+"course": "BA - International Relations",
+"kapp": "B.A."
+},
+{
+"course": "BCA -Cloud Computing & Cyber Security",
+"kapp": "BCA"
+},
+{
+"course": "BBA+LL.B",
+"kapp": "BBA LL.B."
+},
+{
+"course": "B.tech CSE- Artificial intelligence",
+"kapp": "B.Tech"
+},
+{
+"course": "B.des-Fashion & Textile Design",
+"kapp": "B.Des"
+},
+{
+"course": "B.des-Interior & Product Design",
+"kapp": "B.Des"
+},
+{
+"course": "B.Tech CSE- Computer Science Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (AI & ML)- Artificial Intelligence & Machine Learning",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA (Master of Business Administration)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BA (H) Psychology",
+"kapp": "B.A."
+},
+{
+"course": "B.Sc. (H) Agriculture",
+"kapp": "B.Agri"
+},
+{
+"course": "BBA - Bachelor of Business Administration",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech. (Internet of Things)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech. (Electrical Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech.(Computer Science Engineering) Lateral Entry",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (Data Science)",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc (Chemistry)",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Design in Animation,VFX and Game Art",
+"kapp": "B.Des"
+},
+{
+"course": "Law",
+"kapp": "LL.B."
+},
+{
+"course": "Pharmaceutical Sciences",
+"kapp": "B.Pharma"
+},
+{
+"course": "M.Tech - CSE",
+"kapp": "M.Tech"
+},
+{
+"course": "B.Tech.(Hons.) CSE in Big Data Analytics (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com. with ACCA Certification",
+"kapp": "B.Com"
+},
+{
+"course": "MSc Cardiovascular Technology",
+"kapp": "M.Sc Allied Health Sciences"
+},
+{
+"course": "B Tech CSE",
+"kapp": "B.Tech"
+},
+{
+"course": "Diploma (Electrical Engineering) Lateral Entry",
+"kapp": "Diploma"
+},
+{
+"course": "MBA (Dual Specialisation)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.A (Hons) in Economics",
+"kapp": "B.A."
+},
+{
+"course": "B.Tech in Civil Engg with Specialization in AI and Geo Informatics",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor in Medical Radiology and Imaging Technology (BMRIT)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "Diploma (Airlines Cabin Crew & Hospitality)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma (Pharmacy)",
+"kapp": "D.Pharma"
+},
+{
+"course": "B.A (Hons) in History",
+"kapp": "B.A."
+},
+{
+"course": "B.Tech CSE (Cloud Computing & Information Security) - Nextgen",
+"kapp": "B.Tech"
+},
+{
+"course": "Pharm D",
+"kapp": "Pharm.D"
+},
+{
+"course": "B.Tech CSE - Sunstone",
+"kapp": "B.Tech"
+},
+{
+"course": "BDes (Interior Designing)",
+"kapp": "B.Des"
+},
+{
+"course": "B.Tech CSE (Full Stack- IBM)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Animation,VFX and Game Art)",
+"kapp": "Bachelor of Animation"
+},
+{
+"course": "MBA (Financial Analytics)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Tech - Mechanical Engineering (Part Time)",
+"kapp": "M.Tech"
+},
+{
+"course": "B.A (Fine Arts)",
+"kapp": "B.A."
+},
+{
+"course": "Ph.D (Engineering & Technology)",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Tech CE (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA in DevOps and Cloud Computing",
+"kapp": "BCA"
+},
+{
+"course": "B.Tech CSE (Cloud Computing) - IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Hons) in Fisheries",
+"kapp": "B.Sc."
+},
+{
+"course": "Ph.D (Law)",
+"kapp": "Ph.D."
+},
+{
+"course": "BPH+MPH (Integrated 5 Years)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (Hons) in (Non-Medical)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech (Automobile Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA - Artificial Intelligence in Business",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Ed.",
+"kapp": "B.Ed"
+},
+{
+"course": "B.Tech Computer Science and Engineering - Artificial Intelligence",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc.-Nursing Course",
+"kapp": "B.Sc Nursing"
+},
+{
+"course": "Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Management",
+"kapp": "BBA"
+},
+{
+"course": "BA in Film & TV",
+"kapp": "B.A."
+},
+{
+"course": "M.sc Allied Health Sciences",
+"kapp": "M.Sc Allied Health Sciences"
+},
+{
+"course": "B.Sc (Nursing)",
+"kapp": "B.Sc Nursing"
+},
+{
+"course": "MSc Clinical Embryology & Reproductive Genetics",
+"kapp": "M.Sc Allied Health Sciences"
+},
+{
+"course": "MBA - Business Analytics",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Tech CSE Data Science and AI (With The SEEP Scholarship)",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc. (Agri.) Plant Breeding and Genetics",
+"kapp": "M.Sc Agriculture"
+},
+{
+"course": "Bachelor of Science - Nursing (Basic)",
+"kapp": "B.Sc."
+},
+{
+"course": "Information Technology",
+"kapp": "BCA"
+},
+{
+"course": "Diploma in Travel and Tourism",
+"kapp": "Diploma"
+},
+{
+"course": "Germany",
+"kapp": "B.Tech"
+},
+{
+"course": "MSC Radiology",
+"kapp": "M.Sc Allied Health Sciences"
+},
+{
+"course": "B.Com (Hons.)",
+"kapp": "B.Com"
+},
+{
+"course": "BTech CSE (Hons) Artificial Intelligence & Machine Learning",
+"kapp": "B.Tech"
+},
+{
+"course": "BTech CSE (Hons) AI & Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "BTech CSE",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA (Hons) Business Analytics",
+"kapp": "BBA"
+},
+{
+"course": "B Com (Hons)",
+"kapp": "B.Com"
+},
+{
+"course": "Diploma in Computer Science (CSE)",
+"kapp": "Diploma"
+},
+{
+"course": "BTech Electrical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "BSc Radiology & Imaging Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B Pharmacy",
+"kapp": "B.Pharma"
+},
+{
+"course": "B.Sc Radio Medical Imaging Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Tech (Honors) - Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.A. Political Science (Hons.)",
+"kapp": "B.A."
+},
+{
+"course": "B.Tech (Honors) - Information Technology",
+"kapp": "B.Tech"
+},
+{
+"course": "M.des-Fashion",
+"kapp": "M.Des"
+},
+{
+"course": "M.Sc Cardiovascular Technology",
+"kapp": "M.Sc."
+},
+{
+"course": "Diploma (AME)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Legal Literacy",
+"kapp": "Diploma"
+},
+{
+"course": "Bachelor of Dialysis Therapy Technology Lateral entry",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "BCA - PU",
+"kapp": "BCA"
+},
+{
+"course": "Ph.D. Environmental Science",
+"kapp": "Ph.D."
+},
+{
+"course": "MCA",
+"kapp": "MCA"
+},
+{
+"course": "B.Tech (Honors) - Electronics and Communication Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "LL.M. (2 Years)",
+"kapp": "LL.M."
+},
+{
+"course": "BBA (E-Commerce and Digital Marketing)",
+"kapp": "BBA"
+},
+{
+"course": "B.Optometry (Lateral Entry)",
+"kapp": "BOPTM"
+},
+{
+"course": "M.Sc. Fashion Design",
+"kapp": "M.Sc."
+},
+{
+"course": "BBA FinTech",
+"kapp": "BBA"
+},
+{
+"course": "BBA Hons. (Bachelor of Business Administration - Honours)",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech CSE with Specialization",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc IT Hons. (Bachelor of Science - Information Technology - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc MRIT (Bachelor of Science - Medical Radiology & Imaging Technology)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "DME (Diploma in Mechanical Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "B.Tech CSE with Specialization",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Computer Science and Engineering in Data Science with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA (Dual Specialization)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BBA FinTech",
+"kapp": "BBA"
+},
+{
+"course": "BBA Hons. (Bachelor of Business Administration - Honours)",
+"kapp": "BBA"
+},
+{
+"course": "PhD (Doctor of Philosophy in Mass Communication and Journalism)",
+"kapp": "Ph.D."
+},
+{
+"course": "MBA (Dual Specialization)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "DAE (Diploma in Automobile Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "BA English Hons. (Bachelor of Arts - English - Honours)",
+"kapp": "B.A."
+},
+{
+"course": "BBA Hons. (Bachelor of Business Administration - Honours)",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech CSE with Specialization",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc IT Hons. (Bachelor of Science - Information Technology - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc Med Hons. (Bachelor of Science - Medical - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech Computer Science and Engineering in Data Science with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA (Dual Specialization)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BBA FinTech",
+"kapp": "BBA"
+},
+{
+"course": "PhD (Doctor of Philosophy in Mass Communication and Journalism)",
+"kapp": "Ph.D."
+},
+{
+"course": "MBA (Dual Specialization)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "DAE (Diploma in Automobile Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "BBA Hons. (Bachelor of Business Administration - Honours)",
+"kapp": "BBA"
+},
+{
+"course": "BA English Hons. (Bachelor of Arts - English - Honours)",
+"kapp": "B.A."
+},
+{
+"course": "BBA Hons. (Bachelor of Business Administration - Honours)",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech CSE with Specialization",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc IT Hons. (Bachelor of Science - Information Technology - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech CSE with Specialization",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc MRIT (Bachelor of Science - Medical Radiology & Imaging Technology)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Sc NM Hons. (Bachelor of Science - Non Medical - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc MRIT (Bachelor of Science - Medical Radiology & Imaging Technology)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "DME (Diploma in Mechanical Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "B.Tech CSE with Specialization",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Electronics and Communication Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "BHMCT",
+"kapp": "BHM"
+},
+{
+"course": "BBA (Data Analytics) - IBM",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech CSE (Full Stack) - IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Pharm (Practice)",
+"kapp": "B.Pharma"
+},
+{
+"course": "B.Sc (Clinical Microbiology)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (IT)",
+"kapp": "B.Sc."
+},
+{
+"course": "M.A (Sociology)",
+"kapp": "M.A."
+},
+{
+"course": "PhD Pharmaceutical Sciences",
+"kapp": "Ph.D."
+},
+{
+"course": "BCA (Artificial Intelligence)",
+"kapp": "BCA"
+},
+{
+"course": "BBA Business Analytics",
+"kapp": "BBA"
+},
+{
+"course": "BSc Forensic Science",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B Tech CSE AI & ML",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech CSE AI & ML",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech CSE AI & ML",
+"kapp": "B.Tech"
+},
+{
+"course": "Engineering and Technology",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech (Computer Science and Engineering) Data Science (LEET)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Business Administration with IBM",
+"kapp": "BBA"
+},
+{
+"course": "B. Tech (Computer Science and Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech (Computer Science Engineering) IOT and Cyber Security Including Block Chain Technology)",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech (Computer Science Engineering) Artificial Intelligence and Machine Learning",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA (Hons.) with specialization in Entrepreneurship",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Des Animation & Game Design",
+"kapp": "B.Des"
+},
+{
+"course": "B.Sc Optometry",
+"kapp": "BOPTM"
+},
+{
+"course": "B.Sc Optometry",
+"kapp": "BOPTM"
+},
+{
+"course": "Bachelor of Technology - Electronics and Communication Engineering (Biomedical Engineering) - BOSCH",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Voc B.Sc. Cardiovascular Technology",
+"kapp": "B.Voc"
+},
+{
+"course": "Diploma in Cardiac Care Technology",
+"kapp": "Diploma"
+},
+{
+"course": "B.Tech CE (Bachelor of Technology - Civil Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Diploma in Cardiac Care Technology",
+"kapp": "Diploma"
+},
+{
+"course": "B.Sc Fashion Design",
+"kapp": "B.Des"
+},
+{
+"course": "Ph.D",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Plan",
+"kapp": "B.Plan"
+},
+{
+"course": "Diploma (Medical Laboratory Technology)",
+"kapp": "DMLT"
+},
+{
+"course": "Diploma (Medical Laboratory Technology)",
+"kapp": "DMLT"
+},
+{
+"course": "B.Com (Hons) -Economics",
+"kapp": "B.Com"
+},
+{
+"course": "BSC (Microbiology)",
+"kapp": "B.Sc."
+},
+{
+"course": "Lateral Entry Diploma in Engineering Electrical(12th/ITI Pass)",
+"kapp": "Diploma"
+},
+{
+"course": "B.Sc MLT",
+"kapp": "BMLT"
+},
+{
+"course": "Bachelor of Honours Interior Design",
+"kapp": "B.Des"
+},
+{
+"course": "Bachelor of Interior Design ( Hons)",
+"kapp": "B.Des"
+},
+{
+"course": "MBA in Finance",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BA LLB (hons)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "B.Tech Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "MSC",
+"kapp": "M.Sc."
+},
+{
+"course": "BBA (HONOURS/HONOURS WITH RESEARCH)",
+"kapp": "BBA"
+},
+{
+"course": "B. TECH (COMPUTER SCIENCE ENGG.)",
+"kapp": "B.Tech"
+},
+{
+"course": "m pharm",
+"kapp": "M.Pharma"
+},
+{
+"course": "B.Tceh SCE",
+"kapp": "B.Tech"
+},
+{
+"course": "B. TECH (AIML)",
+"kapp": "B.Tech"
+},
+{
+"course": "BA hons (english)",
+"kapp": "B.A."
+},
+{
+"course": "B.tech AI",
+"kapp": "B.Tech"
+},
+{
+"course": "b.tch cse",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech ( Ai Ml ) honours",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech (CSE+AIML)",
+"kapp": "B.Tech"
+},
+{
+"course": "BA honors (English)",
+"kapp": "B.A."
+},
+{
+"course": "b.tech (cse)",
+"kapp": "B.Tech"
+},
+{
+"course": "b.tach biotecnologi",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA(General)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BCA (Honors)",
+"kapp": "BCA"
+},
+{
+"course": "B.Tech AIML",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (computer Science)",
+"kapp": "B.Sc."
+},
+{
+"course": "b.tech [AIML]",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech AIML",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech comouter sceince",
+"kapp": "B.Tech"
+},
+{
+"course": "B.A LLB",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "b.tach AI/ML",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech(CSE)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech(CSE)",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA hons",
+"kapp": "BBA"
+},
+{
+"course": "B.TECH [ BIOTECHNOLOGY ]",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech(CSE)",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech cse",
+"kapp": "B.Tech"
+},
+{
+"course": "bachelor of architecture",
+"kapp": "B.Arch"
+},
+{
+"course": "B.Tech (Computer Science Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA(Banking Finance)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.TACH CSC",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech(CSE)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (AI/ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "BSC",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech (Artificial Intelligence)",
+"kapp": "B.Tech"
+},
+{
+"course": "Mba finance",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Tech (CSE)",
+"kapp": "B.Tech"
+},
+{
+"course": "bsc it reserch",
+"kapp": "B.Sc."
+},
+{
+"course": "BBA LL. B",
+"kapp": "BBA LL.B."
+},
+{
+"course": "MA MASS COMMUNICATION AND JOURNALISM",
+"kapp": "M.J.M.C."
+},
+{
+"course": "Ma clinical psychology",
+"kapp": "M.A."
+},
+{
+"course": "BA LLB (HONS)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "B.tech (CSE)",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA [ BUSINESS ANALYTICS ]",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.tech CSE(AI ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.sc forensic",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "MA Political Science",
+"kapp": "M.A."
+},
+{
+"course": "Diploma to Degree Civil Engineering.",
+"kapp": "Diploma"
+},
+{
+"course": "Btech AI/ML",
+"kapp": "B.Tech"
+},
+{
+"course": "Btech CS",
+"kapp": "B.Tech"
+},
+{
+"course": "phd in law",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Tech CSE ( AI ML )",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech biotech",
+"kapp": "B.Tech"
+},
+{
+"course": "Bca hons",
+"kapp": "BCA"
+},
+{
+"course": "b.tech cs",
+"kapp": "B.Tech"
+},
+{
+"course": "btech cse (robotics)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Computer Science & Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B Com (Hons) - Accounting & Taxation - ACCA UK",
+"kapp": "B.Com"
+},
+{
+"course": "Global B.Tech CSE (2+2) with University of Essex, UK",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech (Electronics Engineering) VLSI Design and Technology powered by L and T EduTech",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Design Fashion Design",
+"kapp": "B.Des"
+},
+{
+"course": "PH.D History",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Tech SCE",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech CSE hons",
+"kapp": "B.Tech"
+},
+{
+"course": "b.tech (cs)",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Sc biotechnology",
+"kapp": "B.Sc."
+},
+{
+"course": "MA CLINICAL PHYSOLOGY",
+"kapp": "M.A."
+},
+{
+"course": "B.TECH [ AI & ML ]",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech AIML",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc(hons) Biotechnology",
+"kapp": "B.Sc."
+},
+{
+"course": "BSc (Hons) in Forensic Science",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Architecture",
+"kapp": "B.Arch"
+},
+{
+"course": "b.sc hons.biotecnology",
+"kapp": "B.Sc."
+},
+{
+"course": "b.sc hons.with reserch",
+"kapp": "B.Sc."
+},
+{
+"course": "b.tach ai/ml",
+"kapp": "B.Tech"
+},
+{
+"course": "B.TECH CS",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech CS",
+"kapp": "B.Tech"
+},
+{
+"course": "BSC",
+"kapp": "B.Sc."
+},
+{
+"course": "B.tech lateral entry",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "B.tech aiml",
+"kapp": "B.Tech"
+},
+{
+"course": "BTECH AI",
+"kapp": "B.Tech"
+},
+{
+"course": "GNM",
+"kapp": "GNM"
+},
+{
+"course": "B.Sc (Data Science and Computing)",
+"kapp": "B.Sc."
+},
+{
+"course": "BTTM",
+"kapp": "BHM"
+},
+{
+"course": "MCA with Specialisation in AI & ML- IBM",
+"kapp": "MCA"
+},
+{
+"course": "Ph.D (Social Sciences)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Sc Fashion Desiging",
+"kapp": "M.Sc."
+},
+{
+"course": "BHM",
+"kapp": "BHM"
+},
+{
+"course": "PhD Forensic Sciences",
+"kapp": "Ph.D."
+},
+{
+"course": "BPES Hons. (Bachelor of Physical Education and Sports - Honours)",
+"kapp": "B.P.Ed"
+},
+{
+"course": "BA LLB (Hons.)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "BHM",
+"kapp": "BHM"
+},
+{
+"course": "B.Tech.- Computer Science & Engineering with specialization in Artificial Intelligence & Machine Learning (AI & ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.B.A. with specialization in Business Analytics",
+"kapp": "BBA"
+},
+{
+"course": "B.Pharma",
+"kapp": "B.Pharma"
+},
+{
+"course": "Dip. in Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Artificial Intelligence & Machine Learning",
+"kapp": "B.Tech"
+},
+{
+"course": "Dip. in Electronic & Communication Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Arts and Bachelor of Legislative Law",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "Bachelor in Computer Applications",
+"kapp": "BCA"
+},
+{
+"course": "M.Sc (Mathematics)",
+"kapp": "M.Sc."
+},
+{
+"course": "Diploma (Medical Lab Sciences)",
+"kapp": "DMLT"
+},
+{
+"course": "Master of Hospital Administration",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Tech Electrical Engineering (Lateral Entry)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "B.A (Hons) in Psychology",
+"kapp": "B.A."
+},
+{
+"course": "MCA with Specialisation in AI & ML",
+"kapp": "MCA"
+},
+{
+"course": "B Tech Automobile Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "MPharma",
+"kapp": "M.Pharma"
+},
+{
+"course": "B.Tech ECE (IOT)",
+"kapp": "B.Tech"
+},
+{
+"course": "Ph.D (Psychology)",
+"kapp": "Ph.D."
+},
+{
+"course": "M Pharmacy Phamacology",
+"kapp": "M.Pharma"
+},
+{
+"course": "B. Tech CSE AI & Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "Doctor of Pharmacy (Pharm.D)",
+"kapp": "Pharm.D"
+},
+{
+"course": "B.com- International finance (integrated with ACCA )",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor in Medical Laboratory Technology (MLT)",
+"kapp": "BMLT"
+},
+{
+"course": "B.Tech ECE",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA (Digital Marketing)",
+"kapp": "BBA"
+},
+{
+"course": "BCA (AI & ML)",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc (Hons) Life Sciences",
+"kapp": "B.Sc."
+},
+{
+"course": "M.Com",
+"kapp": "M.Com"
+},
+{
+"course": "B.Tech Computer Science and Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "BDS",
+"kapp": "BDS"
+},
+{
+"course": "B.Sc(HONS) (Clinical Embryology and Reproductive Genetics)",
+"kapp": "B.Sc."
+},
+{
+"course": "Diploma (Clinical Embryology and Reproductive Genetics)",
+"kapp": "Diploma"
+},
+{
+"course": "M.P.E.S",
+"kapp": "M.P.Ed"
+},
+{
+"course": "Master in Physiotherapy",
+"kapp": "MPT"
+},
+{
+"course": "Ph.D (Nutritions And Food Safety Management)",
+"kapp": "Ph.D."
+},
+{
+"course": "Master in Anaesthesia and Operation Theatre Technology",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Tech - CSE with Specialization in Artificial Intelligence & Machine Learning - Microsoft",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA Digital Marketing",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Medical Lab Sciences (Medical Biochemistry)",
+"kapp": "MMLT"
+},
+{
+"course": "Diploma In Pharmacy",
+"kapp": "D.Pharma"
+},
+{
+"course": "B.Tech.- Computer Science & Engineering with specialization in Artificial Intelligence & Machine Learning (AI & ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. (Hons) Criminology, Cyber Law and Forensic Sciences",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B.Tech CSE ML&AI - IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Airlines & Airport Management)",
+"kapp": "B.Sc Aviation"
+},
+{
+"course": "Diploma in Plumbing and German Skills",
+"kapp": "Diploma"
+},
+{
+"course": "BA LL.B.",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "Ph.D. (Tourism Management)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Pharmacy (Pharmacology)",
+"kapp": "M.Pharma"
+},
+{
+"course": "Ph.D. (Computer Science & Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Pharmacy (Pharmaceutical Chemistry)",
+"kapp": "M.Pharma"
+},
+{
+"course": "B.Sc. in Clinical Psychology",
+"kapp": "B.Sc."
+},
+{
+"course": "BBA-MBA (5- Year Integrated)",
+"kapp": "BBA"
+},
+{
+"course": "M.Optometry",
+"kapp": "M.Optom."
+},
+{
+"course": "M.Tech Civil Eng. (Structural Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Pharmacy - Lateral Entry",
+"kapp": "B.Pharma"
+},
+{
+"course": "MBA in Human Resources",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MCA AI & DS",
+"kapp": "MCA"
+},
+{
+"course": "B.Sc Geology",
+"kapp": "B.Sc."
+},
+{
+"course": "MBA Online",
+"kapp": "Online MBA"
+},
+{
+"course": "BBA with Business Analytics (Industry Partner Grant Thornton)",
+"kapp": "BBA"
+},
+{
+"course": "BBA with specialization in E-Commerce and Digital Marketing",
+"kapp": "BBA"
+},
+{
+"course": "MBA with specialization in Sports Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Sc IT",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech CSE IOT",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA AI and DS",
+"kapp": "BCA"
+},
+{
+"course": "B.A. (Hons.) English",
+"kapp": "B.A."
+},
+{
+"course": "B.com/B.com (hons)",
+"kapp": "B.Com"
+},
+{
+"course": "LL.B. (Bachelor of Law)",
+"kapp": "LL.B."
+},
+{
+"course": "MTTM",
+"kapp": "MHMTT"
+},
+{
+"course": "MBA with specialization in Marketing",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Sc (Hons.) Food Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "M.A. Applied Psychology",
+"kapp": "M.A."
+},
+{
+"course": "B.Tech Civil Engineering (Lateral Entry)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Diploma in Culinary Arts",
+"kapp": "Diploma"
+},
+{
+"course": "M Pharmacy Pharmaceutics",
+"kapp": "M.Pharma"
+},
+{
+"course": "Bachelor in Fashion Designing",
+"kapp": "B.Des"
+},
+{
+"course": "Bachelor in Medical Radiology and Imaging Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "MBA - Data Science with Artificial Intelligence",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Diploma (Electrical Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "M.P.E.S",
+"kapp": "M.P.Ed"
+},
+{
+"course": "Master in Anaesthesia and Operation Theatre Technology",
+"kapp": "M.Sc Allied Health Sciences"
+},
+{
+"course": "Bachelor of Science (Honors) in Microbiology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "M.Sc. Environmental Science",
+"kapp": "M.Sc."
+},
+{
+"course": "B.B.A.LL.B.(Hons.)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "M.Com.",
+"kapp": "M.Com"
+},
+{
+"course": "Ph.D. Business/Management Studies",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Tech CSE",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (IOT with AI & ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "BMRIT",
+"kapp": "BFM"
+},
+{
+"course": "MBA AI & DS",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Com (Hons.) Online",
+"kapp": "B.Com"
+},
+{
+"course": "M.Sc Microbiology",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Tech in DevOps and Cloud Computing",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Lateral Entry",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelors of Medical Laboratory Sciences",
+"kapp": "BMLT"
+},
+{
+"course": "BA.LL.B (Honors)Bachelor of Arts with Bachelor of Law (Honors)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "Bachelor of Science (Hons.) - Agriculture",
+"kapp": "B.Sc."
+},
+{
+"course": "MBA in Marketing",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Tech CSE - Full Stack",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Microelectronics",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (Biomedical Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE Leet (AI & ML) - Nextgen",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Mechatronics Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Cloud Computing",
+"kapp": "B.Tech"
+},
+{
+"course": "B.tech Stem Cell & Tissue Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Mechatronics",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Electronics and Computer Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Electrical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Artificial Intelligence and Machine Learning",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Electronics and Communication",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (Mechanical Engg. with specialization in AI&ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Block Chain Technology",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Automotive Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech in AV/VR",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Data Science and Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - CSE with Specialization in Cyber Security &Blockchain Development - IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA with Specialization in Business Analytics with UPgrad",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Sc (Hons) in Physics",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (Nutrigenetics and Personalised Nutrition)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "PG Diploma in Guidance and Councelling",
+"kapp": "Diploma"
+},
+{
+"course": "M.A (Police Administration)",
+"kapp": "M.A."
+},
+{
+"course": "B.A (Hons) in English",
+"kapp": "B.A."
+},
+{
+"course": "B.Sc (Nutritions And Dietry Sciences)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Sc-IT (Information Technology)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (Hons) in Computer Science",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (Hons) in Botany",
+"kapp": "B.Sc."
+},
+{
+"course": "M.A (Clinical Psychology)",
+"kapp": "M.A."
+},
+{
+"course": "MBA (Fashion Business Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.A (Fine Arts)",
+"kapp": "M.A."
+},
+{
+"course": "Ph.D Physiotherapy",
+"kapp": "Ph.D."
+},
+{
+"course": "B.A (Hons) in Music",
+"kapp": "B.A."
+},
+{
+"course": "B.P.E.S",
+"kapp": "B.P.Ed"
+},
+{
+"course": "Bachelors of Nutrition and Dietetic (Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Optometry (B.Opto)",
+"kapp": "BOPTM"
+},
+{
+"course": "Bachelor of Dialysis Therapy Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Medical Laboratory Sciences (BMLS)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (Stem Cells & Regenerative Medicine)",
+"kapp": "B.Sc. Forensic Science"
+},
+{
+"course": "B.Sc (ART & CLINICAL EMBRYOLOGY)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (Cancer Biology )",
+"kapp": "B.Sc."
+},
+{
+"course": "B.A (Hons) in Geography",
+"kapp": "B.A."
+},
+{
+"course": "B.A (Hons) in Hindi",
+"kapp": "B.A."
+},
+{
+"course": "M.A (History)",
+"kapp": "M.A."
+},
+{
+"course": "Ph.D (Fashion Management)",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Sc (Hons) Food Science and Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "MBA - Marketing Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master Of Design in Animation, VFX and Games",
+"kapp": "M.Des"
+},
+{
+"course": "B.A (Hons) in Political Science",
+"kapp": "B.A."
+},
+{
+"course": "B.A (Hons) in Physical Education",
+"kapp": "B.P.Ed"
+},
+{
+"course": "B.A (Hons) in Sociology",
+"kapp": "B.A."
+},
+{
+"course": "B.A (Hons) in Public Administration",
+"kapp": "B.A."
+},
+{
+"course": "B.A (Hons) in Punjabi",
+"kapp": "B.A."
+},
+{
+"course": "B.Com (Hons) -Banking & Insurance",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.Com (Hons) -Financial Markets",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.Com (Hons) -Business Analytics",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.Com (Hons) -Accounting & Finance)",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.Com (Hons) - Marketing",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.Com (Hons) -Auditing and Taxation",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.Com (Hons) -E-Commerce",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "B.Sc (Hons) in Mathematics",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Com (Hons) -Fintech & Artificial Intelligence",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "BBA - Logistics and Supply Chain Management",
+"kapp": "BBA"
+},
+{
+"course": "BBA - Digital Marketing",
+"kapp": "BBA"
+},
+{
+"course": "BBA - Human Resource",
+"kapp": "BBA"
+},
+{
+"course": "BBA - Business Analytics",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Design UI/UX Design",
+"kapp": "B.Des"
+},
+{
+"course": "BBA - IT & Business Analyst",
+"kapp": "BBA"
+},
+{
+"course": "BBA - Marketing",
+"kapp": "BBA"
+},
+{
+"course": "MBA Specialization in Quality Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Business Analytics",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA - Entrepreneurship and Family Business",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Digital Marketing",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Strategy & Entrepreneurship",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Organization Behavior and Human Resource Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA (Tourism and Hospitality Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Hospitals and Health Systems Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in AI for Business",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA - Event Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Strategy & Consulting",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA (SunStone)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Commerce",
+"kapp": "M.Com"
+},
+{
+"course": "MBA Specialization in Health Care",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Operations and Decision Sciences",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Information Systems Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Manufacturing Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Tech - Environmental Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "BSc Event and Hospitality Management",
+"kapp": "B.Sc."
+},
+{
+"course": "BBA - SUNSTONE",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Design in User Experience (UX) and User Interface (UI)",
+"kapp": "B.Des"
+},
+{
+"course": "M.Tech - CSE with Specialization in Data Science Part Time",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Electronics And Communication Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Civil with Specialization in CTM",
+"kapp": "M.Tech"
+},
+{
+"course": "BCA (Blockchain Technology",
+"kapp": "BCA"
+},
+{
+"course": "M.Sc (Environmental Sciences)",
+"kapp": "M.Sc."
+},
+{
+"course": "MBA - Fintech with Artificial Intelligence",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Sc (Zoology)",
+"kapp": "M.Sc."
+},
+{
+"course": "BBA - Finance",
+"kapp": "BBA"
+},
+{
+"course": "M.Com- International Business",
+"kapp": "M.Com"
+},
+{
+"course": "BBA - Data Science with Artificial Intelligence",
+"kapp": "BBA"
+},
+{
+"course": "MBA - International Business",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BCA (Hons With Research)",
+"kapp": "BCA"
+},
+{
+"course": "BCA (Full Stack Development)",
+"kapp": "BCA"
+},
+{
+"course": "BCA (Data Science)",
+"kapp": "BCA"
+},
+{
+"course": "BBA - Artificial Intelligence in Business",
+"kapp": "BBA"
+},
+{
+"course": "M.Sc (Biological Sciences)",
+"kapp": "M.Sc."
+},
+{
+"course": "Diploma (Electronics and Communication Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Nutrition & Dietetics",
+"kapp": "Diploma"
+},
+{
+"course": "BBA - Entrepreneurship and Family Business",
+"kapp": "BBA"
+},
+{
+"course": "B.Design in Animation,VFX and Games",
+"kapp": "B.Des"
+},
+{
+"course": "M.Tech Computing systems and infrastructure",
+"kapp": "M.Tech"
+},
+{
+"course": "Diploma (Agriculture) (2year)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma (Agriculture)",
+"kapp": "Diploma"
+},
+{
+"course": "BCA (FULL STACK)",
+"kapp": "BCA"
+},
+{
+"course": "BBA - Health Care",
+"kapp": "BBA"
+},
+{
+"course": "M.Tech - Mechanical Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE with Specialization in Cyber Security",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE with Specialization in Cloud Computing &Cyber Security - Microsoft",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech ECE specialization in Microelectronics",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE with Specialization in Data Science",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Civil with Specialization in Highway & Transportation)",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech CSE Cloud Computing",
+"kapp": "M.Tech"
+},
+{
+"course": "BCA - SUNSTONE",
+"kapp": "BCA"
+},
+{
+"course": "PG Diploma (Genetic Counseling)",
+"kapp": "Diploma"
+},
+{
+"course": "BCA (AL) - Nextgen",
+"kapp": "BCA"
+},
+{
+"course": "Diploma (Culinary Arts)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Food production",
+"kapp": "Diploma"
+},
+{
+"course": "Ph.D (Management Studies)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Tech - CSE with Specialization in Artificial Intelligence & Machine Learning - Microsoft",
+"kapp": "M.Tech"
+},
+{
+"course": "BBA (Digital Marketing) - Microsoft",
+"kapp": "BBA"
+},
+{
+"course": "PG Diploma (Clinical Embryology and Reproductive Genetics)",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma (Travel and Tourism Management)",
+"kapp": "Diploma"
+},
+{
+"course": "M.Sc (Fisheries)",
+"kapp": "M.Sc."
+},
+{
+"course": "PG Diploma in Electrical Vehicles",
+"kapp": "Diploma"
+},
+{
+"course": "BCA (Cloud Computing)",
+"kapp": "BCA"
+},
+{
+"course": "PG Diploma in Cyber Security",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma (Makeup & Hair Styling)",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma (Logistics and Supply Chain Management)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Bakery and Confectionary",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Healthcare Hygiene and Housekeeping Aide",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma in FinTech",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma in Nutrigenetics and Personalised Nutrition",
+"kapp": "Diploma"
+},
+{
+"course": "MCA (Artificial Intelligence and Machine Learning)",
+"kapp": "MCA"
+},
+{
+"course": "M.Tech - Electrical Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Mechanical Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech EE specialization in Power Systems and Renewable Energy",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Sc (Agriculture - Plant Pathology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Medical Lab Sciences (Haematology and Transfusion Medicine)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Agriculture - Horticulture)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Optometry (M.Opto)",
+"kapp": "M.Optom."
+},
+{
+"course": "Masters in Medical Radiology and Imaging Technology (electives of Breast Imaging Technology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Dialysis Therapy",
+"kapp": "M.Sc."
+},
+{
+"course": "Masters in Medical Radiology and Imaging Technology (electives of CT Technology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Medical Lab Sciences (Histology and Cytology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Masters in Medical Radiology and Imaging Technology (electives of MRI Technology)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Stem Cells & Regenerative Medicine)",
+"kapp": "M.Sc."
+},
+{
+"course": "Masters in Medical Radiology and Imaging Technology (MMRIT)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc(HONS) (Clinical Embryology & Reproductive Genetics)",
+"kapp": "M.Sc."
+},
+{
+"course": "Masters in Nutrition and Dietetic",
+"kapp": "M.Sc."
+},
+{
+"course": "M.SC (ART & CLINICAL EMBROYOLOGY)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Tech - Civil with Specialization in Production Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE with Specialization in Cyber Security Part Time",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Artificial Intelligence and Machine Learning",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Automotive Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Civil Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech ECE Specialisation in VLSI",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Electronics And Communication Engineering - Part Time",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Sc (Agriculture )",
+"kapp": "M.Sc."
+},
+{
+"course": "MBA Agribusiness Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Sc (Agriculture - Agronomy)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc. Horticulture Vegetable Science",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc. Horticulture Fruit Science",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Clinical Research)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Medical Lab Sciences (Medical Microbiology)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Cancer Biology)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Tech Electrical Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE with Specialization in Cyber Security &Blockchain Development - IBM",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Biomedical Engineering (Part Time)",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE with Specialization in AI Part Time",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Technology (Construction Management)",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Data Science and Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Civil with Specialization in Geotechnical Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Civil Structural Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE with Specialization in Full Stack",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Software Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Biomedical Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - CSE Part Time",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Environmental Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Pharmaceutical Operations and Management",
+"kapp": "M.Tech"
+},
+{
+"course": "PG Diploma (OFFICE ORGANIZATION AND MANAGEMENT)",
+"kapp": "Diploma"
+},
+{
+"course": "M.Sc (BioTechnology)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.A (Hindi)",
+"kapp": "M.A."
+},
+{
+"course": "M.Com- Banking & Insurance",
+"kapp": "M.Com"
+},
+{
+"course": "M.Com-Accounting & Finance",
+"kapp": "M.Com"
+},
+{
+"course": "M.A (Public Administration)",
+"kapp": "M.A."
+},
+{
+"course": "M.A Public Administration",
+"kapp": "M.A."
+},
+{
+"course": "M.Com-Capital Markets",
+"kapp": "M.Com"
+},
+{
+"course": "M.ED",
+"kapp": "M.P.Ed"
+},
+{
+"course": "M.A (Music-Vocal)",
+"kapp": "M.A."
+},
+{
+"course": "M.Sc (Nutrigenetics and Personalized Nutrition)",
+"kapp": "M.Sc."
+},
+{
+"course": "MA (English)",
+"kapp": "M.A."
+},
+{
+"course": "M.A (Punjabi)",
+"kapp": "M.A."
+},
+{
+"course": "M.A (Political Science)",
+"kapp": "M.A."
+},
+{
+"course": "Ph.D (Clinical Psychology)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.A (Economics)",
+"kapp": "M.A."
+},
+{
+"course": "M.Com-Human Resource Management",
+"kapp": "M.Com"
+},
+{
+"course": "Ph.D (News Media And Digital Journalism)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Home Science)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Clinical Embryology and Reproductive Genetics)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Sc (Botany)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.A (English)",
+"kapp": "M.A."
+},
+{
+"course": "Ph.D (Agriculture)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Tech Computer Science Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "Ph.D (Computer Application)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.A (Psychology)",
+"kapp": "M.A."
+},
+{
+"course": "Ph.D (Electronics And Communication Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.A (Inter-Religious Studies)",
+"kapp": "M.A."
+},
+{
+"course": "Ph.D (Mechanical Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Marketing Mangement)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Medical Radiology and Imaging Technology)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Dogri)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Food Science and Technology)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Forensic Sciences",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Sanskrit)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Botany)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Zoology)",
+"kapp": "Ph.D."
+},
+{
+"course": "PG Diploma in Geriatric Care Management",
+"kapp": "Diploma"
+},
+{
+"course": "MSC (Fashion Management)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Physics)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master\u9225\u6a9a of Computer Application",
+"kapp": "MCA"
+},
+{
+"course": "M.Tech Electronics and Communication",
+"kapp": "M.Tech"
+},
+{
+"course": "Ph.D (Mathematics)",
+"kapp": "Ph.D."
+},
+{
+"course": "PG Diploma in Smart Mobility",
+"kapp": "Diploma"
+},
+{
+"course": "Ph.D (Electrical Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Dialysis Technology)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Rehabilitation)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Sc (Food Science)",
+"kapp": "M.Sc."
+},
+{
+"course": "B.A (Mass Communication & Journalism)",
+"kapp": "B.J.M.C."
+},
+{
+"course": "Diploma (Beauty and Wellness)",
+"kapp": "Diploma"
+},
+{
+"course": "Ph.D (Fashion Communication)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Hotel Management)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Public Health)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Cancer Biology)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Sc (Environmental Science)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc ( Microbiology)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Economics)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Food Science And Technology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Diploma (Civil Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma (Mechanical Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "Ph.D (Music)",
+"kapp": "Ph.D."
+},
+{
+"course": "PG Diploma in Smart Manufacturing",
+"kapp": "Diploma"
+},
+{
+"course": "Ph.D (History)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Physics)",
+"kapp": "Ph.D."
+},
+{
+"course": "PG Diploma in Healthcare Hygiene and Housekeeping Aid",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma (Guidance & Counselling)",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma (ART & Clinical Embryology)",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma in Finance",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma (Computer Science and Engr)",
+"kapp": "Diploma"
+},
+{
+"course": "PG Diploma (Disaster Preparedness and Rehabilitation in collaboration with Indian Red Cross Society (IRCS))",
+"kapp": "Diploma"
+},
+{
+"course": "Ph.D (Hindi)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Civil Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Anesthesia Technology)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Sciences)",
+"kapp": "Ph.D."
+},
+{
+"course": "Bachelor\u9225\u6a9a of Commerce",
+"kapp": "BCA"
+},
+{
+"course": "B.Tech+M.Tech Computer Science Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE Gen AI - Microsoft",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (Big Data Analytics) - HCL",
+"kapp": "B.Tech"
+},
+{
+"course": "BCA (Information Security) - HCL",
+"kapp": "BCA"
+},
+{
+"course": "BBA (FinTech) - L&T",
+"kapp": "BBA"
+},
+{
+"course": "BBA (Business Analytics with Upgrad)",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech in AI & ML(Microsoft)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (Computer,Statistics,Mathematics)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.A (Hons) in Computer",
+"kapp": "B.A."
+},
+{
+"course": "Master of Science (Biology)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Anthropology)",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Tech in Threat Intelligence",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc (AI & Mathematics)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech CSE (DS & AI) - IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "M.Sc (Clinical Microbiology)",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Tech (Aerospace Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech CSE (Cyber Security & Block Chain) - IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech+M.Tech Devlopement and Operations, Cloud Computing and Security",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech in CSE (Computer Science & Engineering) with a Graphics & Gaming",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA (Digital Marketing & SMA) - IBM",
+"kapp": "BBA"
+},
+{
+"course": "B.Sc (Astronomy And Astrophysics)",
+"kapp": "B.Sc."
+},
+{
+"course": "BCA (Data Science and Deep learning) - IBM",
+"kapp": "BCA"
+},
+{
+"course": "M.Sc (Data Science and Computing)",
+"kapp": "M.Sc."
+},
+{
+"course": "BCA (Cloud Technology & Information Security) - Nextgen",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc Paramedics and Disaster Management",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Vocational (Organic Farming)",
+"kapp": "B.Voc"
+},
+{
+"course": "Bachelor of Computer Application and Master of Computer Application Integrated",
+"kapp": "BCA"
+},
+{
+"course": "M.Sc (Pharmaceutical Chemistry)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Astronomy And Astrophysics)",
+"kapp": "M.Sc."
+},
+{
+"course": "BCA in Application Security",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc (Microbiology- Hons)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "M.SC. Medical Laboratory Technology",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc. Physics with specialization in Quantum Computing/AI&ML",
+"kapp": "M.Sc."
+},
+{
+"course": "MBA (Sales & Distribution Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Computer Application and Master of Business Administration Integrated",
+"kapp": "BCA"
+},
+{
+"course": "MBA-Executive",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA (Retail Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA IN LOGISTICS AND SUPPLY CHAIN MANAGEMENT",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA with Specialisation in Business & Data Analytics - IBM",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA with Specialization in Digital Marketing with UPgrad",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA (Event Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Sc (Bio-Statistics)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc (Renewable Energy)",
+"kapp": "M.Sc."
+},
+{
+"course": "BCA (CS & Blockchain) - IBM",
+"kapp": "BCA"
+},
+{
+"course": "MCA with Specialization in Big Data Analystics - Microsoft",
+"kapp": "MCA"
+},
+{
+"course": "MSc in Artificial Intelligence for Drug Discovery",
+"kapp": "M.Sc."
+},
+{
+"course": "MBA in Media studies",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA in Association with Seekho",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA with Specialisation in AI for Managers -IBM",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Ph.D (Nutrigenetics)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Computer Science Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Stem Cells and Regenerative Medicine)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Sociology)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Pathology)",
+"kapp": "Ph.D."
+},
+{
+"course": "BCA (Big Data Analytics) - HCL",
+"kapp": "BCA"
+},
+{
+"course": "M.Tech - CSE with Specialisation in Information Security - HCL",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech ECE Specialisation in Very Large Scale",
+"kapp": "M.Tech"
+},
+{
+"course": "Diploma (Civil Engineering) Lateral Entry",
+"kapp": "Diploma"
+},
+{
+"course": "MCA in Cloud and Application Security",
+"kapp": "MCA"
+},
+{
+"course": "BA + B.Ed",
+"kapp": "B.A. B.Ed"
+},
+{
+"course": "M.Tech - CSE with Specialization in Big Data Analytics - HCL",
+"kapp": "M.Tech"
+},
+{
+"course": "B.Sc + B.Ed",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc (Nursing Post-Basic)",
+"kapp": "B.Sc Nursing"
+},
+{
+"course": "MCA in DevOps and Cloud Computing",
+"kapp": "MCA"
+},
+{
+"course": "MCA with Specialisation in Cloud Security - HCL",
+"kapp": "MCA"
+},
+{
+"course": "Ph.D (Education)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Sc (Hematology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Diploma (AME) Lateral Entry",
+"kapp": "Diploma"
+},
+{
+"course": "BCA (Cloud Security) - HCL",
+"kapp": "BCA"
+},
+{
+"course": "BCA in AI & ML(Microsoft)",
+"kapp": "BCA"
+},
+{
+"course": "Diploma (Electronics and Communication Engineering) Lateral Entry",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma (Mechanical Engineering) Lateral Entry",
+"kapp": "Diploma"
+},
+{
+"course": "M.Tech - CSE (IOT)",
+"kapp": "M.Tech"
+},
+{
+"course": "MCA with Specialization in Information Security - Microsoft",
+"kapp": "MCA"
+},
+{
+"course": "Diploma (Computer Science and Engr) Lateral Entry",
+"kapp": "Diploma"
+},
+{
+"course": "MCA in AI & ML(Microsoft)",
+"kapp": "MCA"
+},
+{
+"course": "MPT (Sports)",
+"kapp": "MPT"
+},
+{
+"course": "MPT (Neurology)",
+"kapp": "MPT"
+},
+{
+"course": "M.Sc (Artificial Intelligence and Mathematics)",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Tech - CSE with Specialisation in Machine Intelligence & Deep Learning - IBM",
+"kapp": "M.Tech"
+},
+{
+"course": "Ph.D(Inter-Religious Studies)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Medical and Allied Sciences)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Microbiology)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Tech - CSE with Specialization in Cloud Computing - HCL",
+"kapp": "M.Tech"
+},
+{
+"course": "MCA with Specialisation in AI & ML - IBM",
+"kapp": "MCA"
+},
+{
+"course": "M.Tech Civil- Project & Infrastructure Management",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Civil Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech EE specialization in Electrical Vehicle Technology.",
+"kapp": "M.Tech"
+},
+{
+"course": "Ph.D (Human Resource Management",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Anthropology)",
+"kapp": "Ph.D."
+},
+{
+"course": "MPT (Pediatrics)",
+"kapp": "MPT"
+},
+{
+"course": "Ph.D (Clinical Bio-Chemistry)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Punjabi)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Tech - CSE with Specialisation in Data Science & Artificial Intelligence (IBM)",
+"kapp": "M.Tech"
+},
+{
+"course": "Ph.D (Physical Education)",
+"kapp": "Ph.D."
+},
+{
+"course": "M.Tech. CAD/CAM",
+"kapp": "M.Tech"
+},
+{
+"course": "Ph.D (Biotechnology)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Chemistry)",
+"kapp": "Ph.D."
+},
+{
+"course": "Bachelor of Medical Laboratory Sciences (BMLS) Lateral Entry",
+"kapp": "BMLT"
+},
+{
+"course": "Ph.D (Environmental Science)",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Sc Cardiovascular Technology Lateral Entry",
+"kapp": "B.Sc."
+},
+{
+"course": "MPT (Cardiorespiratory)",
+"kapp": "MPT"
+},
+{
+"course": "Bachelor of Laboratory Technology",
+"kapp": "BMLT"
+},
+{
+"course": "Ph.D( Psychology)",
+"kapp": "Ph.D."
+},
+{
+"course": "MPT (Ortho)",
+"kapp": "MPT"
+},
+{
+"course": "Ph.D (Commerce)",
+"kapp": "Ph.D."
+},
+{
+"course": "MBA Specialization in Artificial Intelligence in Business",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA Specialization in Logistics and Supply Chain Management",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Ph.D (Urdu)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Finance)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (Police Administration)",
+"kapp": "Ph.D."
+},
+{
+"course": "Ph.D (English)",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Tech (Mechanical Engineering) Lateral Entry",
+"kapp": "B.Tech"
+},
+{
+"course": "Specialization Not Available",
+"kapp": "NA"
+},
+{
+"course": "Plant Pathology",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Tech Information Technology [Lateral Entry]",
+"kapp": "B.Tech"
+},
+{
+"course": "BBA- Bachelor of Business Administration",
+"kapp": "BBA"
+},
+{
+"course": "B.Com Hons.",
+"kapp": "B.Com"
+},
+{
+"course": "B.A. LLB - 5 Years",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "General",
+"kapp": "NA"
+},
+{
+"course": "B.Sc. Medical Laboratory Sciences",
+"kapp": "B.Sc."
+},
+{
+"course": "Ph.D Mathematics",
+"kapp": "Ph.D."
+},
+{
+"course": "Microbiology",
+"kapp": "M.Sc."
+},
+{
+"course": "BBA with Specilaization",
+"kapp": "BBA"
+},
+{
+"course": "Cyber Security & Ethical Hacking",
+"kapp": "B.Tech"
+},
+{
+"course": "Psychology",
+"kapp": "B.A."
+},
+{
+"course": "Diploma Beauty and Wellness",
+"kapp": "Diploma"
+},
+{
+"course": "Bachelor of Hotel Management & Catering Technology BHMCT [Lateral]",
+"kapp": "BHM"
+},
+{
+"course": "B.Sc Nutrition & Dietetics (Hons)",
+"kapp": "B.Sc."
+},
+{
+"course": "Non-Medical",
+"kapp": "B.Sc."
+},
+{
+"course": "BCA with Specilaization",
+"kapp": "BCA"
+},
+{
+"course": "History",
+"kapp": "B.A."
+},
+{
+"course": "BioTechnology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech Civil Engineering [Lateral Entry]",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. Radiology and Imaging Techniques",
+"kapp": "B.Sc."
+},
+{
+"course": "Ph.D. Computer Science Engineering",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Sc Hons Agriculture",
+"kapp": "B.Sc."
+},
+{
+"course": "Diploma Makeup & HairStyle",
+"kapp": "Diploma"
+},
+{
+"course": "Pharmaceutics",
+"kapp": "M.Pharma"
+},
+{
+"course": "Bachelor of Hotel Management & Catering Technology BHMCT",
+"kapp": "BHM"
+},
+{
+"course": "B.Tech Information Technology",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Voc Software Development",
+"kapp": "B.Voc"
+},
+{
+"course": "B.Tech - Electrical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA - Master of Business Administration",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "B.Tech - Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Computer Science and Engineering (AI&ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. - Medical Lab Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech - Electronics and Communication Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech - Computer Science and Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "MCA - Master in Computer Application",
+"kapp": "MCA"
+},
+{
+"course": "BCA - Bachelor of Computer Application",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc. - Operation Theatre Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. - Radio and Imaging Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. - Optometry",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. - Medical Microbiology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. - Agriculture",
+"kapp": "B.Sc."
+},
+{
+"course": "M.Tech - Production Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech - Structural Engineering and Construction",
+"kapp": "M.Tech"
+},
+{
+"course": "BPT - Physiotherapy",
+"kapp": "BPT"
+},
+{
+"course": "B.Tech (LE) - Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (LE) - Computer Science and Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc. - Computer Science",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech (LE) - Computer Science and Engineering (AI & ML)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (LE) - Electronics and Communication Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (LE) - Electrical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (LE) - Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B Sc. Medical Lab Science",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech Electrical & Electronics Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc Radiology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Tech (CIVIL Engineering )",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Sc Anesthesia & Operation Theatre",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc Cardiac Care Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "B. Tech (Computer Science Engineering) Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "B. Tech (Computer Science and Engineering) with IBM",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Business Administration",
+"kapp": "BBA"
+},
+{
+"course": "Diploma CSE",
+"kapp": "Diploma"
+},
+{
+"course": "Bachelor of Computer Applications",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor of Arts (Journalism & Mass Communication)",
+"kapp": "B.A."
+},
+{
+"course": "Master of Business Administration (M.B.A)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Computer Applications with IBM",
+"kapp": "BCA"
+},
+{
+"course": "B.Sc AT & OT (LEET)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Business Administration (M.B.A) with IBM",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Tourism and Travel Management",
+"kapp": "BHM"
+},
+{
+"course": "Bachelor of Hotel Management and Catering Technology (B.H.M.C.T)",
+"kapp": "BHM"
+},
+{
+"course": "Bachelor of Management Studies (Airlines, Tourism and Hospitality)",
+"kapp": "BHM"
+},
+{
+"course": "B. Tech (Computer Science Engineering) Artificial Intelligence and Machine Learning (LEET)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech (Mechanical Engineering) LEET",
+"kapp": "B.Tech"
+},
+{
+"course": "B.A. (Computer Science)",
+"kapp": "B.A."
+},
+{
+"course": "B. Pharmacy",
+"kapp": "B.Pharma"
+},
+{
+"course": "B.Tech (CIVIL Engineering) LEET",
+"kapp": "B.Tech"
+},
+{
+"course": "B Sc. Medical Lab Science LEET",
+"kapp": "B.Sc."
+},
+{
+"course": "BSc Medical Laboratory Sciences",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "BSc Cardiovascular Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "BSc Fashion Designing",
+"kapp": "B.Des"
+},
+{
+"course": "Diploma in business Analytics",
+"kapp": "Diploma"
+},
+{
+"course": "UG Certificate in Fashion Designing",
+"kapp": "B.Des"
+},
+{
+"course": "M.Sc Food Processing",
+"kapp": "M.Sc."
+},
+{
+"course": "M.Sc Medical/Non-Medical",
+"kapp": "M.Sc."
+},
+{
+"course": "MBA HR/Marketing",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA for Working Professional",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Tech Civil",
+"kapp": "M.Tech"
+},
+{
+"course": "MSc Optimatory Technology",
+"kapp": "M.Optom."
+},
+{
+"course": "M.Tech in ME/EE/CSE/Civil for Working Professional",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Tech Mechanical",
+"kapp": "M.Tech"
+},
+{
+"course": "Msc Dialysis Technology",
+"kapp": "M.Sc."
+},
+{
+"course": "MSc Radiology & Imaging Technology",
+"kapp": "M.Sc Allied Health Sciences"
+},
+{
+"course": "MSc Operation Theatre & Anaesthesia Technology",
+"kapp": "M.Optom."
+},
+{
+"course": "BSc Optimatory Technology",
+"kapp": "BOPTM"
+},
+{
+"course": "Diploma in Genetic Counselling",
+"kapp": "Diploma"
+},
+{
+"course": "UG Certificate in Mass Communication(Digital Platform)",
+"kapp": "B.J.M.C."
+},
+{
+"course": "B.Sc Agriculture",
+"kapp": "B.Agri"
+},
+{
+"course": "Diploma in Digital taxation and finance",
+"kapp": "Diploma"
+},
+{
+"course": "M.Sc Mass Communication and Journalism",
+"kapp": "M.J.M.C."
+},
+{
+"course": "Diploma in Stem Cell & Technology",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Retail and German Skills",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Artificial Intelligence",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Cyber security",
+"kapp": "Diploma"
+},
+{
+"course": "Drone Remote Pilot Certificate(RPC)",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Clinical Embryology",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Digital Marketing",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Dental Assistance( only female) and German Skills",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Forensic Science and Criminology",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Mechatronics/Electronics and German Skills",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Medical Radio Imaging Technology",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Food Processing and German Skills",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Engineering CIvil",
+"kapp": "Diploma"
+},
+{
+"course": "B.Sc Food Processing in Collaboration with Unati Corporative",
+"kapp": "B.Sc."
+},
+{
+"course": "Diploma in Food Processing in Coloberation with Unati Corporative",
+"kapp": "Diploma"
+},
+{
+"course": "Master of Business Administration (all specializations)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Engineering / Bachelor of Technology (all branches, Hons, Lateral Entry, AI, Cloud, IBM, Google, Microsoft, etc.)",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Engineering",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Science (all specializations, Hons, Research)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Science (all specializations)",
+"kapp": "M.Sc."
+},
+{
+"course": "Bachelor of Computer Applications",
+"kapp": "BCA"
+},
+{
+"course": "Master of Computer Applications",
+"kapp": "MCA"
+},
+{
+"course": "Bachelor of Business Administration",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Commerce",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Arts",
+"kapp": "B.A."
+},
+{
+"course": "Master of Arts",
+"kapp": "M.A."
+},
+{
+"course": "Bachelor of Design",
+"kapp": "B.Des"
+},
+{
+"course": "Bachelor of Pharmacy",
+"kapp": "B.Pharma"
+},
+{
+"course": "Master of Pharmacy",
+"kapp": "M.Pharma"
+},
+{
+"course": "Pharm.D",
+"kapp": "Pharm.D"
+},
+{
+"course": "Bachelor of Law",
+"kapp": "LL.B."
+},
+{
+"course": "Bachelor of Arts + Bachelor of Law / BA LLB",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "Bachelor of Business Administration + Bachelor of Law",
+"kapp": "BBA LL.B."
+},
+{
+"course": "Bachelor of Commerce + Bachelor of Law",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "Master of Law",
+"kapp": "LL.M."
+},
+{
+"course": "Bachelor of Physiotherapy",
+"kapp": "BPT"
+},
+{
+"course": "Master of Physiotherapy",
+"kapp": "MPT"
+},
+{
+"course": "Bachelor of Physical Education",
+"kapp": "B.P.Ed"
+},
+{
+"course": "Master of Physical Education and Sports",
+"kapp": "M.P.Ed"
+},
+{
+"course": "Bachelor of Fine Arts",
+"kapp": "B.A."
+},
+{
+"course": "Master of Fine Arts",
+"kapp": "M.A."
+},
+{
+"course": "Bachelor of Optometry",
+"kapp": "BOPTM"
+},
+{
+"course": "Master of Optometry",
+"kapp": "M.Optom."
+},
+{
+"course": "Bachelor of Architecture",
+"kapp": "B.Arch"
+},
+{
+"course": "Master of Architecture",
+"kapp": "B.Arch"
+},
+{
+"course": "PG Diploma",
+"kapp": "Diploma"
+},
+{
+"course": "Master of Business Administration (Data Science and Artificial Intelligence)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Healthcare and Hospital Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Logistics and Supply Chain Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Digital Marketing)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Tourism, Hospitality and Aviation)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Strategic-HR)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Global Business Management)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Applied Finance and Analytics)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (FinTech and Artificial Intelligence)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Banking, Financial Services and Insurance)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Artificial Intelligence for Business)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Physics)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Computer Applications (Cloud Computing and DevOps)",
+"kapp": "MCA"
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering) (Computer Science and Business Systems)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Cloud Computing) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Arts (Hons./Hons. with Research) (Journalism and Mass Communication)",
+"kapp": "B.A."
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Data Science) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Mathematics)",
+"kapp": "B.Sc"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Cyber Security) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Design (Fashion)",
+"kapp": "B.Des"
+},
+{
+"course": "Bachelor of Design (Product and Industrial Design)",
+"kapp": "B.Des"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (with specialization in Artificial Intelligence and Machine Learning) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Pharmacy (Pharmaceutics)",
+"kapp": "M.Pharma"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Animation, VFX and Gaming)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Business Administration (Hons./Hons. with Research) (Digital Marketing)",
+"kapp": "BBA"
+},
+{
+"course": "Master of Business Administration (Business Analytics)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Computer Science, Statistics and Mathematics)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Arts (Clinical Psychology)",
+"kapp": "M.A."
+},
+{
+"course": "Master of Engineering (Automobile Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Cyber Security)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Biotechnology)",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Computer Applications (Data Science)",
+"kapp": "MCA"
+},
+{
+"course": "Bachelor of Engineering (Aerospace Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Design (Interior)",
+"kapp": "B.Des"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Chemistry)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Engineering (Electronics and Communication Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Arts (Psychology)",
+"kapp": "MA"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (with Specialization in Artificial Intelligence and Machine Learning)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Biotechnology)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Engineering (Environment Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Arts (Hons./Hons. with Research) (Liberal Arts)",
+"kapp": "BA"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Culinary Sciences)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Engineering (Artificial Intelligence)",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Arts (Economics)",
+"kapp": "M.A."
+},
+{
+"course": "Master of Arts (English)",
+"kapp": "M.A."
+},
+{
+"course": "Bachelor of Arts (Hons./Hons. with Research) (Psychology)",
+"kapp": "B.A."
+},
+{
+"course": "Master of Engineering (Computer Science and Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Computer Applications (Hons./Hons. with Research)",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Artificial Intelligence)",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Science (Data Science)",
+"kapp": "M.Sc."
+},
+{
+"course": "Bachelor of Engineering (Automobile Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Arts (Hons./Hons. with Research) (Economics)",
+"kapp": "B.A."
+},
+{
+"course": "Bachelor of Engineering (Chemical Engineering )",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Science (Chemistry)",
+"kapp": "M.Sc."
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Electrical Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Mechanical Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Mechatronics)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Food Technology)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Medical)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Engineering (Information Technology)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Cloud Computing)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Data Science)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Arts + Bachelor of Law (Hons.) (Integrated)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "Bachelor of Business Administration (Hons./Hons. with Research) (Strategic-HR)",
+"kapp": "BBA"
+},
+{
+"course": "Master of Science (Physics)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Science (Biotechnology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Bachelor of Commerce (Hons./Hons. with Research) (Applied Finance and Analytics)",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Commerce (Hons./Hons. with Research)",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Travel and Tourism Management)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Arts (Hons./Hons. with Research) (Social Work)",
+"kapp": "B.A."
+},
+{
+"course": "Master of Engineering (Electrical Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Engineering (Electronics and Communication Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Arts (Politics and International Relations)",
+"kapp": "M.A."
+},
+{
+"course": "Master of Engineering (Mechanical Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Commerce (Hons./Hons. with Research) (Forensic Accounting and Fraud Investigation)",
+"kapp": "B.Com"
+},
+{
+"course": "Master of Physiotherapy (Musculoskeletal Science)",
+"kapp": "MPT"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Hotel and Hospitality Management)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Commerce + Bachelor of Law (Hons.) (Integrated)",
+"kapp": "B.Com LL.B"
+},
+{
+"course": "Bachelor of Computer Applications (Hons./Hons. with Research) (Data Science)",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor of Arts + Bachelor of Education",
+"kapp": "B.A. B.Ed"
+},
+{
+"course": "Master of Engineering (Computer Science and Engineering) (with specialization in Cloud Computing)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Engineering (Civil Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Airlines and Airport Management)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Science (Mathematics)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Science (Industrial Chemistry)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Engineering (Electric Vehicle Technologies)",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Science (Microbiology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Bachelor of Business Administration (Hons./Hons. with Research)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Science + Bachelor of Education",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Engineering (Civil Engineering) (Structural and Construction Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Computer Applications (Artificial Intelligence and Machine Learning)",
+"kapp": "MCA"
+},
+{
+"course": "Master of Engineering (Robotics and Artificial Intelligence)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Digital Film Making)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Engineering (Space Technologies)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Forensic Science)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Engineering (Chemical Engineering) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com. (Hons./Hons. with Research) (Applied Finance and Analytics) Additional ACCA",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (with Specialization in Internet of Things & Artificial Intelligence)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Commerce (Hons./Hons. with Research) (Capital Markets)",
+"kapp": "B.Com"
+},
+{
+"course": "Master of Business Administration ( BUSINESS ANALYTICS)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering) (with Specialization in Full Stack Development)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Business Administration (Hons./Hons. with Research) (Business Analytics)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Technology Lateral Entry (Civil Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Business Administration + Bachelor of Law (Hons.) (Integrated)",
+"kapp": "BBA LL.B."
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Computer Science)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Science (Zoology)",
+"kapp": "M.Sc."
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Nutrition and Dietetics)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Pharmacy (Pharmacology)",
+"kapp": "M.Pharma"
+},
+{
+"course": "Bachelor of Science (Hons.) (Medical Lab Technology)",
+"kapp": "B.Sc"
+},
+{
+"course": "Bachelor of Engineering (Mechatronics) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Computer Science and Engineering -Data Science) with Google",
+"kapp": "B.Tech"
+},
+{
+"course": "B.E. (Hons) CSE Artificial Intelligence in collaboration with Microsoft",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Computer Applications (Hons./Hons. with Research) (User Interface/ User Experience Design)",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor of Business Administration (Hons./Hons. with Research) (Fintech and Artificial Intelligence)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Business Administration (Hons./Hons. with Research) (Data Science & Artificial Intelligence)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Engineering (Civil Engineering) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Post Graduation Diploma in Yoga Education",
+"kapp": "Diploma"
+},
+{
+"course": "Bachelor of Computer Applications (Hons./Hons. with Research) (Augmented Reality and Virtual Reality)",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Microbiology)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Business Administration (Hons./Hons. with Research) (Logistics and Supply Chain Management)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering) (with Specialization in Full Stack Development) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Science (Forensic Science)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Pharmacy (Industrial Pharmacy)",
+"kapp": "M.Pharma"
+},
+{
+"course": "Bachelor of Engineering (Electronics and Communication Engineering) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Electronics and Communication Engineering)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Science (Animation and Multimedia Technology)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Aerospace Engineering) (Lateral Entry)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Data Science and Artificial Intelligence) with SAS",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Electrical Engineering) (Lateral Entry)",
+"kapp": "B.Des"
+},
+{
+"course": "Bachelor of Design (Interior Design)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Biotechnology)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Mechanical Engineering)",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Commerce (Hons./Hons. With Research) in Strategic Finance and Investment Analysis integrated with CFA",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Engineering (Computer Science and Engineering) (Data Science)",
+"kapp": "Pharm.D"
+},
+{
+"course": "Pharm.D (Post Baccalaureate)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (Artificial Intelligence) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering) CLOUD COMPUTING",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering) COMPUTER SCI AND BUSINESS SYSTEM",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Automobile Engineering) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Information Technology) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Biotechnology) (Lateral Entry)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Science (Medical Lab Technology) (Clinical Biochemistry)",
+"kapp": "M.A."
+},
+{
+"course": "Master of Arts (Journalism and Mass Communication)",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Science (Nutrition and Dietetics)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Computer Science and Engineering)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Animation VFX and Gaming)",
+"kapp": "B.Des"
+},
+{
+"course": "B DESIGN INTERIOR",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Mechanical Engineering) (Lateral Entry)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Science (Hons.) (Medical Lab Technology) (Lateral Entry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Computer Science and Engineering-Cloud Computing) with Google",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Electrical Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Food Technology) (Lateral Entry)",
+"kapp": "M.Pharma"
+},
+{
+"course": "Master of Pharmacy (Pharmaceutical Chemistry)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Hons.) (Computer Science and Engineering) (with Specialization in Internet of Things & Artificial Intelligence) (Lateral Entry)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Science (Hons./Hons. with Research) (Computer Science Statistics and Mathematics)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "MBA CASSM in association with IDC",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Science (Medical Lab Technology) (Clinical Microbiology)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration ( StrategicHR)",
+"kapp": "B.Pharma"
+},
+{
+"course": "Bachelor of Pharmacy (Lateral Entry)",
+"kapp": "B.Des"
+},
+{
+"course": "B.Design. (Product & Industrial Design)",
+"kapp": "B.A. LL.B."
+},
+{
+"course": "Bachelor of Arts and Bachelor of Laws(Hons.) Integrated",
+"kapp": "M.Sc."
+},
+{
+"course": "Master of Science (Botany)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Tourism Hospitality and Aviation)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Banking Financial Services and Insurance)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Business Analytics) with IBM",
+"kapp": "M.Tech"
+},
+{
+"course": "Master of Engineering (Computer Science and Engineering) (Artificial intelligence and Machine Learning)",
+"kapp": "MPT"
+},
+{
+"course": "Master of Physiotherapy (Sports Science)",
+"kapp": "BOPTM"
+},
+{
+"course": "Bachelor of Optometry (Lateral Entry)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Capital Markets)",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Commerce (Hons./Hons. with Research) (In association with Association of Chartered Certified Accountants)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering -CSE (Artificial Intelligence & Data Science with SAS)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration DATA SCI AND ARTIFICIAL MGT",
+"kapp": "B.Tech"
+},
+{
+"course": "B.E. (Hons) CSE Artificial Intelligence in collaboration with Microsoft (Lateral Entry)",
+"kapp": "B.Arch"
+},
+{
+"course": "BA Journalism & Mass Comm Hons",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Commerce (Hons./Hons. with Research) (Auditing & Taxation/ Advanced Cost & Management Accounting/E Commerce/Marketing/Financial Markets)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology CSE (Internet of Things and Artificial Intelligence)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Computer Science and Engineering-Cyber Security) with Quick Heal",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor of Computer Applications (Hons.) Artificial Intelligence & Machine Learning",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Science ( Biotechnology) (Hons.)",
+"kapp": "B.Sc."
+},
+{
+"course": "{{program}}",
+"kapp": "B.Com"
+},
+{
+"course": "B.Com. (Hons./Hons. with Research) (Applied Finance and Analytics)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. (Hons./Hons. with Research) (CSM)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Aerospace Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Engineering (Computer Science and Engineering)Data Science",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration LOGISTIC AND SUPPLY CHAIN MGT",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (Robotics & Automation)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Design (Fashion & Design)",
+"kapp": "B.Des"
+},
+{
+"course": "Master of Business Administration ( Strategic HR)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Arts (Hons) (Liberal Art)",
+"kapp": "B.A."
+},
+{
+"course": "Bachelor of Technology ( Electronics and Communication Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology - Information Technology",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Business Administration (Global Business Management) with KPMG",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Applied Finance) with PwC",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (FinTech) with NSE Academy",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Master of Business Administration (Strategic HR)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Computer Applications (Data Science) with SAS",
+"kapp": "BCA"
+},
+{
+"course": "Master of Computer Application (Data Science)",
+"kapp": "MCA"
+},
+{
+"course": "Bachelor of Science (Hons) (Microbiology)",
+"kapp": "B.Sc."
+},
+{
+"course": "Master of Technology (Computer Science and Engineering - Data Science)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Arts (Psychology) (Hons)",
+"kapp": "B.A."
+},
+{
+"course": "Bachelor of Technology (Civil Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Science ( Forensic Science) (Hons.)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Technology (Information Technology)",
+"kapp": "B.Tech"
+},
+{
+"course": "Master of Computer Applications (Artificial Intelligence and Machine Learning) with SAS",
+"kapp": "MCA"
+},
+{
+"course": "Bachelor of Technology (Computer Science and Engineering-Artificial Intelligence and Machine Learning) with Microsoft",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Business Administration and Bachelor of Law (Hons) Integrated",
+"kapp": "BBA LL.B."
+},
+{
+"course": "Bachelor of Science (Data Science) (Hons.)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Com (Hons.) + ACCA (International Accounting and Finance) with Grant Thornton",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Computer Applications (Hons.)",
+"kapp": "BCA"
+},
+{
+"course": "Bachelor of Technology CSE Lateral Entry (Artificial Intelligence & Machine Learning)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Technology Lateral Entry (Electronics & Communication Engineering)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Commerce (Hons.)",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Business Administration (Hons.)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Business Administration (Digital Marketing) (Hons.)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Business Administration (Business Analytics )(Hons.) with Deloitte",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Business Administration (FinTech) (Hons.) + ACCA with Grant Thornton",
+"kapp": "BBA"
+},
+{
+"course": "Master of Technology (Computer Science and Engineering -Artificial Intelligence and Machine Learning) with SAS",
+"kapp": "M.Tech"
+},
+{
+"course": "Bachelor of Business Administration (Branding and Advertising) (Hons.)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Science (Hospitality & Hotel Management)",
+"kapp": "BHM"
+},
+{
+"course": "Bachelor of Technology Lateral Entry (Computer Science & Engineering)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Business Administration (Business Analytics )(Hons.) with KPMG",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Technology Lateral Entry (Information Technology)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Science (Airlines & Airport Management)",
+"kapp": "B.Sc Aviation"
+},
+{
+"course": "Bachelor of Technology Lateral Entry (Mechanical Technology)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Technology Lateral Entry (Electrical Engineering)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Technology (Computer Science and Engineering -Data Science)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Arts (Journalism and Mass Communication) (Hons.)",
+"kapp": "B.J.M.C."
+},
+{
+"course": "Bachelor of Technology CSE Lateral Entry (Data Science)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Business Administration (Business Analytics )(Hons.)",
+"kapp": "BBA"
+},
+{
+"course": "Bachelor of Science (Hons) (Animation VFX & Gaming)",
+"kapp": "Bachelor of Animation"
+},
+{
+"course": "Bachelor of Technology Lateral Entry (Biotechnology)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Technology CSE Lateral Entry (Cyber Security)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "Bachelor of Technology (Computer Science and Engineering-Artificial Intelligence and Machine Learning)",
+"kapp": "B.Tech"
+},
+{
+"course": "Program Name",
+"kapp": "Other"
+},
+{
+"course": "Bachelor of Science (Hons) (Animation, VFX & Gaming)",
+"kapp": "Bachelor of Animation"
+},
+{
+"course": "Master of Business Administration (Strategic HR) with Aon",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Technology CSE Lateral Entry (Cloud Computing)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "BBA - (Bachelor of Business Administration)",
+"kapp": "BBA"
+},
+{
+"course": "Master of Laws in Criminal Law",
+"kapp": "LL.M."
+},
+{
+"course": "Bachelor of Science (Hotel & Hospitality Management)",
+"kapp": "BHM"
+},
+{
+"course": "Diploma in Operation Theatre Technology",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in Dialysis Technician",
+"kapp": "Diploma"
+},
+{
+"course": "Diploma in X-Ray and Imaging Technology",
+"kapp": "Diploma"
+},
+{
+"course": "B.Sc. in Dialysis Therapy Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. in Operation Theatre Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. in Nutrition and Dietetics",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc. in Cardiovascular Technology (Cath Lab)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelors of Optometry",
+"kapp": "BOPTM"
+},
+{
+"course": "B.Sc. in Medical Laboratory Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "PGDHM",
+"kapp": "Diploma"
+},
+{
+"course": "B.Sc. in Medical Radiology & Imaging Technology",
+"kapp": "B.Sc."
+},
+{
+"course": "Certificate in Emergency Medical Technician",
+"kapp": "Certificate"
+},
+{
+"course": "Certificate in Billing Excellence and Patient Experience",
+"kapp": "Certificate"
+},
+{
+"course": "B Tech CSE in Specialisation in Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "MSc (Physics)",
+"kapp": "M.Sc."
+},
+{
+"course": "MSc Microbiology",
+"kapp": "M.Sc."
+},
+{
+"course": "MSc Microbiology",
+"kapp": "M.Sc."
+},
+{
+"course": "BSc Clinical Embryology and Reproductive Genetics",
+"kapp": "B.Sc."
+},
+{
+"course": "MSc Forensic Science",
+"kapp": "M.Sc."
+},
+{
+"course": "B Tech Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech CSE in Specialisation in Cyber Security",
+"kapp": "B.Tech"
+},
+{
+"course": "BSc Clinical Embryology and Reproductive Genetics",
+"kapp": "B.Sc."
+},
+{
+"course": "B Tech EE",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech CSE in Specialisation in Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech Civil Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech Mechanical Engineering",
+"kapp": "B.Tech"
+},
+{
+"course": "B Tech CSE in Specialisation in Data Science",
+"kapp": "B.Tech"
+},
+{
+"course": "M Tech EEE",
+"kapp": "M.Tech"
+},
+{
+"course": "B Tech EEE",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Technology (B.Tech)",
+"kapp": "B.Tech"
+},
+{
+"course": "Bachelor of Computer Application (BCA)",
+"kapp": "BCA"
+},
+{
+"course": "Master of Business Administration (MBA)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "Bachelor of Business Administration (BBA)",
+"kapp": "BBA"
+},
+{
+"course": "Diploma in Pharmacy (D.Pharma)",
+"kapp": "D.Pharma"
+},
+{
+"course": "Bachelor of Pharmacy (B.Pharma)",
+"kapp": "B.Pharma"
+},
+{
+"course": "Bachelor of Commerce (B.Com (Hons))",
+"kapp": "B.Com"
+},
+{
+"course": "Bachelor of Science (B.Sc (H.Sc))",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Science (B.Sc (PCM))",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Science (B.Sc (ZBC))",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Science in Nursing (B.Sc Nursing)",
+"kapp": "B.Sc."
+},
+{
+"course": "Bachelor of Commerce (B Com)",
+"kapp": "B.Com"
+},
+{
+"course": "Diploma (Mechanical)",
+"kapp": "Diploma"
+},
+{
+"course": "Master of Computer Applications (MCA)",
+"kapp": "MCA"
+},
+{
+"course": "Bachelor of Education (B.Ed.)",
+"kapp": "B.Ed"
+},
+{
+"course": "NA",
+"kapp": "NA"
+},
+{
+"course": "Master of Education (M.Ed.)",
+"kapp": "M.P.Ed"
+},
+{
+"course": "Master of Pharmacy (M.Ph)",
+"kapp": "M.Pharma"
+},
+{
+"course": "BBA Technology & Business Management",
+"kapp": "BBA"
+},
+{
+"course": "BBA Luxury & Fashion Management",
+"kapp": "BBA"
+},
+{
+"course": "B.Tech ECOE (Bachelor of Technology - Electronics and Computer Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech MAE (Bachelor of Technology - Mechanical and Automation Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Com (H) in Data Science",
+"kapp": "B.Com"
+},
+{
+"course": "B.Sc MLS (Bachelor of Science - Medical Lab Sciences)",
+"kapp": "BMLT"
+},
+{
+"course": "B.Com Hons. (Bachelor of Commerce - Honours)",
+"kapp": "B.Com"
+},
+{
+"course": "B.Sc Phy Hons. (Bachelor of Science - Physics - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc Maths Hons. (Bachelor of Science - Mathematics - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc ND Hons. (Bachelor of Science - Nutrition and Dietetics - Honours)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "B.Tech ASE (Bachelor of Technology - Aerospace Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech RAE (Bachelor of Technology - Robotics and Automation Engineering)",
+"kapp": "B.Tech"
+},
+{
+"course": "MBA-BFSI (Master of Business Administration - Banking Financial Services and Insurance)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "BOD (Bachelor of Design)",
+"kapp": "B.Des"
+},
+{
+"course": "B.Sc OTAT (Bachelor of Science - Operation Theatre and Anaesthesia Technology)",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "M.Sc Mathematics (Master of Science - Mathematics)",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Sc AM Hons. (Bachelor of Science - Animation & Multimedia - Honours )",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc Chem Hons. (Bachelor of Science - Chemistry - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc CA Hons. (Bachelor of Science - Culinary Arts - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "B.Sc ATH Hons. (Bachelor of Science - Airlines Tourism and Hospitality - Honours)",
+"kapp": "B.Sc Aviation"
+},
+{
+"course": "BCA (H) with Cyber Security",
+"kapp": "BCA"
+},
+{
+"course": "B.Pharma (Bachelor of Pharmacy)",
+"kapp": "B.Pharma"
+},
+{
+"course": "M.Sc Physics (Master of Science - Physics)",
+"kapp": "M.Sc."
+},
+{
+"course": "MA English (Master of Arts - English)",
+"kapp": "M.A."
+},
+{
+"course": "M.Tech CC (Master of Technology (CAD/CAM))",
+"kapp": "M.Tech"
+},
+{
+"course": "M.Sc MLS (Master of Science - Medical Lab Sciences)",
+"kapp": "MMLT"
+},
+{
+"course": "M.Sc Chemistry (Master of Science - Chemistry)",
+"kapp": "M.Sc."
+},
+{
+"course": "MBA in Business Analytics (Powered with Upgrad)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "PhD Physics (Doctor of Philosophy in Physics)",
+"kapp": "Ph.D"
+},
+{
+"course": "BHMCT (Bachelor of Hotel Management and Catering Technology)",
+"kapp": "BHMCT"
+},
+{
+"course": "M.Sc IT (Master of Science - Information Technology)",
+"kapp": "M.Sc."
+},
+{
+"course": "B.Sc DMSN Hons. (Bachelor of Science - Digital Marketing and Social Networks - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "DEE (Diploma in Electrical Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "HNDE (HIGHER NATIONAL DIPLOMA IN ENGINEERING)",
+"kapp": "Diploma"
+},
+{
+"course": "M.Tech ME (Master of Technology - Mechanical Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "MBA in Digital Marketing (Powered with Upgrad)",
+"kapp": "MBA/PGDM"
+},
+{
+"course": "M.Sc AM (Master of Science - Animation and Multimedia)",
+"kapp": "M.Sc."
+},
+{
+"course": "PhD Chemistry (Doctor of Philosophy in Chemistry)",
+"kapp": "Ph.D."
+},
+{
+"course": "BA JMC Hons. (BA Journalism and Mass Communication - Honours )",
+"kapp": "B.J.M.C."
+},
+{
+"course": "M.Tech CE (Master of Technology - Civil Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "DCSE (Diploma in Computer Science and Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "M.Tech ECE (Master of Technology - Electronics and Communication Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "DDMSN (Diploma in Digital Marketing and Social Networks)",
+"kapp": "Diploma"
+},
+{
+"course": "B.Tech CSE (Bachelor of Technology - Computer Science and Engineering - Lateral)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "DMCAM (Diploma in Mechanical Engineering (CAD/CAM))",
+"kapp": "Diploma"
+},
+{
+"course": "B.Sc PS Hons. (Bachelor of Science - Physical Science - Honours)",
+"kapp": "B.Sc."
+},
+{
+"course": "DCS (Diploma in Cyber Security)",
+"kapp": "Diploma"
+},
+{
+"course": "M.Tech ASE (Master of Technology - Aerospace Engineering)",
+"kapp": "M.Tech"
+},
+{
+"course": "Bacholors of Cardiac Care Technology",
+"kapp": "B.Sc Allied Health Sciences"
+},
+{
+"course": "DCE (Diploma in Civil Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "M.Optom (Master of Optometry)",
+"kapp": "M.Optom."
+},
+{
+"course": "PhD ME (Doctor of Philosophy in Mechanical Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD CA (Doctor of Philosophy in Computer Applications )",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD HMT (Doctor of Philosophy inTourism)",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Tech CE (Bachelor of Technology - Civil Engineering - Lateral)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "DECE (Diploma in Electronics and Communication Engineering)",
+"kapp": "Diploma"
+},
+{
+"course": "MPES (Master of Physical Education and Sports)",
+"kapp": "M.P.Ed"
+},
+{
+"course": "HNDC (HIGHER NATIONAL DIPLOMA IN COMPUTING)",
+"kapp": "Diploma"
+},
+{
+"course": "M.Tech CSE (Master of Technology - Computer Science Engineering )",
+"kapp": "M.Tech"
+},
+{
+"course": "PhD CSE (Doctor of Philosophy in Computer Science Engineering)",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD PE (Doctor of Philosophy in Physical Education)",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD Pharmacy (Doctor of Philosophy in Pharmaceutical Sciences)",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD BS (Doctor of Philosophy in Business Management and Commerce)",
+"kapp": "Ph.D."
+},
+{
+"course": "B.Tech ASE (Bachelor of Technology - Aerospace Engineering - Lateral)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "B.Tech ECOE (Bachelor of Technology - Electronics and Computer Engineering - Lateral)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "B.Tech. Mechanical and Smart Manufacturing",
+"kapp": "B.Tech"
+},
+{
+"course": "B.Tech ECE (Bachelor of Technology - Electronics and Communication Engineering - Lateral)",
+"kapp": "B.Tech (Lateral)"
+},
+{
+"course": "PhD ENG (Doctor of Philosophy in English)",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD Pharmacy (Doctor of Philosophy in Pharmacy )",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD HMT(Doctor of Philosophy in Hotel Management)",
+"kapp": "Ph.D."
+},
+{
+"course": "PhD Mathematics (Doctor of Philosophy in Mathematics)",
+"kapp": "Ph.D."
+}
+]

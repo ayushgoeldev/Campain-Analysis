@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lead Report</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Lead&nbsp;Report</h1>
+    <nav class="tabs">
+      <button class="tab is-active" data-view="report">Report</button>
+      <button class="tab" data-view="data">Data</button>
+      <button class="tab" data-view="settings">SETUP</button>
+      <button class="tab" data-view="mappings">Mappings</button>
+      <button class="tab" data-view="duplicates">Duplicates</button>
+    </nav>
+    <div class="client-picker" id="clientPicker">
+      <button class="client-btn" id="clientBtn" type="button">
+        <span class="ci-label">Client:</span> <span id="clientName">—</span> <span class="caret">▾</span>
+      </button>
+      <div class="client-menu hidden" id="clientMenu">
+        <input class="inp" id="clientSearch" placeholder="Search clients…" />
+        <div id="clientList" class="client-list"></div>
+        <div class="client-new">
+          <input class="inp" id="newClientName" placeholder="New client name" />
+          <button class="btn primary sm" id="newClientBtn" type="button">Create</button>
+        </div>
+      </div>
+    </div>
+    <div class="dataset-pill" id="datasetPill">No dataset</div>
+  </header>
+
+  <main>
+    <!-- REPORT VIEW -->
+    <section id="view-report" class="view is-active">
+      <div class="report-toolbar">
+        <div>
+          <h2 id="reportTitle">Weekly Report</h2>
+          <span id="reportSub" class="muted"></span>
+        </div>
+        <div class="report-actions">
+          <button class="btn" id="expandAll" type="button">Expand all</button>
+          <button class="btn" id="collapseAll" type="button">Collapse all</button>
+          <button class="btn" id="downloadXlsx" type="button">⬇ Download Excel</button>
+          <button class="btn primary" id="downloadPdf" type="button">⬇ Download PDF</button>
+        </div>
+      </div>
+
+      <div id="reportEmpty" class="empty hidden">
+        <p>No data yet. Go to <strong>Data</strong> and upload an export to build the report.</p>
+      </div>
+
+      <div id="reportBody"></div>
+    </section>
+
+    <!-- DATA VIEW -->
+    <section id="view-data" class="view">
+      <div class="card">
+        <h2>Upload export</h2>
+        <p class="muted">CSV or XLSX from meritto (or any CRM). Banner rows are auto-skipped; the header row is detected automatically.</p>
+        <form id="uploadForm">
+          <label class="field">
+            <span>File</span>
+            <input type="file" name="file" id="fileInput" accept=".csv,.tsv,.xlsx,.xls" required />
+          </label>
+          <div class="row">
+            <label class="field">
+              <span>Name (optional)</span>
+              <input type="text" name="name" id="uploadName" placeholder="e.g. Week 30" />
+            </label>
+            <label class="field">
+              <span>Header row (optional)</span>
+              <input type="number" name="headerRow" id="headerRow" min="0" placeholder="auto" />
+            </label>
+          </div>
+          <button type="submit" class="btn primary" id="uploadBtn">Upload &amp; build report</button>
+          <span id="uploadStatus" class="status"></span>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Datasets</h2>
+        <table class="grid" id="datasetsTable">
+          <thead><tr><th>Active</th><th>Name</th><th>Rows</th><th>Uploaded</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DUPLICATES VIEW -->
+    <section id="view-duplicates" class="view">
+      <div class="card">
+        <h2>Duplicate uploads</h2>
+        <p class="muted">Upload the per-Medium duplicate export for each category. <strong>Duplicate = Secondary + Tertiary</strong>; Medium is mapped to <strong>Kapp Medium</strong> via your Lead Code mappings. These feed the report's Dup columns in Top Lead Codes and the Duplicate KPIs, matched by Kapp Medium.</p>
+
+        <div class="map-bar">
+          <div class="seg">
+            <button class="seg-btn is-active" data-dup="leads">Leads</button>
+            <button class="seg-btn" data-dup="fi">Form Initiated</button>
+            <button class="seg-btn" data-dup="apps">Applications</button>
+            <button class="seg-btn" data-dup="adm">Admissions</button>
+          </div>
+          <span id="dupMeta" class="muted map-count"></span>
+        </div>
+
+        <form id="dupForm" class="map-add">
+          <input type="file" id="dupFile" class="inp" accept=".csv,.tsv,.xlsx,.xls" required />
+          <button class="btn primary" id="dupUpload" type="submit">Upload &amp; apply</button>
+          <button class="btn ghost" id="dupClear" type="button">Clear this category</button>
+          <span id="dupStatus" class="status"></span>
+        </form>
+
+        <div class="tblwrap"><table class="grid" id="dupTable"></table></div>
+      </div>
+    </section>
+
+    <!-- MAPPINGS VIEW -->
+    <section id="view-mappings" class="view">
+      <div class="card">
+        <h2>Mappings</h2>
+        <p class="muted">Normalize raw values into report buckets. <strong>Course</strong> maps a raw course name → KAPP course; <strong>Lead Code</strong> maps a parsed campaign token → New Lead Code. Unmatched values pass through unchanged. Changes apply to the report after you <strong>Recompute</strong>.</p>
+
+        <div class="map-bar">
+          <div class="seg">
+            <button class="seg-btn is-active" data-map="course">Course</button>
+            <button class="seg-btn" data-map="lead_code">Lead Code</button>
+          </div>
+          <input id="mapSearch" class="inp" placeholder="Search…" />
+          <span id="mapCount" class="muted map-count"></span>
+          <button class="btn" id="mapRecompute">Recompute to apply</button>
+        </div>
+
+        <div class="map-add">
+          <input id="mapNewKey" class="inp" placeholder="From (raw value)" />
+          <span class="arrow">→</span>
+          <input id="mapNewValue" class="inp" placeholder="To (mapped value)" />
+          <button class="btn primary" id="mapAdd">Add / Update</button>
+          <span id="mapStatus" class="status"></span>
+        </div>
+
+        <div class="map-bulk">
+          <button class="btn" id="mapSample" type="button">⬇ Download sample</button>
+          <label class="btn" for="mapFile">⬆ Upload file (add/update)</label>
+          <label class="btn" for="mapFileReplace">↺ Replace all from file</label>
+          <input type="file" id="mapFile" accept=".csv,.tsv,.xlsx,.xls" hidden />
+          <input type="file" id="mapFileReplace" accept=".csv,.tsv,.xlsx,.xls" hidden />
+          <button class="btn ghost danger-btn" id="mapClearAll" type="button">🗑 Clear all</button>
+          <span id="mapBulkStatus" class="status"></span>
+        </div>
+
+        <div class="tblwrap"><table class="grid" id="mapTable"></table></div>
+      </div>
+    </section>
+
+    <!-- SETUP VIEW -->
+    <section id="view-settings" class="view">
+      <div class="card" id="previewCard">
+        <button type="button" class="drawer-toggle" id="previewToggle" aria-expanded="true">
+          <span>Dataset columns &amp; sample rows</span>
+          <span class="chev" aria-hidden="true">▾</span>
+        </button>
+        <div class="drawer-body" id="previewBody">
+          <p class="muted">The actual headers &amp; data in your active dataset. Click a column name to copy it, then paste it into the matching field below.</p>
+          <div id="previewChips" class="chips"></div>
+          <div class="tblwrap"><table class="grid" id="previewTable"></table></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>SETUP</h2>
+        <p class="muted">Column mappings &amp; rules — the app equivalent of the sheet's Setup tab. After changing these, click <strong>Recompute</strong> to re-derive the active dataset.</p>
+        <div id="settingsForm" class="settings-grid"></div>
+        <div class="row">
+          <button class="btn primary" id="saveSettings">Save</button>
+          <button class="btn" id="recomputeBtn">Recompute active dataset</button>
+          <button class="btn ghost" id="resetSettings">Reset to defaults</button>
+          <span id="settingsStatus" class="status"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/js/dashboard.js" type="module"></script>
+</body>
+</html>
