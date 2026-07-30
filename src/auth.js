@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import crypto from 'node:crypto';
+import { query } from './db.js';
 
 const SESSION_COOKIE = 'lead_report_session';
 const SESSION_TTL_MS = 1000 * 60 * 60 * 12;
-const sessions = new Map();
 
 function parseCookies(header = '') {
   return Object.fromEntries(header.split(';').map((part) => {
@@ -24,8 +24,8 @@ function cookieOptions(req) {
   const secure = req.secure || req.headers['x-forwarded-proto'] === 'https' || process.env.VERCEL === '1';
   return {
     httpOnly: true,
-    sameSite: 'none',
-    secure: true,
+    sameSite: secure ? 'none' : 'lax',
+    secure,
     maxAge: SESSION_TTL_MS,
     path: '/',
   };
@@ -34,41 +34,37 @@ function cookieOptions(req) {
 function configuredUser() {
   const username = process.env.APP_USERNAME;
   const password = process.env.APP_PASSWORD;
-  console.log('Auth config:', { username, hasPassword: !!password }); // ← add this
   if (!username || !password) return null;
   return { username, password };
 }
 
-function pruneSessions() {
-  const now = Date.now();
-  for (const [id, session] of sessions) {
-    if (now - session.createdAt > SESSION_TTL_MS) sessions.delete(id);
+export async function isAuthed(req) {
+  const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  if (!sessionId) return false;
+  try {
+    const { rows } = await query(
+      `SELECT id FROM sessions WHERE id = $1 AND created_at > now() - interval '12 hours'`,
+      [sessionId]
+    );
+    return rows.length > 0;
+  } catch {
+    return false;
   }
 }
 
-export function isAuthed(req) {
-  pruneSessions();
-  const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
-  if (!sessionId) return false;
-  const session = sessions.get(sessionId);
-  if (!session) return false;
-  session.lastSeenAt = Date.now();
-  return true;
-}
-
-export function requireAuth(req, res, next) {
-  if (isAuthed(req)) return next();
+export async function requireAuth(req, res, next) {
+  if (await isAuthed(req)) return next();
   if (req.path.startsWith('/api/')) return res.status(401).json({ error: 'Login required' });
   return res.redirect('/login.html');
 }
 
 export const authRouter = Router();
 
-authRouter.get('/session', (req, res) => {
-  res.json({ authenticated: isAuthed(req) });
+authRouter.get('/session', async (req, res) => {
+  res.json({ authenticated: await isAuthed(req) });
 });
 
-authRouter.post('/login', (req, res) => {
+authRouter.post('/login', async (req, res) => {
   const { username, password } = req.body || {};
   const user = configuredUser();
   if (!user) return res.status(503).json({ error: 'Login is not configured' });
@@ -77,14 +73,23 @@ authRouter.post('/login', (req, res) => {
   }
 
   const sessionId = crypto.randomBytes(32).toString('hex');
-  sessions.set(sessionId, { createdAt: Date.now(), lastSeenAt: Date.now() });
+  try {
+    await query(
+      `INSERT INTO sessions (id, created_at) VALUES ($1, now())`,
+      [sessionId]
+    );
+  } catch {
+    return res.status(500).json({ error: 'Failed to create session' });
+  }
   res.cookie(SESSION_COOKIE, sessionId, cookieOptions(req));
   res.json({ ok: true });
 });
 
-authRouter.post('/logout', (req, res) => {
+authRouter.post('/logout', async (req, res) => {
   const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
-  if (sessionId) sessions.delete(sessionId);
+  if (sessionId) {
+    await query(`DELETE FROM sessions WHERE id = $1`, [sessionId]).catch(() => {});
+  }
   res.clearCookie(SESSION_COOKIE, { path: '/' });
   res.json({ ok: true });
 });
