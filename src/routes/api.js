@@ -46,7 +46,11 @@ router.put('/settings', wrap(async (req, res) => {
 
 // --- Clients ---------------------------------------------------------------
 router.get('/clients', wrap(async (req, res) => {
-  res.json({ clients: await listClients((req.query.q || '').trim()), active: await activeClient(req) });
+  const active = await activeClient(req);
+  const clients = (await listClients((req.query.q || '').trim())).map((c) => ({
+    ...c, is_active: c.id === active.id,
+  }));
+  res.json({ clients, active });
 }));
 
 router.post('/clients', wrap(async (req, res) => {
