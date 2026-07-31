@@ -116,8 +116,8 @@ function summaryHtml(s) {
   const share = (x) => (totLeads ? fmtPct(x / totLeads) : '—');
   const rows = [
     ['Total Leads', fmtInt(totLeads), `${fmtInt(s.leads)} · ${share(s.leads)}`, `${fmtInt(dup.leads)} · ${share(dup.leads)}`, '', ''],
-    ['Form Initiated', '', fmtInt(s.fi), fmtInt(dup.fi), fmtPct(c.lead_to_fi), fmtPct(d.lead_to_fi)],
-    ['Applications', '', fmtInt(s.apps), fmtInt(dup.apps), fmtPct(c.fi_to_app), fmtPct(d.fi_to_app)],
+    ['Form Initiated', fmtInt(s.fi + dup.fi), fmtInt(s.fi), fmtInt(dup.fi), fmtPct(c.lead_to_fi), fmtPct(d.lead_to_fi)],
+    ['Applications', fmtInt(s.apps + dup.apps), fmtInt(s.apps), fmtInt(dup.apps), fmtPct(c.fi_to_app), fmtPct(d.fi_to_app)],
     ['Admissions', '', fmtInt(s.adm), fmtInt(dup.adm), fmtPct(c.app_to_adm), fmtPct(d.app_to_adm)],
     ['Target', fmtInt(s.target), '', '', '', ''],
     ['Target Achieved %', '', '', '', fmtPct(c.target_achieved), ''],
