@@ -7,7 +7,7 @@ import { authRouter, isAuthed, requireAuth } from './auth.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '50mb' }));
 const publicDir = path.join(here, '..', 'public');
 
 
