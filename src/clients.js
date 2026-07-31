@@ -7,22 +7,16 @@ export async function activeClientId(req) {
     const { getSessionClientId } = await import('./auth.js');
     const sessionClientId = await getSessionClientId(req);
     if (sessionClientId) {
-      // Verify it still exists
       const { rows } = await query('SELECT id FROM clients WHERE id = $1', [sessionClientId]);
       if (rows.length) return rows[0].id;
     }
   }
 
-  // 2. Fall back to DB global active (first login, or no session)
-  let { rows } = await query('SELECT id FROM clients WHERE is_active ORDER BY id LIMIT 1');
+  // 2. Fall back to first client (no global is_active dependency)
+  const { rows } = await query('SELECT id FROM clients ORDER BY id LIMIT 1');
   if (rows.length) return rows[0].id;
 
   // 3. Create default client if none exists
-  ({ rows } = await query('SELECT id FROM clients ORDER BY id LIMIT 1'));
-  if (rows.length) {
-    await query('UPDATE clients SET is_active = (id = $1)', [rows[0].id]);
-    return rows[0].id;
-  }
   const ins = await query("INSERT INTO clients (name, is_active) VALUES ('Default Client', true) RETURNING id");
   return ins.rows[0].id;
 }
@@ -37,11 +31,11 @@ export async function listClients(q = '') {
   const where = q ? 'WHERE c.name ILIKE $1' : '';
   const params = q ? [`%${q}%`] : [];
   const { rows } = await query(
-    `SELECT c.id, c.name, c.is_active,
+    `SELECT c.id, c.name,
        (SELECT COALESCE(SUM(row_count), 0) FROM datasets d WHERE d.client_id = c.id)::int AS rows,
        (SELECT count(*) FROM duplicate_uploads du WHERE du.client_id = c.id)::int AS dup_files
      FROM clients c ${where}
-     ORDER BY c.is_active DESC, lower(c.name)`, params);
+     ORDER BY lower(c.name)`, params);
   return rows;
 }
 
@@ -56,13 +50,11 @@ export async function createClient(name, req) {
 }
 
 export async function activateClient(id, req) {
-  // Update session-scoped active client
+  // Only update session — never touch the global DB flag
   if (req) {
     const { setSessionClientId } = await import('./auth.js');
     await setSessionClientId(req, Number(id));
   }
-  // Also update DB global so new sessions get a sensible default
-  await query('UPDATE clients SET is_active = (id = $1)', [Number(id)]);
 }
 
 export async function renameClient(id, name) {
@@ -77,6 +69,4 @@ export async function deleteClient(id) {
   await query('DELETE FROM annotations WHERE client_id = $1', [cid]);
   await query('DELETE FROM client_settings WHERE client_id = $1', [cid]);
   await query('DELETE FROM clients WHERE id = $1', [cid]);
-  const { rows } = await query('SELECT 1 FROM clients WHERE is_active LIMIT 1');
-  if (!rows.length) await activeClientId();
 }
