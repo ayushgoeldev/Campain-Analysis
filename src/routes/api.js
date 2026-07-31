@@ -20,7 +20,7 @@ const wrap = (fn) => (req, res) => fn(req, res).catch((err) => {
   res.status(500).json({ error: err.message });
 });
 
-router.get('/health', wrap(async (_req, res) => {
+router.get('/health', wrap(async (req, res) => {
   await query('SELECT 1');
   res.json({ ok: true });
 }));
@@ -32,7 +32,7 @@ router.get('/debug-env', (req, res) => {
 });
 
 // --- Settings --------------------------------------------------------------
-router.get('/settings', wrap(async (_req, res) => {
+router.get('/settings', wrap(async (req, res) => {
   res.json({ settings: await getSettings(req), defaults: await defaultSettings() });
 }));
 
@@ -192,7 +192,7 @@ router.put('/annotations', wrap(async (req, res) => {
 }));
 
 // --- Duplicate uploads -----------------------------------------------------
-router.get('/duplicates', wrap(async (_req, res) => {
+router.get('/duplicates', wrap(async (req, res) => {
   res.json(await duplicatesSummary(req));
 }));
 
