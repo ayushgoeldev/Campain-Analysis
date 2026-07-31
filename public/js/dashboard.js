@@ -265,7 +265,7 @@ async function chunkedCsvUpload(file, name, headerRowOverride) {
   if (!datasetId) throw new Error(started.error || 'Could not start upload');
 
   const CHUNK = 5000;
-const PARALLEL = 3;
+const PARALLEL = 5;
 let sent = 0;
 
 // Split all rows into chunks

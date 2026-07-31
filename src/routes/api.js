@@ -46,7 +46,12 @@ router.put('/settings', wrap(async (req, res) => {
 
 // --- Clients ---------------------------------------------------------------
 router.get('/clients', wrap(async (req, res) => {
-  res.json({ clients: await listClients((req.query.q || '').trim()), active: await activeClient(req) });
+  const active = await activeClient(req);
+  const clients = await listClients((req.query.q || '').trim());
+  // Mark is_active per session, not globally
+  const activeId = active?.id;
+  const clientsWithActive = clients.map((c) => ({ ...c, is_active: c.id === activeId }));
+  res.json({ clients: clientsWithActive, active });
 }));
 
 router.post('/clients', wrap(async (req, res) => {
