@@ -265,29 +265,32 @@ async function chunkedCsvUpload(file, name, headerRowOverride) {
   if (!datasetId) throw new Error(started.error || 'Could not start upload');
 
   const CHUNK = 5000;
-const PARALLEL = 5;
-let sent = 0;
+  const PARALLEL = 5;
+  let sent = 0;
 
-// Split all rows into chunks
-const chunks = [];
-for (let i = 0; i < rows.length; i += CHUNK) {
-  chunks.push(rows.slice(i, i + CHUNK));
-}
+  // Split all rows into chunks
+  const chunks = [];
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    chunks.push(rows.slice(i, i + CHUNK));
+  }
 
-// Send PARALLEL chunks at a time
-for (let i = 0; i < chunks.length; i += PARALLEL) {
-  const batch = chunks.slice(i, i + PARALLEL);
-  await Promise.all(batch.map(async (chunk) => {
-    const res = await fetch('/api/upload/rows', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ datasetId, rows: chunk }),
-    });
-    if (!res.ok) throw new Error('Batch upload failed');
-    sent += chunk.length;
-    status.textContent = `Uploading ${fmtInt(Math.min(sent, rows.length))} / ${fmtInt(rows.length)} rows…`;
-  }));
-}
+  // Send PARALLEL chunks at a time
+  for (let i = 0; i < chunks.length; i += PARALLEL) {
+    const batch = chunks.slice(i, i + PARALLEL);
+    await Promise.all(batch.map(async (chunk) => {
+      const res = await fetch('/api/upload/rows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ datasetId, rows: chunk }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Batch upload failed');
+      }
+      sent += chunk.length;
+      status.textContent = `Uploading ${fmtInt(Math.min(sent, rows.length))} / ${fmtInt(rows.length)} rows…`;
+    }));
+  }
   await fetch('/api/upload/finish', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ datasetId }),
   });
