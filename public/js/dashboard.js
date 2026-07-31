@@ -209,18 +209,101 @@ function setPill(active) {
   $('#datasetPill').textContent = active ? `${active.name || active.source_filename} · ${fmtInt(active.row_count)} rows` : 'No dataset';
 }
 
+// Minimal RFC-4180-ish CSV parser (handles quotes, escaped quotes, CRLF).
+function parseCSV(text) {
+  const rows = []; let row = []; let field = ''; let inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+      else field += ch;
+    } else if (ch === '"') inQ = true;
+    else if (ch === ',') { row.push(field); field = ''; }
+    else if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+    else if (ch !== '\r') field += ch;
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// Find the header row even when a CRM export prepends banner rows.
+function detectHeaderRow(matrix) {
+  let best = 0, bestScore = -1;
+  for (let i = 0; i < Math.min(matrix.length, 25); i++) {
+    const cells = matrix[i] || [];
+    const nonEmpty = cells.filter((c) => String(c ?? '').trim() !== '').length;
+    const shortText = cells.filter((c) => { const v = String(c ?? '').trim(); return v && v.length <= 40; }).length;
+    const score = nonEmpty + shortText;
+    if (nonEmpty >= 3 && score > bestScore) { bestScore = score; best = i; }
+  }
+  return best;
+}
+
+// Large CSVs: parse in the browser and POST rows in small batches so we never
+// hit the serverless per-request body limit. Works from any browser.
+async function chunkedCsvUpload(file, name, headerRowOverride) {
+  const status = $('#uploadStatus');
+  status.textContent = 'Reading file…'; status.className = 'status';
+  const matrix = parseCSV(await file.text());
+  const hIdx = headerRowOverride !== '' && headerRowOverride != null ? Number(headerRowOverride) : detectHeaderRow(matrix);
+  const headers = (matrix[hIdx] || []).map((h, i) => String(h ?? '').trim() || `Column ${i + 1}`);
+  const rows = [];
+  for (let r = hIdx + 1; r < matrix.length; r++) {
+    const line = matrix[r] || [];
+    if (line.every((c) => String(c ?? '').trim() === '')) continue;
+    const obj = {};
+    for (let c = 0; c < headers.length; c++) obj[headers[c]] = line[c] ?? '';
+    rows.push(obj);
+  }
+  if (!rows.length) throw new Error('No data rows found in file');
+
+  const started = await (await fetch('/api/upload/start', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name || file.name, filename: file.name, headers }),
+  })).json();
+  const datasetId = started.datasetId;
+  if (!datasetId) throw new Error(started.error || 'Could not start upload');
+
+  const CHUNK = 1500; let sent = 0;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const batch = rows.slice(i, i + CHUNK);
+    const res = await fetch('/api/upload/rows', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ datasetId, rows: batch }),
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `Upload failed at row ${sent}`);
+    sent += batch.length;
+    status.textContent = `Uploading ${fmtInt(sent)} / ${fmtInt(rows.length)} rows…`;
+  }
+  await fetch('/api/upload/finish', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ datasetId }),
+  });
+  return sent;
+}
+
 $('#uploadForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const status = $('#uploadStatus');
   const btn = $('#uploadBtn');
-  status.textContent = 'Uploading & importing…'; status.className = 'status';
+  const file = $('#fileInput').files[0];
+  const name = $('#uploadName').value;
+  const headerRow = $('#headerRow').value;
+  if (!file) { status.textContent = 'Choose a file'; status.className = 'status err'; return; }
   btn.disabled = true;
   try {
-    const fd = new FormData(e.target);
-    const res = await fetch('/api/upload', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Upload failed');
-    status.textContent = `✓ Imported ${fmtInt(data.rowCount)} rows (${data.columns} cols)`; status.className = 'status ok';
+    const isCsv = /\.(csv|tsv|txt)$/i.test(file.name);
+    if (isCsv) {
+      // Browser-side chunked upload — no size limit, works on any laptop.
+      const n = await chunkedCsvUpload(file, name, headerRow);
+      status.textContent = `✓ Imported ${fmtInt(n)} rows`; status.className = 'status ok';
+    } else {
+      // XLSX/other: single multipart request (fine for smaller files).
+      status.textContent = 'Uploading & importing…'; status.className = 'status';
+      const res = await fetch('/api/upload', { method: 'POST', body: new FormData(e.target) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      status.textContent = `✓ Imported ${fmtInt(data.rowCount)} rows (${data.columns} cols)`; status.className = 'status ok';
+    }
     e.target.reset();
     loadDatasets(); loadReport();
   } catch (err) {

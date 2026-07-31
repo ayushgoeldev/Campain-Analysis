@@ -4,7 +4,8 @@ import os from 'node:os';
 import fs from 'node:fs';
 import { query, withClient } from '../db.js';
 import { getSettings, saveSettings, defaultSettings } from '../settings.js';
-import { parseFile, importRows, recomputeDataset } from '../importer.js';
+import { parseFile, importRows, recomputeDataset, startDataset, appendRows, finishDataset } from '../importer.js';
+import { invalidateMappings } from '../mappings.js';
 import { fullReport, resolveDataset, preview } from '../report.js';
 import { reportToXlsx } from '../reportxlsx.js';
 import { importDuplicates, duplicatePreview, duplicatesSummary, clearDuplicates } from '../duplicates.js';
@@ -110,6 +111,28 @@ router.post('/upload', upload.single('file'), wrap(async (req, res) => {
   } finally {
     fs.unlink(req.file.path, () => {});
   }
+}));
+
+// --- Chunked upload (browser parses the CSV and sends rows in small batches) -
+// Works from any browser and avoids the serverless per-request body limit.
+router.post('/upload/start', wrap(async (req, res) => {
+  const { name, filename, headers } = req.body || {};
+  const datasetId = await startDataset({ name, filename, headers });
+  res.json({ datasetId });
+}));
+
+router.post('/upload/rows', wrap(async (req, res) => {
+  const { datasetId, rows } = req.body || {};
+  if (!datasetId || !Array.isArray(rows)) return res.status(400).json({ error: 'datasetId and rows[] required' });
+  const inserted = await appendRows(Number(datasetId), rows);
+  res.json({ inserted });
+}));
+
+router.post('/upload/finish', wrap(async (req, res) => {
+  const { datasetId } = req.body || {};
+  if (!datasetId) return res.status(400).json({ error: 'datasetId required' });
+  const rowCount = await finishDataset(Number(datasetId));
+  res.json({ ok: true, rowCount });
 }));
 
 // Recompute derived fields for the active (or given) dataset.
@@ -231,6 +254,7 @@ router.post('/mappings', wrap(async (req, res) => {
     `INSERT INTO ${cfg.table} (${cfg.key}, ${cfg.value}) VALUES ($1, $2)
      ON CONFLICT (${cfg.conflict}) DO UPDATE SET ${cfg.value} = EXCLUDED.${cfg.value}
      RETURNING id`, [key, value]);
+  invalidateMappings();
   res.json({ id: r.rows[0].id });
 }));
 
@@ -247,12 +271,14 @@ router.put('/mappings/:id', wrap(async (req, res) => {
     if (e.code === '23505') return res.status(409).json({ error: 'That key already exists' });
     throw e;
   }
+  invalidateMappings();
   res.json({ ok: true });
 }));
 
 router.delete('/mappings/:id', wrap(async (req, res) => {
   const cfg = mapCfg(req.query.type);
   await query(`DELETE FROM ${cfg.table} WHERE id = $1`, [Number(req.params.id)]);
+  invalidateMappings();
   res.json({ ok: true });
 }));
 
@@ -260,6 +286,7 @@ router.delete('/mappings/:id', wrap(async (req, res) => {
 router.delete('/mappings/:type/all', wrap(async (req, res) => {
   const cfg = mapCfg(req.params.type);
   await query(`DELETE FROM ${cfg.table}`);
+  invalidateMappings();
   res.json({ ok: true });
 }));
 
@@ -309,6 +336,7 @@ router.post('/mappings/:type/upload', upload.single('file'), wrap(async (req, re
         await client.query('COMMIT');
       } catch (e) { await client.query('ROLLBACK'); throw e; }
     });
+    invalidateMappings();
     res.json({ count: inserted, replaced: replace });
   } finally {
     fs.unlink(req.file.path, () => {});

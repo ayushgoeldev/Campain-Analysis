@@ -27,6 +27,12 @@ CREATE TABLE IF NOT EXISTS lead_code_mapping (
   medium text NOT NULL,
   code   text NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id         text PRIMARY KEY,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
 CREATE UNIQUE INDEX IF NOT EXISTS lead_code_mapping_key ON lead_code_mapping (lower(btrim(medium)));
 
 -- ---------------------------------------------------------------------------

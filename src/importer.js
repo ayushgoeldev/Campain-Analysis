@@ -133,6 +133,49 @@ export async function importRows(rows, { name, filename, headers } = {}) {
   });
 }
 
+// --- Chunked upload (browser sends parsed rows in small batches) -----------
+// Lets large files be imported from any browser without hitting the platform's
+// per-request body limit: start once, append many small batches, then finish.
+
+export async function startDataset({ name, filename, headers } = {}) {
+  const clientId = await activeClientId();
+  const cols = headers && headers.length ? headers : null;
+  const ds = await query(
+    `INSERT INTO datasets (name, source_filename, row_count, columns, client_id, is_active)
+     VALUES ($1,$2,0,$3,$4,false) RETURNING id`,
+    [name || filename || 'Upload', filename || null, cols, clientId]);
+  return ds.rows[0].id;
+}
+
+export async function appendRows(datasetId, rows) {
+  if (!Array.isArray(rows) || !rows.length) return 0;
+  const settings = await getSettings();
+  const { courseRows, leadCodeRows } = await loadMappings();
+  const dateOrder = resolveDateOrder(settings, rows.slice(0, 5000).map((r) => r[settings.date_column]));
+  const ctx = buildContext(settings, courseRows, leadCodeRows, dateOrder);
+  await withClient(async (client) => {
+    await client.query('BEGIN');
+    try {
+      const BATCH = 1000;
+      for (let i = 0; i < rows.length; i += BATCH) {
+        await insertBatch(client, datasetId, rows.slice(i, i + BATCH), ctx);
+      }
+      await client.query('COMMIT');
+    } catch (e) { await client.query('ROLLBACK'); throw e; }
+  });
+  return rows.length;
+}
+
+export async function finishDataset(datasetId) {
+  const meta = await query('SELECT client_id FROM datasets WHERE id = $1', [datasetId]);
+  const clientId = meta.rows[0] && meta.rows[0].client_id;
+  const cnt = await query('SELECT count(*)::int AS n FROM leads WHERE dataset_id = $1', [datasetId]);
+  const n = cnt.rows[0].n;
+  await query('UPDATE datasets SET row_count = $1 WHERE id = $2', [n, datasetId]);
+  if (clientId != null) await query('UPDATE datasets SET is_active = (id = $1) WHERE client_id = $2', [datasetId, clientId]);
+  return n;
+}
+
 // Recompute derived fields for a dataset (after settings/mappings change),
 // re-reading the untouched raw `data` jsonb. Streams in batches.
 export async function recomputeDataset(datasetId) {
