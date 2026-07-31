@@ -40,24 +40,24 @@ router.put('/settings', wrap(async (req, res) => {
   const saved = await saveSettings(req.body);
   // Keep the client's name in sync with the report title typed in SETUP.
   const title = (req.body && req.body.report_title || '').trim();
-  if (title) await renameClient(await activeClientId(), title);
+  if (title) await renameClient(await activeClientId(req), title);
   res.json({ settings: saved });
 }));
 
 // --- Clients ---------------------------------------------------------------
 router.get('/clients', wrap(async (req, res) => {
-  res.json({ clients: await listClients((req.query.q || '').trim()), active: await activeClient() });
+  res.json({ clients: await listClients((req.query.q || '').trim()), active: await activeClient(req) });
 }));
 
 router.post('/clients', wrap(async (req, res) => {
   const name = (req.body.name || '').trim();
   if (!name) return res.status(400).json({ error: 'Client name is required' });
-  const id = await createClient(name);
+  const id = await createClient(name, req);
   res.json({ id });
 }));
 
 router.post('/clients/:id/activate', wrap(async (req, res) => {
-  await activateClient(req.params.id);
+  await activateClient(req.params.id, req);
   res.json({ ok: true });
 }));
 
@@ -74,8 +74,8 @@ router.delete('/clients/:id', wrap(async (req, res) => {
 }));
 
 // --- Datasets (scoped to the active client) --------------------------------
-router.get('/datasets', wrap(async (_req, res) => {
-  const cid = await activeClientId();
+router.get('/datasets', wrap(async (req, res) => {
+  const cid = await activeClientId(req);
   const { rows } = await query(
     `SELECT id, name, source_filename, row_count, uploaded_at, is_active
      FROM datasets WHERE client_id = $1 ORDER BY uploaded_at DESC`, [cid]);
@@ -168,8 +168,8 @@ router.get('/preview', wrap(async (req, res) => {
 }));
 
 // --- Annotations (editable Insights / Challenges) --------------------------
-router.get('/annotations', wrap(async (_req, res) => {
-  const cid = await activeClientId();
+router.get('/annotations', wrap(async (req, res) => {
+  const cid = await activeClientId(req);
   const { rows } = await query('SELECT scope, key, insights, challenges FROM annotations WHERE client_id = $1', [cid]);
   const out = {};
   for (const r of rows) {
@@ -181,7 +181,7 @@ router.get('/annotations', wrap(async (_req, res) => {
 router.put('/annotations', wrap(async (req, res) => {
   const { scope, key } = req.body || {};
   if (!scope || key == null) return res.status(400).json({ error: 'scope and key are required' });
-  const cid = await activeClientId();
+  const cid = await activeClientId(req);
   await query(
     `INSERT INTO annotations (client_id, scope, key, insights, challenges, updated_at)
      VALUES ($1,$2,$3,$4,$5, now())
