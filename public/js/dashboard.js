@@ -36,6 +36,8 @@ $$('.tab').forEach((btn) => btn.addEventListener('click', () => {
 
 // ---- Report ---------------------------------------------------------------
 let annos = {};
+let currentOriginMonth = [];
+const CHART_COLORS = ['#4f8ef7', '#f59e42', '#6ee7b7', '#f87171', '#fbbf24', '#a78bfa'];
 const annoOf = (scope, key) => (annos[scope] && annos[scope][key]) || { insights: '', challenges: '' };
 
 async function loadReport() {
@@ -136,18 +138,89 @@ function stagesHtml(block) {
   return `<div class="tblwrap"><table class="grid"><thead><tr><th>Stage</th><th>Leads</th><th>%</th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
 
+function originMonthChartHtml() {
+  return `<div class="chart-block">
+    <div class="seg chart-metric-seg">
+      <button class="seg-btn is-active" data-chart-metric="leads">Leads</button>
+      <button class="seg-btn" data-chart-metric="fi">FI</button>
+      <button class="seg-btn" data-chart-metric="apps">Apps</button>
+      <button class="seg-btn" data-chart-metric="adm">Adms</button>
+    </div>
+    <svg id="originMonthSvg" class="origin-chart" viewBox="0 0 820 340" width="820" height="340" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>`;
+}
+
+function drawOriginMonthChart(rows, metric = 'leads') {
+  const svg = document.getElementById('originMonthSvg');
+  if (!svg || !rows.length) return;
+  const months = [...new Set(rows.map((r) => r.month))].sort();
+  const origins = [...new Set(rows.map((r) => r.origin))];
+  const lookup = {};
+  for (const r of rows) (lookup[r.origin] = lookup[r.origin] || {})[r.month] = r;
+  const W = 820, H = 340;
+  const PAD = { top: 48, right: 20, bottom: 72, left: 72 };
+  const cW = W - PAD.left - PAD.right, cH = H - PAD.top - PAD.bottom;
+  const maxVal = Math.max(...rows.map((r) => Number(r[metric] || 0)), 1);
+  const niceMax = Math.ceil(maxVal / 5) * 5 || 5;
+  const xOf = (i) => PAD.left + (months.length < 2 ? cW / 2 : (i / (months.length - 1)) * cW);
+  const yOf = (v) => PAD.top + cH - (v / niceMax) * cH;
+  const METRIC_LABEL = { leads: 'Leads', fi: 'Form Initiated', apps: 'Applications', adm: 'Admissions' };
+  const label = METRIC_LABEL[metric] || metric;
+  let out = '';
+  out += `<rect width="${W}" height="${H}" fill="#fff"/>`;
+  out += `<rect x="${PAD.left}" y="${PAD.top}" width="${cW}" height="${cH}" fill="#fafafa" stroke="#e4e4e4" stroke-width="1"/>`;
+  out += `<text x="${PAD.left + cW / 2}" y="26" text-anchor="middle" font-size="14" font-weight="600" fill="#222" font-family="sans-serif">${label} Trend by Lead Origin</text>`;
+  const midY = PAD.top + cH / 2;
+  out += `<text transform="rotate(-90,18,${midY})" x="18" y="${midY}" text-anchor="middle" font-size="12" fill="#555" font-family="sans-serif">${label}</text>`;
+  out += `<text x="${PAD.left + cW / 2}" y="${H - 2}" text-anchor="middle" font-size="12" fill="#555" font-family="sans-serif">Month</text>`;
+  for (let i = 0; i <= 5; i++) {
+    const v = (niceMax / 5) * i, y = yOf(v);
+    if (i > 0) out += `<line x1="${PAD.left}" y1="${y.toFixed(1)}" x2="${PAD.left + cW}" y2="${y.toFixed(1)}" stroke="#d8d8d8" stroke-width="1" stroke-dasharray="4,3"/>`;
+    out += `<text x="${PAD.left - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#555" font-family="sans-serif">${fmtInt(Math.round(v))}</text>`;
+  }
+  months.forEach((m, i) => {
+    const x = xOf(i), parts = fmtMonth(m).split(' ');
+    out += `<text x="${x.toFixed(1)}" y="${(PAD.top + cH + 16).toFixed(1)}" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif">${parts[0] || ''}</text>`;
+    out += `<text x="${x.toFixed(1)}" y="${(PAD.top + cH + 29).toFixed(1)}" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif">${parts[1] || ''}</text>`;
+  });
+  origins.forEach((origin, oi) => {
+    const color = CHART_COLORS[oi % CHART_COLORS.length];
+    const pts = months.map((m, i) => [xOf(i), yOf(Number(lookup[origin]?.[m]?.[metric] || 0))]);
+    out += `<path d="${pts.map((p, pi) => `${pi ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('')}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach(([x, y], pi) => {
+      const v = Number(lookup[origin]?.[months[pi]]?.[metric] || 0);
+      out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${color}" stroke="#fff" stroke-width="2"><title>${esc(origin)} · ${fmtMonth(months[pi])}: ${fmtInt(v)}</title></circle>`;
+    });
+  });
+  out += `<line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${PAD.top + cH}" stroke="#666" stroke-width="1.5"/>`;
+  out += `<line x1="${PAD.left}" y1="${PAD.top + cH}" x2="${PAD.left + cW}" y2="${PAD.top + cH}" stroke="#666" stroke-width="1.5"/>`;
+  const LEG_W = 130, LEG_H = origins.length * 22 + 14;
+  const LEG_X = PAD.left + cW - 10 - LEG_W, LEG_Y = PAD.top + 10;
+  out += `<rect x="${LEG_X}" y="${LEG_Y}" width="${LEG_W}" height="${LEG_H}" fill="white" stroke="#ccc" stroke-width="1" rx="4"/>`;
+  origins.forEach((origin, oi) => {
+    const color = CHART_COLORS[oi % CHART_COLORS.length];
+    const ly = LEG_Y + 10 + oi * 22;
+    out += `<line x1="${LEG_X + 8}" y1="${ly + 5}" x2="${LEG_X + 22}" y2="${ly + 5}" stroke="${color}" stroke-width="2"/>`;
+    out += `<circle cx="${LEG_X + 15}" cy="${ly + 5}" r="4" fill="${color}" stroke="#fff" stroke-width="1.5"/>`;
+    out += `<text x="${LEG_X + 28}" y="${ly + 9}" font-size="11" fill="#333" font-family="sans-serif">${esc(origin)}</text>`;
+  });
+  svg.innerHTML = out;
+}
+
 function renderReport(d) {
+  currentOriginMonth = d.origin_month || [];
   $('#reportBody').innerHTML = [
     drawer('Summary', summaryHtml(d.summary)),
     drawer('Top Lead Codes', rankTableHtml('Lead Code', d.top_lead_codes, 'lead_codes')),
     drawer('Top Courses', rankTableHtml('Course', d.top_courses, 'courses')),
     drawer('Top Cities', rankTableHtml('City', d.top_cities, 'cities')),
     drawer('Lead Origin (overall)', rankTableHtml('Lead Origin', d.origin, 'origin')),
-    drawer('Lead Origin × Month', originMonthTableHtml(d.origin_month, 'origin_month')),
+    drawer('Lead Origin × Month', originMonthChartHtml() + originMonthTableHtml(d.origin_month, 'origin_month')),
     drawer('Top Performing Medium by Month', monthTableHtml('Medium', d.top_medium_by_month, 'medium_month')),
     drawer('Top Performing Course by Month', monthTableHtml('Course', d.top_course_by_month, 'course_month')),
     drawer('Lead Stages', stagesHtml(d.lead_stages), false),
   ].join('');
+  drawOriginMonthChart(currentOriginMonth, 'leads');
 }
 
 // Drawer open/close (delegated, covers report tables + SETUP preview).
@@ -157,6 +230,15 @@ document.addEventListener('click', (e) => {
   const card = t.closest('.card');
   const collapsed = card.classList.toggle('collapsed');
   t.setAttribute('aria-expanded', String(!collapsed));
+});
+
+// Chart metric toggle.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-chart-metric]');
+  if (!btn) return;
+  btn.closest('.seg').querySelectorAll('.seg-btn').forEach((b) => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  drawOriginMonthChart(currentOriginMonth, btn.dataset.chartMetric);
 });
 
 // Save Insights / Challenges on blur.
