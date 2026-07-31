@@ -176,6 +176,15 @@
       <div class="card">
         <h2>SETUP</h2>
         <p class="muted">Column mappings &amp; rules — the app equivalent of the sheet's Setup tab. After changing these, click <strong>Recompute</strong> to re-derive the active dataset.</p>
+        <div class="row" style="margin-bottom:1rem">
+          <label style="font-weight:600;margin-right:.5rem">CRM Preset:</label>
+          <select id="crmPreset" class="inp" style="width:auto;min-width:140px">
+            <option value="">— choose —</option>
+            <option value="NPF">NPF (Meritto)</option>
+            <option value="LSQ">LSQ (LeadSquared)</option>
+          </select>
+          <button class="btn" id="applyCrmPreset" style="margin-left:.5rem">Apply Preset</button>
+        </div>
         <div id="settingsForm" class="settings-grid"></div>
         <div class="row">
           <button class="btn primary" id="saveSettings">Save</button>

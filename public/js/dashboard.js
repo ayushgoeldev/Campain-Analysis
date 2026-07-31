@@ -183,6 +183,7 @@ function drawOriginMonthChart(rows, metric = 'leads') {
     out += `<text x="${x.toFixed(1)}" y="${(PAD.top + cH + 16).toFixed(1)}" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif">${parts[0] || ''}</text>`;
     out += `<text x="${x.toFixed(1)}" y="${(PAD.top + cH + 29).toFixed(1)}" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif">${parts[1] || ''}</text>`;
   });
+    const placed = [];
   origins.forEach((origin, oi) => {
     const color = CHART_COLORS[oi % CHART_COLORS.length];
     const pts = months.map((m, i) => [xOf(i), yOf(Number(lookup[origin]?.[m]?.[metric] || 0))]);
@@ -190,7 +191,15 @@ function drawOriginMonthChart(rows, metric = 'leads') {
     pts.forEach(([x, y], pi) => {
       const v = Number(lookup[origin]?.[months[pi]]?.[metric] || 0);
       out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${color}" stroke="#fff" stroke-width="2"><title>${esc(origin)} · ${fmtMonth(months[pi])}: ${fmtInt(v)}</title></circle>`;
-      const labelY = y < PAD.top + 18 ? y + 16 : y - 9;
+      let labelY = y - 9;
+      if (y < PAD.top + 18) labelY = y + 16;
+      const textW = fmtInt(v).length * 6;
+      for (let tries = 0; tries < 6; tries++) {
+        const hit = placed.some((p) => Math.abs(p.x - x) < (textW + p.w) / 2 && Math.abs(p.y - labelY) < 12);
+        if (!hit) break;
+        labelY += labelY < y ? -13 : 13;
+      }
+      placed.push({ x, y: labelY, w: textW });
       out += `<text x="${x.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="${color}" font-family="sans-serif">${fmtInt(v)}</text>`;
     });
   });
@@ -411,6 +420,58 @@ $('#uploadForm').addEventListener('submit', async (e) => {
   } finally { btn.disabled = false; }
 });
 
+// ---- CRM Presets ----------------------------------------------------------
+const CRM_PRESETS = {
+  NPF: {
+    report_title: '',
+    target: 50,
+    deal_type: 'CPA',
+    record_key_column: 'Name',
+    lead_source_column: 'Campaign',
+    lead_code_delimiter: '/',
+    lead_code_token: 2,
+    course_column: 'Mobile Verification Status',
+    city_column: 'City',
+    form_initiated_column: 'Registration Device',
+    application_column: 'Course',
+    admission_column: 'Lead Stage',
+    lead_stage_column: 'Lead Stage',
+    date_column: 'Instance Date',
+    date_format: 'auto',
+    instance_column: 'Instance',
+    instance_filter: 'Primary',
+    lead_origin_column: 'Lead Origin',
+    application_values: ['1'],
+    admission_values: ['Submitted'],
+    form_initiated_values: ['1', '2'],
+    top_n: 15,
+  },
+  LSQ: {
+    report_title: '',
+    target: 100,
+    deal_type: 'CPS',
+    record_key_column: 'Name',
+    lead_source_column: 'Lead Stage',
+    lead_code_delimiter: '',
+    lead_code_token: 1,
+    course_column: 'Instance',
+    city_column: 'State',
+    form_initiated_column: 'Lead Score',
+    application_column: 'Lead Score',
+    admission_column: 'Lead Status',
+    lead_stage_column: 'Lead Status',
+    date_column: 'Instance Date',
+    date_format: 'auto',
+    instance_column: 'Instance',
+    instance_filter: 'Primary',
+    lead_origin_column: 'Lead Origin',
+    application_values: ['CUCET Payment Done'],
+    admission_values: ['Enrolled', 'Refunded'],
+    form_initiated_values: ['CUCET Payment Done'],
+    top_n: 15,
+  },
+};
+
 // ---- Settings -------------------------------------------------------------
 const FIELDS = [
   ['report_title', 'Report title / client name (PDF heading)', 'text'],
@@ -514,6 +575,14 @@ $('#recomputeBtn').addEventListener('click', async () => {
 });
 
 $('#resetSettings').addEventListener('click', () => { if (defaultsCache) renderSettings(defaultsCache); });
+$('#applyCrmPreset')?.addEventListener('click', () => {
+  const sel = $('#crmPreset').value;
+  const preset = CRM_PRESETS[sel];
+  if (!preset) return;
+  renderSettings(preset);
+  $('#settingsStatus').textContent = `${sel} preset loaded — review, then Save + Recompute`;
+  $('#settingsStatus').className = 'status ok';
+});
 
 // ---- Mappings -------------------------------------------------------------
 let mapType = 'course';
