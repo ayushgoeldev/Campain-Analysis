@@ -290,4 +290,7 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
   .editable:empty::before { content: ''; }
   .editable { border: none !important; }
   .tblwrap { overflow: visible; }
+  .chart-block { margin-bottom: 1.25rem; }
+  .chart-metric-seg { margin-bottom: 0.75rem; }
+  .origin-chart { width: 100%; display: block; }
 }
