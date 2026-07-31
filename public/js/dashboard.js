@@ -190,6 +190,8 @@ function drawOriginMonthChart(rows, metric = 'leads') {
     pts.forEach(([x, y], pi) => {
       const v = Number(lookup[origin]?.[months[pi]]?.[metric] || 0);
       out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="${color}" stroke="#fff" stroke-width="2"><title>${esc(origin)} · ${fmtMonth(months[pi])}: ${fmtInt(v)}</title></circle>`;
+      const labelY = y < PAD.top + 18 ? y + 16 : y - 9;
+      out += `<text x="${x.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="10" font-weight="600" fill="${color}" font-family="sans-serif">${fmtInt(v)}</text>`;
     });
   });
   out += `<line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${PAD.top + cH}" stroke="#666" stroke-width="1.5"/>`;
