@@ -446,7 +446,7 @@ const CRM_PRESETS = {
     form_initiated_values: ['1', '2'],
     top_n: 15,
   },
-  LSQ: {
+    LSQ: {
     report_title: '',
     target: 100,
     deal_type: 'CPS',
@@ -468,6 +468,7 @@ const CRM_PRESETS = {
     application_values: ['CUCET Payment Done'],
     admission_values: ['Enrolled', 'Refunded'],
     form_initiated_values: ['CUCET Payment Done'],
+    duplicate_instance_values: [],
     top_n: 15,
   },
 };
@@ -818,7 +819,13 @@ $('#newClientBtn')?.addEventListener('click', async () => {
   const name = $('#newClientName').value.trim();
   if (!name) return;
   const res = await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-  if (res.ok) { $('#newClientName').value = ''; $('#clientMenu').classList.add('hidden'); await switchClient(); }
+  if (res.ok) {
+    const { id } = await res.json();
+    await fetch(`/api/clients/${id}/activate`, { method: 'POST' });
+    $('#newClientName').value = '';
+    $('#clientMenu').classList.add('hidden');
+    await switchClient();
+  }
 });
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.client-picker')) $('#clientMenu')?.classList.add('hidden');
