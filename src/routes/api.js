@@ -106,7 +106,7 @@ router.post('/upload', upload.single('file'), wrap(async (req, res) => {
       name: req.body.name || req.file.originalname,
       filename: req.file.originalname,
       headers,
-    });
+    }, req);
     res.json({ ...result, headers, columns: headers.length });
   } finally {
     fs.unlink(req.file.path, () => {});
@@ -117,14 +117,14 @@ router.post('/upload', upload.single('file'), wrap(async (req, res) => {
 // Works from any browser and avoids the serverless per-request body limit.
 router.post('/upload/start', wrap(async (req, res) => {
   const { name, filename, headers } = req.body || {};
-  const datasetId = await startDataset({ name, filename, headers });
+  const datasetId = await startDataset({ name, filename, headers }, req);
   res.json({ datasetId });
 }));
 
 router.post('/upload/rows', wrap(async (req, res) => {
   const { datasetId, rows } = req.body || {};
   if (!datasetId || !Array.isArray(rows)) return res.status(400).json({ error: 'datasetId and rows[] required' });
-  const inserted = await appendRows(Number(datasetId), rows);
+  const inserted = await appendRows(Number(datasetId), rows, req);
   res.json({ inserted });
 }));
 
@@ -139,7 +139,7 @@ router.post('/upload/finish', wrap(async (req, res) => {
 router.post('/recompute', wrap(async (req, res) => {
   const datasetId = await resolveDataset(req.body?.datasetId, req);
   if (!datasetId) return res.status(400).json({ error: 'No dataset to recompute' });
-  res.json(await recomputeDataset(datasetId));
+  res.json(await recomputeDataset(datasetId, req));
 }));
 
 // --- Report ----------------------------------------------------------------

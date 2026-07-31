@@ -97,8 +97,8 @@ async function insertBatch(client, datasetId, batch, ctx) {
 }
 
 // Import a parsed file into a new dataset. Returns { datasetId, rowCount }.
-export async function importRows(rows, { name, filename, headers } = {}) {
-  const settings = await getSettings();
+export async function importRows(rows, { name, filename, headers } = {}, req) {
+  const settings = await getSettings(req);
   const { courseRows, leadCodeRows } = await loadMappings();
   // Resolve the date order once, from a sample of this file's date column.
   const sample = rows.slice(0, 5000).map((r) => r[settings.date_column]);
@@ -106,7 +106,7 @@ export async function importRows(rows, { name, filename, headers } = {}) {
   const ctx = buildContext(settings, courseRows, leadCodeRows, dateOrder);
   const cols = headers && headers.length ? headers : Object.keys(rows[0] || {});
 
-  const clientId = await activeClientId();
+  const clientId = await activeClientId(req);
   return withClient(async (client) => {
     await client.query('BEGIN');
     try {
@@ -137,8 +137,8 @@ export async function importRows(rows, { name, filename, headers } = {}) {
 // Lets large files be imported from any browser without hitting the platform's
 // per-request body limit: start once, append many small batches, then finish.
 
-export async function startDataset({ name, filename, headers } = {}) {
-  const clientId = await activeClientId();
+export async function startDataset({ name, filename, headers } = {}, req) {
+  const clientId = await activeClientId(req);
   const cols = headers && headers.length ? headers : null;
   const ds = await query(
     `INSERT INTO datasets (name, source_filename, row_count, columns, client_id, is_active)
@@ -147,9 +147,9 @@ export async function startDataset({ name, filename, headers } = {}) {
   return ds.rows[0].id;
 }
 
-export async function appendRows(datasetId, rows) {
+export async function appendRows(datasetId, rows, req) {
   if (!Array.isArray(rows) || !rows.length) return 0;
-  const settings = await getSettings();
+  const settings = await getSettings(req);
   const { courseRows, leadCodeRows } = await loadMappings();
   const dateOrder = resolveDateOrder(settings, rows.slice(0, 5000).map((r) => r[settings.date_column]));
   const ctx = buildContext(settings, courseRows, leadCodeRows, dateOrder);
@@ -178,8 +178,8 @@ export async function finishDataset(datasetId) {
 
 // Recompute derived fields for a dataset (after settings/mappings change),
 // re-reading the untouched raw `data` jsonb. Streams in batches.
-export async function recomputeDataset(datasetId) {
-  const settings = await getSettings();
+export async function recomputeDataset(datasetId, req) {
+  const settings = await getSettings(req);
   const { courseRows, leadCodeRows } = await loadMappings();
   // Sample the date column from the stored rows to resolve day/month order once.
   const dateSample = await query(
