@@ -13,9 +13,8 @@ export async function defaultSettings() {
   return { ...defaultsCache };
 }
 
-// Settings for the active client (seeded from defaults the first time).
-export async function getSettings() {
-  const clientId = await activeClientId();
+export async function getSettings(req) {
+  const clientId = await activeClientId(req);
   const { rows } = await query('SELECT config FROM client_settings WHERE client_id = $1', [clientId]);
   if (rows.length) return rows[0].config;
   const def = await defaultSettings();
@@ -23,8 +22,8 @@ export async function getSettings() {
   return def;
 }
 
-export async function saveSettings(config) {
-  return saveSettingsFor(await activeClientId(), config);
+export async function saveSettings(config, req) {
+  return saveSettingsFor(await activeClientId(req), config);
 }
 
 export async function saveSettingsFor(clientId, config) {

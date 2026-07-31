@@ -33,11 +33,11 @@ router.get('/debug-env', (req, res) => {
 
 // --- Settings --------------------------------------------------------------
 router.get('/settings', wrap(async (_req, res) => {
-  res.json({ settings: await getSettings(), defaults: await defaultSettings() });
+  res.json({ settings: await getSettings(req), defaults: await defaultSettings() });
 }));
 
 router.put('/settings', wrap(async (req, res) => {
-  const saved = await saveSettings(req.body);
+  const saved = await saveSettings(req.body, req);
   // Keep the client's name in sync with the report title typed in SETUP.
   const title = (req.body && req.body.report_title || '').trim();
   if (title) await renameClient(await activeClientId(req), title);
@@ -46,12 +46,7 @@ router.put('/settings', wrap(async (req, res) => {
 
 // --- Clients ---------------------------------------------------------------
 router.get('/clients', wrap(async (req, res) => {
-  const active = await activeClient(req);
-  const clients = await listClients((req.query.q || '').trim());
-  // Mark is_active per session, not globally
-  const activeId = active?.id;
-  const clientsWithActive = clients.map((c) => ({ ...c, is_active: c.id === activeId }));
-  res.json({ clients: clientsWithActive, active });
+  res.json({ clients: await listClients((req.query.q || '').trim()), active: await activeClient(req) });
 }));
 
 router.post('/clients', wrap(async (req, res) => {
@@ -142,21 +137,21 @@ router.post('/upload/finish', wrap(async (req, res) => {
 
 // Recompute derived fields for the active (or given) dataset.
 router.post('/recompute', wrap(async (req, res) => {
-  const datasetId = await resolveDataset(req.body?.datasetId);
+  const datasetId = await resolveDataset(req.body?.datasetId, req);
   if (!datasetId) return res.status(400).json({ error: 'No dataset to recompute' });
   res.json(await recomputeDataset(datasetId));
 }));
 
 // --- Report ----------------------------------------------------------------
 router.get('/report', wrap(async (req, res) => {
-  const datasetId = await resolveDataset(req.query.datasetId);
+  const datasetId = await resolveDataset(req.query.datasetId, req);
   if (!datasetId) return res.json({ empty: true });
-  res.json(await fullReport(datasetId));
+  res.json(await fullReport(datasetId, req));
 }));
 
 // Full report as a downloadable .xlsx (one sheet per table).
 router.get('/report.xlsx', wrap(async (req, res) => {
-  const datasetId = await resolveDataset(req.query.datasetId);
+  const datasetId = await resolveDataset(req.query.datasetId, req);
   if (!datasetId) return res.status(400).json({ error: 'No data to export' });
   const { buf, filename } = await reportToXlsx(datasetId);
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -166,10 +161,10 @@ router.get('/report.xlsx', wrap(async (req, res) => {
 
 // Column headers + sample rows of the active dataset (for configuring SETUP).
 router.get('/preview', wrap(async (req, res) => {
-  const datasetId = await resolveDataset(req.query.datasetId);
+  const datasetId = await resolveDataset(req.query.datasetId, req);
   if (!datasetId) return res.json({ empty: true });
   const limit = Math.min(Number(req.query.limit) || 8, 50);
-  res.json(await preview(datasetId, limit));
+  res.json(await preview(datasetId, limit, req));
 }));
 
 // --- Annotations (editable Insights / Challenges) --------------------------
@@ -198,12 +193,12 @@ router.put('/annotations', wrap(async (req, res) => {
 
 // --- Duplicate uploads -----------------------------------------------------
 router.get('/duplicates', wrap(async (_req, res) => {
-  res.json(await duplicatesSummary());
+  res.json(await duplicatesSummary(req));
 }));
 
 router.get('/duplicates/:category', wrap(async (req, res) => {
   const q = (req.query.q || '').trim();
-  res.json(await duplicatePreview(req.params.category, { q, limit: req.query.limit }));
+  res.json(await duplicatePreview(req.params.category, { q, limit: req.query.limit }, req));
 }));
 
 router.post('/duplicates/:category', upload.single('file'), wrap(async (req, res) => {
@@ -211,14 +206,14 @@ router.post('/duplicates/:category', upload.single('file'), wrap(async (req, res
   try {
     const { headers, rows } = parseFile(req.file.path);
     if (!rows.length) return res.status(400).json({ error: 'No data rows found in file' });
-    res.json(await importDuplicates(req.params.category, headers, rows, req.file.originalname));
+    res.json(await importDuplicates(req.params.category, headers, rows, req.file.originalname, req));
   } finally {
     fs.unlink(req.file.path, () => {});
   }
 }));
 
 router.delete('/duplicates/:category', wrap(async (req, res) => {
-  await clearDuplicates(req.params.category);
+  await clearDuplicates(req.params.category, req);
   res.json({ ok: true });
 }));
 

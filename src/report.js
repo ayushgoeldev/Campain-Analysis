@@ -7,9 +7,9 @@ const norm = (v) => String(v ?? '').trim().toLowerCase();
 const pct = (num, den) => (den ? num / den : 0);
 
 // Resolve which dataset to report on within the active client (else its newest).
-export async function resolveDataset(datasetId) {
+export async function resolveDataset(datasetId, req) {
   if (datasetId) return Number(datasetId);
-  const cid = await activeClientId();
+  const cid = await activeClientId(req);
   let { rows } = await query(
     `SELECT id FROM datasets WHERE client_id = $1 AND is_active ORDER BY uploaded_at DESC LIMIT 1`, [cid]);
   if (rows.length) return rows[0].id;
@@ -34,8 +34,8 @@ export async function preview(datasetId, limit = 8) {
 }
 
 // Headline metrics: primary counts, duplicate counts, and conversion % for each.
-export async function summary(datasetId) {
-  const settings = await getSettings();
+export async function summary(datasetId, req) {
+  const settings = await getSettings(req);
   const { rows } = await query(
     `SELECT SUM(prim_flag) AS leads, SUM(fi_flag*prim_flag) AS fi,
             SUM(app_flag*prim_flag) AS apps, SUM(adm_flag*prim_flag) AS adm
@@ -43,12 +43,12 @@ export async function summary(datasetId) {
   const r = rows[0] || {};
   const n = (x) => Number(x || 0);
   const leads = n(r.leads), fi = n(r.fi), apps = n(r.apps), adm = n(r.adm);
-  const dup = await duplicateTotals();               // { leads, fi, apps, adm }
+  const dup = await duplicateTotals(req);               // { leads, fi, apps, adm }
   const target = Number(settings.target || 0);
   const dealType = String(settings.deal_type || 'CPA').toUpperCase() === 'CPS' ? 'CPS' : 'CPA';
   const targetMetric = dealType === 'CPS' ? 'Admissions' : 'Applications';
   const achieved = dealType === 'CPS' ? adm : apps;
-  const client = await activeClient();
+  const client = await activeClient(req);
   const reportTitle = (settings.report_title && settings.report_title.trim()) || client.name || 'Weekly Report';
 
   return {
@@ -199,14 +199,14 @@ export const topMediumByMonth = (id, dealType) => topPerMonth(id, 'lead_code', d
 export const topCourseByMonth = (id, dealType) => topPerMonth(id, 'kapp_course', dealType);
 
 // The whole report in one payload.
-export async function fullReport(datasetId) {
-  const settings = await getSettings();
+export async function fullReport(datasetId, req) {
+  const settings = await getSettings(req);
   const limit = Number(settings.top_n || 15);
   const dealType = String(settings.deal_type || 'CPA').toUpperCase() === 'CPS' ? 'CPS' : 'CPA';
-  const [dupMaps, dupTotals] = [await duplicatesByMedium(), await duplicateTotals()];
+  const [dupMaps, dupTotals] = [await duplicatesByMedium(req), await duplicateTotals(req)];
   const [sum, leadCodes, courses, cities, stages, origin, originMonth, mediumMonth, courseMonth] =
     await Promise.all([
-      summary(datasetId),
+      summary(datasetId, req),
       topBy(datasetId, 'lead_code', { limit, dupMaps, dupTotals, dealType }),
       topBy(datasetId, 'kapp_course', { limit, dealType }),
       topBy(datasetId, 'city', { limit, dealType }),

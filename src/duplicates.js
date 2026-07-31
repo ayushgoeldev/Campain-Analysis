@@ -1,6 +1,4 @@
 // Duplicate uploads — per-Medium exports for leads / fi / apps / adm.
-// Duplicate count = Secondary + Tertiary; Medium is normalized to Kapp Medium
-// via the lead-code mapping. Feeds the report's duplicate columns.
 import { withClient, query } from './db.js';
 import { loadMappings } from './mappings.js';
 import { activeClientId } from './clients.js';
@@ -14,7 +12,6 @@ const num = (v) => {
   return Number.isFinite(n) ? Math.round(n) : 0;
 };
 
-// Match the export's columns by header keywords (order/exact-name independent).
 function resolveHeaders(headers) {
   const L = headers.map((h) => [h, String(h).toLowerCase()]);
   const find = (pred) => (L.find(([, l]) => pred(l)) || [])[0] || null;
@@ -37,13 +34,12 @@ const DB_COLS = ['client_id', 'category', 'source', 'medium', 'campaign', 'prima
   'tertiary_leads', 'total_instances', 'verified', 'unverified', 'form_initiated',
   'payment_approved', 'dup_count', 'kapp_medium'];
 
-// Parse+store one category's export for the active client, replacing what was there.
-export async function importDuplicates(category, headers, rows, filename) {
+export async function importDuplicates(category, headers, rows, filename, req) {
   if (!DUP_CATEGORIES.includes(category)) throw new Error('Unknown duplicate category');
   const H = resolveHeaders(headers);
   if (!H.medium) throw new Error('Could not find a "Medium" column in the file');
 
-  const clientId = await activeClientId();
+  const clientId = await activeClientId(req);
   const { leadCodeRows } = await loadMappings();
   const map = new Map(leadCodeRows.map((r) => [norm(r.medium), r.code]));
 
@@ -63,7 +59,7 @@ export async function importDuplicates(category, headers, rows, filename) {
       unverified: num(r[H.unverified]),
       form_initiated: num(r[H.form_initiated]),
       payment_approved: num(r[H.payment_approved]),
-      dup_count: secondary + tertiary,                 // the formula: M = E + F
+      dup_count: secondary + tertiary,
       kapp_medium: map.get(norm(medium)) || medium || null,
     };
   }).filter((x) => x.medium);
@@ -100,24 +96,22 @@ export async function importDuplicates(category, headers, rows, filename) {
   return { category, rowCount: records.length, dupTotal: records.reduce((s, x) => s + x.dup_count, 0) };
 }
 
-export async function clearDuplicates(category) {
-  const cid = await activeClientId();
+export async function clearDuplicates(category, req) {
+  const cid = await activeClientId(req);
   await query('DELETE FROM duplicate_rows WHERE category = $1 AND client_id = $2', [category, cid]);
   await query('DELETE FROM duplicate_uploads WHERE category = $1 AND client_id = $2', [category, cid]);
 }
 
-// Category totals for the active client: { leads, fi, apps, adm } over dup_count.
-export async function duplicateTotals() {
-  const cid = await activeClientId();
+export async function duplicateTotals(req) {
+  const cid = await activeClientId(req);
   const { rows } = await query('SELECT category, COALESCE(SUM(dup_count),0)::int AS total FROM duplicate_rows WHERE client_id = $1 GROUP BY category', [cid]);
   const out = { leads: 0, fi: 0, apps: 0, adm: 0 };
   for (const r of rows) if (r.category in out) out[r.category] = Number(r.total);
   return out;
 }
 
-// Per-kapp_medium duplicate sums for the active client, one Map per category.
-export async function duplicatesByMedium() {
-  const cid = await activeClientId();
+export async function duplicatesByMedium(req) {
+  const cid = await activeClientId(req);
   const { rows } = await query(
     `SELECT category, lower(btrim(kapp_medium)) AS k, COALESCE(SUM(dup_count),0)::int AS total
      FROM duplicate_rows WHERE client_id = $1 AND kapp_medium IS NOT NULL GROUP BY category, k`, [cid]);
@@ -126,10 +120,9 @@ export async function duplicatesByMedium() {
   return maps;
 }
 
-// Preview + totals + meta for one category (for the Duplicates tab).
-export async function duplicatePreview(category, { limit = 200, q = '' } = {}) {
+export async function duplicatePreview(category, { limit = 200, q = '' } = {}, req) {
   if (!DUP_CATEGORIES.includes(category)) throw new Error('Unknown duplicate category');
-  const cid = await activeClientId();
+  const cid = await activeClientId(req);
   const where = q ? 'AND (medium ILIKE $3 OR kapp_medium ILIKE $3 OR campaign ILIKE $3)' : '';
   const params = q ? [category, cid, `%${q}%`] : [category, cid];
   const rows = await query(
@@ -145,11 +138,10 @@ export async function duplicatePreview(category, { limit = 200, q = '' } = {}) {
   return { rows: rows.rows, totals: totals.rows[0], meta: meta.rows[0] || null };
 }
 
-// Meta for all categories (for the tab's status line).
-export async function duplicatesSummary() {
-  const cid = await activeClientId();
+export async function duplicatesSummary(req) {
+  const cid = await activeClientId(req);
   const { rows } = await query('SELECT category, source_filename, row_count, uploaded_at FROM duplicate_uploads WHERE client_id = $1', [cid]);
-  const tot = await duplicateTotals();
+  const tot = await duplicateTotals(req);
   const byCat = {};
   for (const c of DUP_CATEGORIES) byCat[c] = { uploaded: false, dup: tot[c] };
   for (const r of rows) byCat[r.category] = { uploaded: true, filename: r.source_filename, rowCount: r.row_count, uploaded_at: r.uploaded_at, dup: tot[r.category] };
