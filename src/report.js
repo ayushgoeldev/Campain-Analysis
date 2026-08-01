@@ -43,7 +43,7 @@ export async function summary(datasetId, req) {
   const r = rows[0] || {};
   const n = (x) => Number(x || 0);
   const leads = n(r.leads), fi = n(r.fi), apps = n(r.apps), adm = n(r.adm);
-  const dup = await duplicateTotals(req);               // { leads, fi, apps, adm }
+  const dup = await duplicateTotals(req, datasetId);
   const target = Number(settings.target || 0);
   const dealType = String(settings.deal_type || 'CPA').toUpperCase() === 'CPS' ? 'CPS' : 'CPA';
   const targetMetric = dealType === 'CPS' ? 'Admissions' : 'Applications';
@@ -95,7 +95,9 @@ export async function topBy(datasetId, column, { limit = 15, dupMaps = null, dup
   const { rows } = await query(
     `SELECT COALESCE(NULLIF(btrim(${col}), ''), '(blank)') AS key,
        SUM(prim_flag) AS leads, SUM(fi_flag*prim_flag) AS fi,
-       SUM(app_flag*prim_flag) AS apps, SUM(adm_flag*prim_flag) AS adm
+       SUM(app_flag*prim_flag) AS apps, SUM(adm_flag*prim_flag) AS adm,
+       SUM(dup_flag) AS dup_leads, SUM(fi_flag*dup_flag) AS dup_fi,
+       SUM(app_flag*dup_flag) AS dup_apps, SUM(adm_flag*dup_flag) AS dup_adm
      FROM leads
      WHERE dataset_id = $1 AND ${col} IS NOT NULL AND btrim(${col}) <> ''
      GROUP BY key`, [datasetId]);
@@ -103,7 +105,12 @@ export async function topBy(datasetId, column, { limit = 15, dupMaps = null, dup
   const dupOf = (cat, key) => (dupMaps ? (dupMaps[cat].get(norm(key)) || 0) : 0);
   const all = rows.map((r) => shapeRow(r.key,
     { leads: +r.leads, fi: +r.fi, apps: +r.apps, adm: +r.adm },
-    { leads: dupOf('leads', r.key), fi: dupOf('fi', r.key), apps: dupOf('apps', r.key), adm: dupOf('adm', r.key) }));
+    {
+      leads: dupOf('leads', r.key) + +r.dup_leads,
+      fi:    dupOf('fi',    r.key) + +r.dup_fi,
+      apps:  dupOf('apps',  r.key) + +r.dup_apps,
+      adm:   dupOf('adm',   r.key) + +r.dup_adm,
+    }));
 
   // Pick ranking metric with a fallback chain so the table is never empty.
   const grand = (f) => all.reduce((s, x) => s + x[f], 0);
