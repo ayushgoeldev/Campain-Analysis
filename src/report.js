@@ -203,7 +203,7 @@ export async function fullReport(datasetId, req) {
   const settings = await getSettings(req);
   const limit = Number(settings.top_n || 15);
   const dealType = String(settings.deal_type || 'CPA').toUpperCase() === 'CPS' ? 'CPS' : 'CPA';
-  const [dupMaps, dupTotals] = [await duplicatesByMedium(req), await duplicateTotals(req)];
+  const [dupMaps, dupTotals] = [await duplicatesByMedium(req), await duplicateTotals(req, datasetId)];
   const [sum, leadCodes, courses, cities, stages, origin, originMonth, mediumMonth, courseMonth] =
     await Promise.all([
       summary(datasetId, req),

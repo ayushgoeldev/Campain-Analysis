@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS lead_code_mapping (
 CREATE TABLE IF NOT EXISTS sessions (
   id         text PRIMARY KEY,
   created_at timestamptz NOT NULL DEFAULT now()
-  
 );
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS active_client_id bigint;
 
@@ -45,11 +44,10 @@ CREATE TABLE IF NOT EXISTS datasets (
   name         text,
   source_filename text,
   row_count    integer NOT NULL DEFAULT 0,
-  columns      text[],            -- original header names, in file order
+  columns      text[],
   uploaded_at  timestamptz NOT NULL DEFAULT now(),
   is_active    boolean NOT NULL DEFAULT true
 );
--- For databases created before `columns` existed:
 ALTER TABLE datasets ADD COLUMN IF NOT EXISTS columns text[];
 
 -- ---------------------------------------------------------------------------
@@ -60,13 +58,12 @@ CREATE TABLE IF NOT EXISTS leads (
   id          bigserial PRIMARY KEY,
   dataset_id  bigint NOT NULL REFERENCES datasets(id) ON DELETE CASCADE,
   data        jsonb NOT NULL,
-  -- derived (computed by src/derive.js on import / recompute):
   record_key  text,
   lead_code   text,
   kapp_course text,
   city        text,
   origin      text,
-  month       text,        -- 'YYYY-MM'
+  month       text,
   lead_stage  text,
   fi_flag     smallint NOT NULL DEFAULT 0,
   app_flag    smallint NOT NULL DEFAULT 0,
@@ -80,15 +77,13 @@ CREATE INDEX IF NOT EXISTS leads_kapp_course    ON leads (dataset_id, kapp_cours
 CREATE INDEX IF NOT EXISTS leads_city           ON leads (dataset_id, city);
 CREATE INDEX IF NOT EXISTS leads_origin_month   ON leads (dataset_id, origin, month);
 CREATE INDEX IF NOT EXISTS leads_flags          ON leads (dataset_id, prim_flag, app_flag, adm_flag);
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS dup_flag smallint NOT NULL DEFAULT 0;
 
 -- ---------------------------------------------------------------------------
--- Duplicate uploads: per-Medium duplicate exports, one set per category
--- (leads / fi / apps / adm). Duplicate count = secondary + tertiary; medium is
--- normalized to kapp_medium via the lead-code mapping. Feeds the report's
--- duplicate columns, matched by kapp_medium.
+-- Duplicate uploads
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS duplicate_uploads (
-  category        text PRIMARY KEY,   -- leads | fi | apps | adm
+  category        text PRIMARY KEY,
   source_filename text,
   row_count       integer NOT NULL DEFAULT 0,
   uploaded_at     timestamptz NOT NULL DEFAULT now()
@@ -96,7 +91,7 @@ CREATE TABLE IF NOT EXISTS duplicate_uploads (
 
 CREATE TABLE IF NOT EXISTS duplicate_rows (
   id              bigserial PRIMARY KEY,
-  category        text NOT NULL,       -- leads | fi | apps | adm
+  category        text NOT NULL,
   source          text,
   medium          text,
   campaign        text,
@@ -108,14 +103,13 @@ CREATE TABLE IF NOT EXISTS duplicate_rows (
   unverified      integer NOT NULL DEFAULT 0,
   form_initiated  integer NOT NULL DEFAULT 0,
   payment_approved integer NOT NULL DEFAULT 0,
-  dup_count       integer NOT NULL DEFAULT 0,   -- secondary + tertiary
+  dup_count       integer NOT NULL DEFAULT 0,
   kapp_medium     text
 );
 CREATE INDEX IF NOT EXISTS duplicate_rows_key ON duplicate_rows (category, lower(btrim(kapp_medium)));
 
 -- ---------------------------------------------------------------------------
--- Annotations: free-text Insights / Challenges the user types into the report,
--- keyed by table scope (e.g. 'lead_codes') and row key (e.g. a lead code).
+-- Annotations
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS annotations (
   scope      text NOT NULL,
@@ -127,9 +121,7 @@ CREATE TABLE IF NOT EXISTS annotations (
 );
 
 -- ---------------------------------------------------------------------------
--- Multi-client: each client owns its own datasets, duplicate uploads, settings
--- and annotations. Exactly one client is active at a time. Course/lead-code
--- mappings stay global (shared across clients).
+-- Multi-client
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS clients (
   id         bigserial PRIMARY KEY,
@@ -149,8 +141,6 @@ ALTER TABLE duplicate_uploads ADD COLUMN IF NOT EXISTS client_id bigint;
 ALTER TABLE duplicate_rows    ADD COLUMN IF NOT EXISTS client_id bigint;
 ALTER TABLE annotations       ADD COLUMN IF NOT EXISTS client_id bigint;
 
--- One-time migration: create a default client and assign all existing data
--- (datasets, duplicates, annotations, settings) to it.
 DO $$
 DECLARE cid bigint;
 BEGIN
@@ -174,7 +164,6 @@ BEGIN
   UPDATE annotations       SET client_id = cid WHERE client_id IS NULL;
 END $$;
 
--- Per-client uniqueness (replacing the old global keys).
 ALTER TABLE duplicate_uploads DROP CONSTRAINT IF EXISTS duplicate_uploads_pkey;
 CREATE UNIQUE INDEX IF NOT EXISTS duplicate_uploads_client_cat ON duplicate_uploads (client_id, category);
 ALTER TABLE annotations DROP CONSTRAINT IF EXISTS annotations_pkey;

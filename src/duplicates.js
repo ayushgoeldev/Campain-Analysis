@@ -102,11 +102,23 @@ export async function clearDuplicates(category, req) {
   await query('DELETE FROM duplicate_uploads WHERE category = $1 AND client_id = $2', [category, cid]);
 }
 
-export async function duplicateTotals(req) {
+export async function duplicateTotals(req, datasetId = null) {
   const cid = await activeClientId(req);
   const { rows } = await query('SELECT category, COALESCE(SUM(dup_count),0)::int AS total FROM duplicate_rows WHERE client_id = $1 GROUP BY category', [cid]);
   const out = { leads: 0, fi: 0, apps: 0, adm: 0 };
   for (const r of rows) if (r.category in out) out[r.category] = Number(r.total);
+  if (datasetId) {
+    const { rows: dr } = await query(
+      `SELECT SUM(dup_flag) AS leads, SUM(fi_flag*dup_flag) AS fi,
+              SUM(app_flag*dup_flag) AS apps, SUM(adm_flag*dup_flag) AS adm
+       FROM leads WHERE dataset_id = $1`, [datasetId]);
+    if (dr[0]) {
+      out.leads += Number(dr[0].leads || 0);
+      out.fi    += Number(dr[0].fi    || 0);
+      out.apps  += Number(dr[0].apps  || 0);
+      out.adm   += Number(dr[0].adm   || 0);
+    }
+  }
   return out;
 }
 

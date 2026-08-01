@@ -74,7 +74,7 @@ export function parseFile(filePath, { headerRow = null } = {}) {
 
 const COLS = [
   'dataset_id', 'data', 'record_key', 'lead_code', 'kapp_course', 'city',
-  'origin', 'month', 'lead_stage', 'fi_flag', 'app_flag', 'adm_flag', 'prim_flag',
+  'origin', 'month', 'lead_stage', 'fi_flag', 'app_flag', 'adm_flag', 'prim_flag', 'dup_flag',
 ];
 
 async function insertBatch(client, datasetId, batch, ctx) {
@@ -84,8 +84,8 @@ async function insertBatch(client, datasetId, batch, ctx) {
   for (const row of batch) {
     const d = deriveRow(row, ctx);
     params.push(
-      datasetId, JSON.stringify(row), d.record_key, d.lead_code, d.kapp_course,
-      d.city, d.origin, d.month, d.lead_stage, d.fi_flag, d.app_flag, d.adm_flag, d.prim_flag
+            datasetId, JSON.stringify(row), d.record_key, d.lead_code, d.kapp_course,
+      d.city, d.origin, d.month, d.lead_stage, d.fi_flag, d.app_flag, d.adm_flag, d.prim_flag, d.dup_flag
     );
     const ph = COLS.map(() => `$${p++}`);
     values.push(`(${ph.join(',')})`);
@@ -203,27 +203,27 @@ export async function recomputeDataset(datasetId, req) {
 
     // Build parallel arrays and update the whole batch in ONE statement via
     // unnest — one round-trip per batch instead of one per row.
-    const ids = [], rk = [], lc = [], kc = [], ci = [], og = [], mo = [], ls = [], fi = [], ap = [], ad = [], pr = [];
+        const ids = [], rk = [], lc = [], kc = [], ci = [], og = [], mo = [], ls = [], fi = [], ap = [], ad = [], pr = [], du = [];
     for (const r of rows) {
       const d = deriveRow(r.data, ctx);
-      ids.push(r.id); rk.push(d.record_key); lc.push(d.lead_code); kc.push(d.kapp_course);
+            ids.push(r.id); rk.push(d.record_key); lc.push(d.lead_code); kc.push(d.kapp_course);
       ci.push(d.city); og.push(d.origin); mo.push(d.month); ls.push(d.lead_stage);
-      fi.push(d.fi_flag); ap.push(d.app_flag); ad.push(d.adm_flag); pr.push(d.prim_flag);
+      fi.push(d.fi_flag); ap.push(d.app_flag); ad.push(d.adm_flag); pr.push(d.prim_flag); du.push(d.dup_flag);
     }
     await query(
-      `UPDATE leads AS l SET
+            `UPDATE leads AS l SET
          record_key = d.record_key, lead_code = d.lead_code, kapp_course = d.kapp_course,
          city = d.city, origin = d.origin, month = d.month, lead_stage = d.lead_stage,
-         fi_flag = d.fi_flag, app_flag = d.app_flag, adm_flag = d.adm_flag, prim_flag = d.prim_flag
+         fi_flag = d.fi_flag, app_flag = d.app_flag, adm_flag = d.adm_flag, prim_flag = d.prim_flag, dup_flag = d.dup_flag
        FROM (
          SELECT * FROM unnest(
            $1::bigint[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[],
-           $7::text[], $8::text[], $9::smallint[], $10::smallint[], $11::smallint[], $12::smallint[]
+           $7::text[], $8::text[], $9::smallint[], $10::smallint[], $11::smallint[], $12::smallint[], $13::smallint[]
          ) AS t(id, record_key, lead_code, kapp_course, city, origin, month, lead_stage,
-                fi_flag, app_flag, adm_flag, prim_flag)
+                fi_flag, app_flag, adm_flag, prim_flag, dup_flag)
        ) AS d
        WHERE l.id = d.id`,
-      [ids, rk, lc, kc, ci, og, mo, ls, fi, ap, ad, pr]
+      [ids, rk, lc, kc, ci, og, mo, ls, fi, ap, ad, pr, du]
     );
 
     lastId = rows[rows.length - 1].id;
