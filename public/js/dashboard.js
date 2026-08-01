@@ -46,7 +46,7 @@ async function loadReport() {
   const empty = data.empty;
   $('#reportEmpty').classList.toggle('hidden', !empty);
   $('#reportBody').classList.toggle('hidden', !!empty);
-  if (empty) { $('#reportBody').innerHTML = ''; $('#reportSub').textContent = ''; return; }
+  if (empty) { $('#reportBody').innerHTML = ''; $('#reportSub').textContent = ''; $('#reportTitle').textContent = 'Weekly Report'; return; }
   const s = data.summary;
   $('#reportTitle').textContent = s.report_title || 'Weekly Report';
   $('#reportSub').textContent = `Deal type ${s.deal_type} · target ${fmtInt(s.target)} (${s.target_metric})`;
@@ -423,6 +423,7 @@ $('#uploadForm').addEventListener('submit', async (e) => {
 // ---- CRM Presets ----------------------------------------------------------
 const CRM_PRESETS = {
   NPF: {
+    crm_type: 'NPF',
     report_title: '',
     target: 50,
     deal_type: 'CPA',
@@ -447,6 +448,7 @@ const CRM_PRESETS = {
     top_n: 15,
   },
     LSQ: {
+    crm_type: 'LSQ',  
     report_title: '',
     target: 100,
     deal_type: 'CPS',
@@ -475,6 +477,7 @@ const CRM_PRESETS = {
 
 // ---- Settings -------------------------------------------------------------
 const FIELDS = [
+  ['crm_type', '', 'hidden'],
   ['report_title', 'Report title / client name (PDF heading)', 'text'],
   ['target', 'Target (CPA → applications · CPS → admissions)', 'number'],
   ['deal_type', 'Deal Type', 'select', ['CPA', 'CPS']],
@@ -495,7 +498,8 @@ const FIELDS = [
   ['lead_origin_column', 'Lead Origin column', 'text'],
   ['application_values', 'Application values (comma sep; blank = any non-empty)', 'list'],
   ['admission_values', 'Admission values (comma sep)', 'list'],
-  ['form_initiated_values', 'Form-Initiated values (comma sep)', 'list'],
+    ['form_initiated_values', 'Form-Initiated values (comma sep)', 'list'],
+  ['duplicate_instance_values', 'Duplicate instance values (comma sep; blank = use uploaded dup files)', 'list'],
   ['top_n', 'Top N rows per table', 'number'],
 ];
 let defaultsCache = null;
@@ -531,7 +535,15 @@ async function loadPreview() {
 }
 
 function renderSettings(s) {
+  const crmType = String(s.crm_type || '').toUpperCase();
   $('#settingsForm').innerHTML = FIELDS.map(([key, label, type, options]) => {
+    if (type === 'hidden') {
+      return `<input type="hidden" data-key="${key}" data-type="hidden" value="${String(s[key] ?? '').replace(/"/g, '&quot;')}" />`;
+    }
+    if (key === 'duplicate_instance_values') {
+      const hasValues = Array.isArray(s[key]) && s[key].length > 0;
+      if (crmType !== 'LSQ' && !hasValues) return '';
+    }
     if (type === 'select') {
       const current = String(s[key] ?? (options && options[0]) ?? '');
       const opts = (options || []).map((o) =>

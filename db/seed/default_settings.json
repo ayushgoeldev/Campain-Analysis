@@ -1,4 +1,5 @@
 {
+  "crm_type": "",
   "report_title": "",
   "target": 50,
   "deal_type": "CPA",
@@ -29,4 +30,8 @@
   ],
   "duplicate_instance_values": [],
   "top_n": 15
+
+  
 }
+
+
