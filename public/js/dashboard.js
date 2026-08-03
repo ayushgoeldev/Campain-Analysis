@@ -1054,6 +1054,7 @@ $$('.sidebar-sub-item[data-wd-sub]').forEach((btn) => btn.addEventListener('clic
 
 // ---- Weekly Dump ----------------------------------------------------------
 const WD_FIELDS = [
+  ['dup_values', 'Duplicate lead values (comma-sep)', 'list'],
   ['fi_column',  'Form Initiated — column',           'text'],
   ['fi_values',  'Form Initiated — values (comma-sep)', 'list'],
   ['app_column', 'Application — column',              'text'],
@@ -1076,6 +1077,7 @@ const WD_PRESETS = {
     primary_value:    'Primary',
     secondary_value:  'Secondary',
     tertiary_value:   'Tertiary',
+    dup_values:       ['Secondary', 'Tertiary'],
     fi_column:   'LeadStage',
     fi_values:   ['AR- Application Received', 'Offered', 'Offer Accepted'],
     app_column:  'LeadStage',
@@ -1095,6 +1097,7 @@ const WD_PRESETS = {
     primary_value:    'Primary',
     secondary_value:  'Secondary',
     tertiary_value:   'Tertiary',
+    dup_values:       ['Secondary', 'Tertiary'],
     fi_column:   '',
     fi_values:   [],
     app_column:  '',
@@ -1114,6 +1117,7 @@ const WD_PRESETS = {
     primary_value:    'Primary',
     secondary_value:  'Secondary',
     tertiary_value:   'Tertiary',
+    dup_values:       ['Secondary', 'Tertiary'],
     fi_column:   'Stage',
     fi_values:   [],
     app_column:  'Stage',
