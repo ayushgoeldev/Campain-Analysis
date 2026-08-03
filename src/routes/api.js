@@ -473,16 +473,22 @@ function buildGenericReport(allRows, { trackingId, crmType, clientName, settings
   const secVal   = (settings.secondary_value || 'Secondary').toLowerCase();
   const terVal   = (settings.tertiary_value  || 'Tertiary').toLowerCase();
 
-  // Build duplicate-value set from dup_values list; fall back to secondary+tertiary values.
-  const dupSet = (() => {
-    const list = settings.dup_values;
-    if (Array.isArray(list) && list.length > 0) {
-      return new Set(list.map((v) => String(v).trim().toLowerCase()).filter(Boolean));
-    }
-    return new Set([secVal, terVal]);
+  const toSet = (arr) => new Set((arr || []).map((v) => String(v).trim().toLowerCase()).filter(Boolean));
+
+  // Secondary values: list field takes priority, falls back to single secondary_value.
+  const secSet = (() => {
+    const list = settings.secondary_values;
+    if (Array.isArray(list) && list.length > 0) return toSet(list);
+    return new Set([secVal]);
   })();
 
-  const toSet = (arr) => new Set((arr || []).map((v) => String(v).trim().toLowerCase()).filter(Boolean));
+  // Tertiary values: list field takes priority, falls back to single tertiary_value.
+  const terSet = (() => {
+    const list = settings.tertiary_values;
+    if (Array.isArray(list) && list.length > 0) return toSet(list);
+    return new Set([terVal]);
+  })();
+
   const fiVals  = toSet(settings.fi_values);
   const appVals = toSet(settings.app_values);
   const admVals = toSet(settings.adm_values);
@@ -505,18 +511,23 @@ function buildGenericReport(allRows, { trackingId, crmType, clientName, settings
     const source   = srcValFixed || String(getCol(rows[0], srcCol)).trim();
     const campaign = getCol(rows[0], campCol);
 
-    const primary  = rows.filter((r) => String(getCol(r, ltCol)).trim().toLowerCase() === priVal);
-    const allDups  = rows.filter((r) => dupSet.has(String(getCol(r, ltCol)).trim().toLowerCase()));
+    const ltNorm   = (r) => String(getCol(r, ltCol)).trim().toLowerCase();
+    const primary   = rows.filter((r) => ltNorm(r) === priVal);
+    const secondary = rows.filter((r) => secSet.has(ltNorm(r)));
+    const tertiary  = rows.filter((r) => terSet.has(ltNorm(r)));
 
     const verified   = verCol ? primary.filter((r) => String(getCol(r, verCol)).trim().toLowerCase() === verVal).length : 0;
     const unverified = primary.length - verified;
 
     const fi_p  = primary.filter((r) => matches(r, fiCol, fiVals)).length;
-    const fi_d  = allDups.filter((r) => matches(r, fiCol, fiVals)).length;
+    const fi_s  = secondary.filter((r) => matches(r, fiCol, fiVals)).length;
+    const fi_t  = tertiary.filter((r) => matches(r, fiCol, fiVals)).length;
     const app_p = primary.filter((r) => matches(r, appCol, appVals)).length;
-    const app_d = allDups.filter((r) => matches(r, appCol, appVals)).length;
+    const app_s = secondary.filter((r) => matches(r, appCol, appVals)).length;
+    const app_t = tertiary.filter((r) => matches(r, appCol, appVals)).length;
     const adm_p = primary.filter((r) => matches(r, admCol, admVals)).length;
-    const adm_d = allDups.filter((r) => matches(r, admCol, admVals)).length;
+    const adm_s = secondary.filter((r) => matches(r, admCol, admVals)).length;
+    const adm_t = tertiary.filter((r) => matches(r, admCol, admVals)).length;
 
     reportRows.push({
       tracking_id: trackingId,
@@ -526,18 +537,18 @@ function buildGenericReport(allRows, { trackingId, crmType, clientName, settings
       medium,
       campaign_name: String(campaign),
       primary_leads:    primary.length,
-      secondary_leads:  allDups.length,
-      tertiary_leads:   0,
+      secondary_leads:  secondary.length,
+      tertiary_leads:   tertiary.length,
       total_instances:  rows.length,
       verified_leads:   verified,
       unverified_leads: unverified,
       form_initiated:   fi_p,
       payment_approved: app_p,
       enrolments:       adm_p,
-      duplicate_leads:  allDups.length,
-      duplicate_fi:     fi_d,
-      duplicate_app:    app_d,
-      duplicate_adm:    adm_d,
+      duplicate_leads:  secondary.length + tertiary.length,
+      duplicate_fi:     fi_s + fi_t,
+      duplicate_app:    app_s + app_t,
+      duplicate_adm:    adm_s + adm_t,
     });
   }
 

@@ -486,6 +486,65 @@ $('#uploadForm').addEventListener('submit', async (e) => {
 })();
 
 // ---- Campaign Analysis merge upload ---------------------------------------
+// Parses all CSV files client-side, unions headers, uploads via chunked API.
+async function chunkedCsvMerge(files, name, statusEl) {
+  const fileArr = [...files];
+  const allHeaders = new Set();
+  const parsed = [];
+  for (const f of fileArr) {
+    statusEl.textContent = `Reading ${f.name}…`; statusEl.className = 'status';
+    const matrix = parseCSV(await f.text());
+    const hIdx = detectHeaderRow(matrix);
+    const headers = (matrix[hIdx] || []).map((h, i) => String(h ?? '').trim() || `Column ${i + 1}`);
+    headers.forEach((h) => allHeaders.add(h));
+    const rows = [];
+    for (let r = hIdx + 1; r < matrix.length; r++) {
+      const line = matrix[r] || [];
+      if (line.every((c) => String(c ?? '').trim() === '')) continue;
+      const obj = {};
+      for (let c = 0; c < headers.length; c++) obj[headers[c]] = line[c] ?? '';
+      rows.push(obj);
+    }
+    parsed.push(rows);
+  }
+  const mergedHeaders = [...allHeaders];
+  const mergedRows = parsed.flatMap((rows) => rows.map((row) => {
+    const out = {};
+    for (const h of mergedHeaders) out[h] = row[h] ?? '';
+    return out;
+  }));
+  if (!mergedRows.length) throw new Error('No data rows found in any file');
+
+  const dsName = name || `Merged (${fileArr.length} files)`;
+  const started = await (await fetch('/api/upload/start', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: dsName, filename: dsName, headers: mergedHeaders }),
+  })).json();
+  if (!started.datasetId) throw new Error(started.error || 'Could not start upload');
+
+  const CHUNK = 5000;
+  let sent = 0;
+  const chunks = [];
+  for (let i = 0; i < mergedRows.length; i += CHUNK) chunks.push(mergedRows.slice(i, i + CHUNK));
+  for (let i = 0; i < chunks.length; i += 5) {
+    const batch = chunks.slice(i, i + 5);
+    await Promise.all(batch.map(async (chunk) => {
+      const res = await fetch('/api/upload/rows', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ datasetId: started.datasetId, rows: chunk }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Batch upload failed');
+      sent += chunk.length;
+      statusEl.textContent = `Uploading ${fmtInt(Math.min(sent, mergedRows.length))} / ${fmtInt(mergedRows.length)} rows…`;
+    }));
+  }
+  const fin = await (await fetch('/api/upload/finish', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ datasetId: started.datasetId }),
+  })).json();
+  return { rowCount: fin.rowCount, fileCount: fileArr.length, columns: mergedHeaders.length };
+}
+
 $('#mergeForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const status = $('#mergeStatus');
@@ -493,15 +552,26 @@ $('#mergeForm')?.addEventListener('submit', async (e) => {
   const files = $('#mergeFiles').files;
   const name = $('#mergeName').value;
   if (!files.length) { status.textContent = 'Choose at least one file'; status.className = 'status err'; return; }
+  const allCsv = [...files].every((f) => /\.(csv|tsv|txt)$/i.test(f.name));
   btn.disabled = true;
-  status.textContent = 'Uploading…'; status.className = 'status';
+  status.textContent = 'Reading files…'; status.className = 'status';
   try {
-    const fd = new FormData();
-    for (const f of files) fd.append('files', f);
-    if (name) fd.append('name', name);
-    const res = await fetch('/api/upload/merge', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Merge failed');
+    let data;
+    if (allCsv) {
+      data = await chunkedCsvMerge(files, name, status);
+    } else {
+      const fd = new FormData();
+      for (const f of files) fd.append('files', f);
+      if (name) fd.append('name', name);
+      const res = await fetch('/api/upload/merge', { method: 'POST', body: fd });
+      const text = await res.text();
+      try { data = JSON.parse(text); } catch {
+        throw new Error(res.status === 413 || text.includes('Entity Too Large')
+          ? 'Files too large — Vercel limits XLSX uploads to 4.5 MB total.'
+          : `Server error (${res.status})`);
+      }
+      if (!res.ok) throw new Error(data.error || 'Merge failed');
+    }
     status.textContent = `✓ Merged ${data.fileCount} files → ${fmtInt(data.rowCount)} rows (${data.columns} cols)`;
     status.className = 'status ok';
     e.target.reset();
@@ -1054,7 +1124,8 @@ $$('.sidebar-sub-item[data-wd-sub]').forEach((btn) => btn.addEventListener('clic
 
 // ---- Weekly Dump ----------------------------------------------------------
 const WD_FIELDS = [
-  ['dup_values', 'Duplicate lead values (comma-sep)', 'list'],
+  ['secondary_values', 'Secondary lead values (comma-sep)', 'list'],
+  ['tertiary_values',  'Tertiary lead values (comma-sep)',  'list'],
   ['fi_column',  'Form Initiated — column',           'text'],
   ['fi_values',  'Form Initiated — values (comma-sep)', 'list'],
   ['app_column', 'Application — column',              'text'],
@@ -1074,10 +1145,11 @@ const WD_PRESETS = {
     lead_type_column: 'LeadType',
     verified_column:  'VerificationStatus',
     verified_value:   'Verified',
-    primary_value:    'Primary',
-    secondary_value:  'Secondary',
-    tertiary_value:   'Tertiary',
-    dup_values:       ['Secondary', 'Tertiary'],
+    primary_value:     'Primary',
+    secondary_value:   'Secondary',
+    tertiary_value:    'Tertiary',
+    secondary_values:  ['Secondary'],
+    tertiary_values:   ['Tertiary'],
     fi_column:   'LeadStage',
     fi_values:   ['AR- Application Received', 'Offered', 'Offer Accepted'],
     app_column:  'LeadStage',
@@ -1097,7 +1169,8 @@ const WD_PRESETS = {
     primary_value:    'Primary',
     secondary_value:  'Secondary',
     tertiary_value:   'Tertiary',
-    dup_values:       ['Secondary', 'Tertiary'],
+    secondary_values:  ['Secondary'],
+    tertiary_values:   ['Tertiary'],
     fi_column:   '',
     fi_values:   [],
     app_column:  '',
@@ -1117,7 +1190,8 @@ const WD_PRESETS = {
     primary_value:    'Primary',
     secondary_value:  'Secondary',
     tertiary_value:   'Tertiary',
-    dup_values:       ['Secondary', 'Tertiary'],
+    secondary_values:  ['Secondary'],
+    tertiary_values:   ['Tertiary'],
     fi_column:   'Stage',
     fi_values:   [],
     app_column:  'Stage',
@@ -1693,6 +1767,65 @@ function bindSingleUploadHandler() {
   });
 }
 
+// Parses all CSV files client-side, unions headers, uploads via WD chunked API.
+async function wdChunkedCsvMerge(files, name, statusEl) {
+  const fileArr = [...files];
+  const allHeaders = new Set();
+  const parsed = [];
+  for (const f of fileArr) {
+    statusEl.textContent = `Reading ${f.name}…`; statusEl.className = 'status';
+    const matrix = parseCSV(await f.text());
+    const hIdx = detectHeaderRow(matrix);
+    const headers = (matrix[hIdx] || []).map((h, i) => String(h ?? '').trim() || `Column ${i + 1}`);
+    headers.forEach((h) => allHeaders.add(h));
+    const rows = [];
+    for (let r = hIdx + 1; r < matrix.length; r++) {
+      const line = matrix[r] || [];
+      if (line.every((c) => String(c ?? '').trim() === '')) continue;
+      const obj = {};
+      for (let c = 0; c < headers.length; c++) obj[headers[c]] = line[c] ?? '';
+      rows.push(obj);
+    }
+    parsed.push(rows);
+  }
+  const mergedHeaders = [...allHeaders];
+  const mergedRows = parsed.flatMap((rows) => rows.map((row) => {
+    const out = {};
+    for (const h of mergedHeaders) out[h] = row[h] ?? '';
+    return out;
+  }));
+  if (!mergedRows.length) throw new Error('No data rows found in any file');
+
+  const dsName = name || `Merged (${fileArr.length} files)`;
+  const started = await (await fetch('/api/wd/upload/start', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: dsName, filename: dsName, headers: mergedHeaders }),
+  })).json();
+  if (!started.datasetId) throw new Error(started.error || 'Could not start upload');
+
+  const CHUNK = 5000;
+  let sent = 0;
+  const chunks = [];
+  for (let i = 0; i < mergedRows.length; i += CHUNK) chunks.push(mergedRows.slice(i, i + CHUNK));
+  for (let i = 0; i < chunks.length; i += 5) {
+    const batch = chunks.slice(i, i + 5);
+    await Promise.all(batch.map(async (chunk) => {
+      const res = await fetch('/api/wd/upload/rows', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ datasetId: started.datasetId, rows: chunk }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Batch upload failed');
+      sent += chunk.length;
+      statusEl.textContent = `Uploading ${fmtInt(Math.min(sent, mergedRows.length))} / ${fmtInt(mergedRows.length)} rows…`;
+    }));
+  }
+  await fetch('/api/wd/upload/finish', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ datasetId: started.datasetId }),
+  });
+  return { rowCount: sent, fileCount: fileArr.length };
+}
+
 function bindWdMergeHandler() {
   const form = $('#wdMergeForm');
   if (!form) return;
@@ -1703,15 +1836,26 @@ function bindWdMergeHandler() {
     const files = $('#wdMergeFiles').files;
     const name = $('#wdMergeName').value;
     if (!files.length) { s.textContent = 'Choose files'; s.className = 'status err'; return; }
+    const allCsv = [...files].every((f) => /\.(csv|tsv|txt)$/i.test(f.name));
     btn.disabled = true;
-    s.textContent = 'Uploading…'; s.className = 'status';
+    s.textContent = 'Reading files…'; s.className = 'status';
     try {
-      const fd = new FormData();
-      for (const f of files) fd.append('files', f);
-      if (name) fd.append('name', name);
-      const res = await fetch('/api/wd/upload/merge', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Merge failed');
+      let data;
+      if (allCsv) {
+        data = await wdChunkedCsvMerge(files, name, s);
+      } else {
+        const fd = new FormData();
+        for (const f of files) fd.append('files', f);
+        if (name) fd.append('name', name);
+        const res = await fetch('/api/wd/upload/merge', { method: 'POST', body: fd });
+        const text = await res.text();
+        try { data = JSON.parse(text); } catch {
+          throw new Error(res.status === 413 || text.includes('Entity Too Large')
+            ? 'Files too large — Vercel limits XLSX uploads to 4.5 MB total.'
+            : `Server error (${res.status})`);
+        }
+        if (!res.ok) throw new Error(data.error || 'Merge failed');
+      }
       s.textContent = `✓ Merged ${data.fileCount} files → ${fmtInt(data.rowCount)} rows`;
       s.className = 'status ok';
       form.reset();
