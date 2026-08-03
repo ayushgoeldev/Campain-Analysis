@@ -6,12 +6,10 @@ import { withClient, query } from './db.js';
 import { getSettings } from './settings.js';
 import { loadMappings } from './mappings.js';
 import { buildContext, deriveRow, resolveDateOrder } from './derive.js';
-import { activeClientId } from './clients.js';
+import { activeClientId, activeWdClientId } from './clients.js';
 
 // --- File parsing ----------------------------------------------------------
 
-// Rows arrive as arrays; find the header row even when a CRM export prepends
-// banner/notification rows (as meritto's "RAW" view does).
 function detectHeaderRow(matrix) {
   let best = 0;
   let bestScore = -1;
@@ -19,7 +17,6 @@ function detectHeaderRow(matrix) {
   for (let i = 0; i < limit; i++) {
     const cells = matrix[i] || [];
     const nonEmpty = cells.filter((c) => String(c ?? '').trim() !== '').length;
-    // Prefer a row with many short, distinct-looking text headers.
     const shortText = cells.filter((c) => {
       const v = String(c ?? '').trim();
       return v && v.length <= 40;
@@ -41,7 +38,7 @@ function matrixToRows(matrix, headerRowIndex) {
   const rows = [];
   for (let r = headerRowIndex + 1; r < matrix.length; r++) {
     const line = matrix[r] || [];
-    if (line.every((c) => String(c ?? '').trim() === '')) continue; // skip blank
+    if (line.every((c) => String(c ?? '').trim() === '')) continue;
     const obj = {};
     for (let c = 0; c < headers.length; c++) obj[headers[c]] = line[c] ?? '';
     rows.push(obj);
@@ -70,6 +67,28 @@ export function parseFile(filePath, { headerRow = null } = {}) {
   return matrixToRows(matrix, headerRowIndex);
 }
 
+// Parse all sheets in an XLSX — returns [{name, headers, rows}] with _sheet tag on each row.
+// For CSV/TSV, returns a single-item array with sheet name 'Sheet1'.
+export function parseFileAllSheets(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  if (ext === '.csv' || ext === '.tsv') {
+    const { headers, rows } = parseFile(filePath);
+    return [{ name: 'Sheet1', headers, rows: rows.map((r) => ({ ...r, _sheet: 'Sheet1' })) }];
+  }
+  const wb = XLSX.readFile(filePath, { cellDates: false, raw: true });
+  return wb.SheetNames.map((sheetName) => {
+    const ws = wb.Sheets[sheetName];
+    const matrix = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+    const headerRowIndex = detectHeaderRow(matrix);
+    const { headers, rows } = matrixToRows(matrix, headerRowIndex);
+    return {
+      name: sheetName,
+      headers,
+      rows: rows.map((r) => ({ ...r, _sheet: sheetName })),
+    };
+  });
+}
+
 // --- Loading into Postgres --------------------------------------------------
 
 const COLS = [
@@ -84,7 +103,7 @@ async function insertBatch(client, datasetId, batch, ctx) {
   for (const row of batch) {
     const d = deriveRow(row, ctx);
     params.push(
-            datasetId, JSON.stringify(row), d.record_key, d.lead_code, d.kapp_course,
+      datasetId, JSON.stringify(row), d.record_key, d.lead_code, d.kapp_course,
       d.city, d.origin, d.month, d.lead_stage, d.fi_flag, d.app_flag, d.adm_flag, d.prim_flag, d.dup_flag
     );
     const ph = COLS.map(() => `$${p++}`);
@@ -96,11 +115,9 @@ async function insertBatch(client, datasetId, batch, ctx) {
   );
 }
 
-// Import a parsed file into a new dataset. Returns { datasetId, rowCount }.
 export async function importRows(rows, { name, filename, headers } = {}, req) {
   const settings = await getSettings(req);
   const { courseRows, leadCodeRows } = await loadMappings();
-  // Resolve the date order once, from a sample of this file's date column.
   const sample = rows.slice(0, 5000).map((r) => r[settings.date_column]);
   const dateOrder = resolveDateOrder(settings, sample);
   const ctx = buildContext(settings, courseRows, leadCodeRows, dateOrder);
@@ -122,7 +139,6 @@ export async function importRows(rows, { name, filename, headers } = {}, req) {
       }
 
       await client.query(`UPDATE datasets SET row_count = $1 WHERE id = $2`, [rows.length, datasetId]);
-      // New upload becomes the active dataset for THIS client.
       await client.query(`UPDATE datasets SET is_active = (id = $1) WHERE client_id = $2`, [datasetId, clientId]);
       await client.query('COMMIT');
       return { datasetId, rowCount: rows.length };
@@ -133,9 +149,7 @@ export async function importRows(rows, { name, filename, headers } = {}, req) {
   });
 }
 
-// --- Chunked upload (browser sends parsed rows in small batches) -----------
-// Lets large files be imported from any browser without hitting the platform's
-// per-request body limit: start once, append many small batches, then finish.
+// --- Chunked upload --------------------------------------------------------
 
 export async function startDataset({ name, filename, headers } = {}, req) {
   const clientId = await activeClientId(req);
@@ -176,12 +190,60 @@ export async function finishDataset(datasetId) {
   return n;
 }
 
-// Recompute derived fields for a dataset (after settings/mappings change),
-// re-reading the untouched raw `data` jsonb. Streams in batches.
+// --- Weekly Dump upload (raw rows only — no field derivation) --------------
+
+export async function startWdDataset({ name, filename, headers } = {}, req) {
+  const clientId = await activeWdClientId(req);
+  if (!clientId) throw new Error('No active Weekly Dump client. Create one in the Clients tab first.');
+  const cols = headers && headers.length ? headers : null;
+  const ds = await query(
+    `INSERT INTO datasets (name, source_filename, row_count, columns, client_id, is_active, source_type)
+     VALUES ($1,$2,0,$3,$4,false,'weekly_dump') RETURNING id`,
+    [name || filename || 'Upload', filename || null, cols, clientId]);
+  return ds.rows[0].id;
+}
+
+export async function appendWdRows(datasetId, rows) {
+  if (!Array.isArray(rows) || !rows.length) return 0;
+  await withClient(async (client) => {
+    await client.query('BEGIN');
+    try {
+      const BATCH = 1000;
+      for (let i = 0; i < rows.length; i += BATCH) {
+        const batch = rows.slice(i, i + BATCH);
+        const values = [];
+        const params = [];
+        let p = 1;
+        for (const row of batch) {
+          params.push(datasetId, JSON.stringify(row));
+          values.push(`($${p++}, $${p++})`);
+        }
+        await client.query(`INSERT INTO leads (dataset_id, data) VALUES ${values.join(',')}`, params);
+      }
+      await client.query('COMMIT');
+    } catch (e) { await client.query('ROLLBACK'); throw e; }
+  });
+  return rows.length;
+}
+
+export async function finishWdDataset(datasetId) {
+  const meta = await query('SELECT client_id FROM datasets WHERE id = $1', [datasetId]);
+  const clientId = meta.rows[0]?.client_id;
+  const cnt = await query('SELECT count(*)::int AS n FROM leads WHERE dataset_id = $1', [datasetId]);
+  const n = cnt.rows[0].n;
+  await query('UPDATE datasets SET row_count = $1 WHERE id = $2', [n, datasetId]);
+  if (clientId != null) {
+    await query(
+      `UPDATE datasets SET is_active = (id = $1) WHERE client_id = $2 AND source_type = 'weekly_dump'`,
+      [datasetId, clientId]);
+  }
+  return n;
+}
+
+// Recompute derived fields for a dataset.
 export async function recomputeDataset(datasetId, req) {
   const settings = await getSettings(req);
   const { courseRows, leadCodeRows } = await loadMappings();
-  // Sample the date column from the stored rows to resolve day/month order once.
   const dateSample = await query(
     `SELECT data->>$2 AS d FROM leads
        WHERE dataset_id = $1 AND NULLIF(btrim(data->>$2), '') IS NOT NULL
@@ -201,17 +263,15 @@ export async function recomputeDataset(datasetId, req) {
     );
     if (!rows.length) break;
 
-    // Build parallel arrays and update the whole batch in ONE statement via
-    // unnest — one round-trip per batch instead of one per row.
-        const ids = [], rk = [], lc = [], kc = [], ci = [], og = [], mo = [], ls = [], fi = [], ap = [], ad = [], pr = [], du = [];
+    const ids = [], rk = [], lc = [], kc = [], ci = [], og = [], mo = [], ls = [], fi = [], ap = [], ad = [], pr = [], du = [];
     for (const r of rows) {
       const d = deriveRow(r.data, ctx);
-            ids.push(r.id); rk.push(d.record_key); lc.push(d.lead_code); kc.push(d.kapp_course);
+      ids.push(r.id); rk.push(d.record_key); lc.push(d.lead_code); kc.push(d.kapp_course);
       ci.push(d.city); og.push(d.origin); mo.push(d.month); ls.push(d.lead_stage);
       fi.push(d.fi_flag); ap.push(d.app_flag); ad.push(d.adm_flag); pr.push(d.prim_flag); du.push(d.dup_flag);
     }
     await query(
-            `UPDATE leads AS l SET
+      `UPDATE leads AS l SET
          record_key = d.record_key, lead_code = d.lead_code, kapp_course = d.kapp_course,
          city = d.city, origin = d.origin, month = d.month, lead_stage = d.lead_stage,
          fi_flag = d.fi_flag, app_flag = d.app_flag, adm_flag = d.adm_flag, prim_flag = d.prim_flag, dup_flag = d.dup_flag

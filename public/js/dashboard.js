@@ -9,6 +9,18 @@ const fmtPct = (x) => {
   return `${v > 0 && v < 1 ? v.toFixed(2) : v.toFixed(1)}%`;
 };
 
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const el = document.createElement('div');
+  const icons = { ok: '✓', err: '✕', info: 'ℹ', warn: '⚠' };
+  el.className = `toast toast-${type}`;
+  el.innerHTML = `<span style="font-weight:700;flex-shrink:0">${icons[type] || '●'}</span><span>${String(msg).replace(/</g,'&lt;')}</span>`;
+  container.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  setTimeout(() => { el.classList.remove('show'); el.addEventListener('transitionend', () => el.remove(), { once: true }); }, 3200);
+}
+
 // 'YYYY-MM' -> 'Jul 2026'. Leaves '(none)' / blank as-is.
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function fmtMonth(ym) {
@@ -23,8 +35,8 @@ $("#logoutBtn")?.addEventListener("click", async () => {
 });
 
 // ---- Tab navigation -------------------------------------------------------
-$$('.tab').forEach((btn) => btn.addEventListener('click', () => {
-  $$('.tab').forEach((b) => b.classList.remove('is-active'));
+$$('.tab[data-view]').forEach((btn) => btn.addEventListener('click', () => {
+  $$('.tab[data-view]').forEach((b) => b.classList.remove('is-active'));
   $$('.view').forEach((v) => v.classList.remove('is-active'));
   btn.classList.add('is-active');
   $(`#view-${btn.dataset.view}`).classList.add('is-active');
@@ -34,16 +46,28 @@ $$('.tab').forEach((btn) => btn.addEventListener('click', () => {
   if (btn.dataset.view === 'duplicates') loadDup();
 }));
 
+// ---- Weekly Dump tab navigation -------------------------------------------
+$$('.tab[data-wd-view]').forEach((btn) => btn.addEventListener('click', () => {
+  $$('.tab[data-wd-view]').forEach((b) => b.classList.remove('is-active'));
+  $$('.wd-view').forEach((v) => v.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  $(`#wd-view-${btn.dataset.wdView}`).classList.add('is-active');
+  if (btn.dataset.wdView === 'report') loadWdReport();
+  if (btn.dataset.wdView === 'setup') loadWdSetup();
+  if (btn.dataset.wdView === 'datasets') loadWdDatasets();
+}));
+
 // ---- Report ---------------------------------------------------------------
 let annos = {};
 let currentOriginMonth = [];
-const CHART_COLORS = ['#4f8ef7', '#f59e42', '#6ee7b7', '#f87171', '#fbbf24', '#a78bfa'];
+const CHART_COLORS = ['#4f8ef7', '#f59e42', '#22c55e', '#f87171', '#fbbf24', '#a78bfa'];
 const annoOf = (scope, key) => (annos[scope] && annos[scope][key]) || { insights: '', challenges: '' };
 
 async function loadReport() {
   annos = await (await fetch('/api/annotations')).json().catch(() => ({}));
-  const data = await (await fetch('/api/report')).json();
-  const empty = data.empty;
+  const topN = $('#topNSelect')?.value || '15';
+  const data = await (await fetch(`/api/report?top_n=${topN}`)).json().catch(() => ({ empty: true }));
+  const empty = data.empty || !!data.error || !data.summary;
   $('#reportEmpty').classList.toggle('hidden', !empty);
   $('#reportBody').classList.toggle('hidden', !!empty);
   if (empty) { $('#reportBody').innerHTML = ''; $('#reportSub').textContent = ''; $('#reportTitle').textContent = 'Weekly Report'; return; }
@@ -69,8 +93,6 @@ function annoMerged(scope, rowspan) {
   return cell('insights', a.insights) + cell('challenges', a.challenges);
 }
 
-// Short headers (no "Primary" prefix — the Dup columns carry the distinction),
-// funnel ratios (Lead→FI, FI→App, App→Adm), duplicate counts.
 const RANK_COLS = [
   ['leads', 'Leads', fmtInt], ['fi', 'FI', fmtInt], ['apps', 'Apps', fmtInt], ['adm', 'Adms', fmtInt],
   ['lead_to_fi', 'Lead→FI', fmtPct], ['fi_to_app', 'FI→App', fmtPct], ['app_to_adm', 'App→Adm', fmtPct],
@@ -110,8 +132,7 @@ function originMonthTableHtml(rows, scope) {
   return tableHtml(['Lead Origin', 'Month'], MONTH_COLS, rows.map((r) => ({ lead: [esc(r.origin), fmtMonth(r.month)], r })), scope);
 }
 
-// Summary as a funnel (image-4 style). Total Leads = primary + duplicate with
-// each side's share; FI converts from Leads, App from FI, Adm from App.
+// Summary as a funnel.
 function summaryHtml(s) {
   const c = s.conversions, d = s.conversions_dup, dup = s.duplicates;
   const totLeads = s.leads + dup.leads;
@@ -183,7 +204,7 @@ function drawOriginMonthChart(rows, metric = 'leads') {
     out += `<text x="${x.toFixed(1)}" y="${(PAD.top + cH + 16).toFixed(1)}" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif">${parts[0] || ''}</text>`;
     out += `<text x="${x.toFixed(1)}" y="${(PAD.top + cH + 29).toFixed(1)}" text-anchor="middle" font-size="11" fill="#555" font-family="sans-serif">${parts[1] || ''}</text>`;
   });
-    const placed = [];
+  const placed = [];
   origins.forEach((origin, oi) => {
     const color = CHART_COLORS[oi % CHART_COLORS.length];
     const pts = months.map((m, i) => [xOf(i), yOf(Number(lookup[origin]?.[m]?.[metric] || 0))]);
@@ -218,9 +239,25 @@ function drawOriginMonthChart(rows, metric = 'leads') {
   svg.innerHTML = out;
 }
 
+function renderKpiGrid(s) {
+  const dup = s.duplicates || {};
+  const c = s.conversions || {};
+  const totLeads = (s.leads || 0) + (dup.leads || 0);
+  const achievement = Number(c.target_achieved || 0);
+  const cls = achievement >= 1 ? 'good' : achievement >= 0.5 ? 'warn' : 'accent';
+  const kpis = [
+    { label: 'Total Leads', value: fmtInt(totLeads), sub: `${fmtInt(s.leads||0)} primary · ${fmtInt(dup.leads||0)} dup`, cls: 'accent' },
+    { label: 'Form Initiated', value: fmtInt(s.fi||0), sub: `Lead→FI: ${fmtPct(c.lead_to_fi)}`, cls: '' },
+    { label: 'Applications', value: fmtInt(s.apps||0), sub: `FI→App: ${fmtPct(c.fi_to_app)}`, cls: '' },
+    { label: 'Admissions', value: fmtInt(s.adm||0), sub: `App→Adm: ${fmtPct(c.app_to_adm)}`, cls: 'good' },
+    { label: 'Target Achievement', value: fmtPct(c.target_achieved), sub: `Target: ${fmtInt(s.target||0)}`, cls },
+  ];
+  return `<div class="kpi-grid">${kpis.map((k) => `<div class="kpi ${k.cls}"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="sub">${k.sub}</div></div>`).join('')}</div>`;
+}
+
 function renderReport(d) {
   currentOriginMonth = d.origin_month || [];
-  $('#reportBody').innerHTML = [
+  $('#reportBody').innerHTML = renderKpiGrid(d.summary) + [
     drawer('Summary', summaryHtml(d.summary)),
     drawer('Top Lead Codes', rankTableHtml('Lead Code', d.top_lead_codes, 'lead_codes')),
     drawer('Top Courses', rankTableHtml('Course', d.top_courses, 'courses')),
@@ -266,17 +303,23 @@ document.addEventListener('blur', async (e) => {
     body: JSON.stringify({ scope, key, insights, challenges }) });
 }, true);
 
-$('#downloadPdf')?.addEventListener('click', () => {
-  // Print as-is: collapsed drawers are excluded from the PDF (see print CSS).
-  window.print();
+$('#exportBtn')?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  $('#exportMenu')?.classList.toggle('hidden');
 });
-$('#downloadXlsx')?.addEventListener('click', () => { window.location.href = '/api/report.xlsx'; });
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#exportDropdown')) $('#exportMenu')?.classList.add('hidden');
+});
+$('#downloadPdf')?.addEventListener('click', () => { window.print(); $('#exportMenu')?.classList.add('hidden'); });
+$('#downloadXlsx')?.addEventListener('click', () => { window.location.href = '/api/report.xlsx'; $('#exportMenu')?.classList.add('hidden'); });
+$('#topNSelect')?.addEventListener('change', () => loadReport());
 $('#expandAll')?.addEventListener('click', () => $$('#reportBody .card').forEach((c) => c.classList.remove('collapsed')));
 $('#collapseAll')?.addEventListener('click', () => $$('#reportBody .card').forEach((c) => c.classList.add('collapsed')));
 
 // ---- Datasets -------------------------------------------------------------
 async function loadDatasets() {
-  const { datasets } = await (await fetch('/api/datasets')).json();
+  const raw = await (await fetch('/api/datasets')).json().catch(() => ({}));
+  const datasets = raw.datasets || [];
   const tbody = $('#datasetsTable tbody');
   if (!datasets.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#999">No datasets yet</td></tr>'; setPill(null); return; }
   tbody.innerHTML = datasets.map((d) => `<tr>
@@ -302,7 +345,7 @@ function setPill(active) {
   $('#datasetPill').textContent = active ? `${active.name || active.source_filename} · ${fmtInt(active.row_count)} rows` : 'No dataset';
 }
 
-// Minimal RFC-4180-ish CSV parser (handles quotes, escaped quotes, CRLF).
+// Minimal RFC-4180-ish CSV parser.
 function parseCSV(text) {
   const rows = []; let row = []; let field = ''; let inQ = false;
   for (let i = 0; i < text.length; i++) {
@@ -319,7 +362,6 @@ function parseCSV(text) {
   return rows;
 }
 
-// Find the header row even when a CRM export prepends banner rows.
 function detectHeaderRow(matrix) {
   let best = 0, bestScore = -1;
   for (let i = 0; i < Math.min(matrix.length, 25); i++) {
@@ -332,8 +374,6 @@ function detectHeaderRow(matrix) {
   return best;
 }
 
-// Large CSVs: parse in the browser and POST rows in small batches so we never
-// hit the serverless per-request body limit. Works from any browser.
 async function chunkedCsvUpload(file, name, headerRowOverride) {
   const status = $('#uploadStatus');
   status.textContent = 'Reading file…'; status.className = 'status';
@@ -361,13 +401,11 @@ async function chunkedCsvUpload(file, name, headerRowOverride) {
   const PARALLEL = 5;
   let sent = 0;
 
-  // Split all rows into chunks
   const chunks = [];
   for (let i = 0; i < rows.length; i += CHUNK) {
     chunks.push(rows.slice(i, i + CHUNK));
   }
 
-  // Send PARALLEL chunks at a time
   for (let i = 0; i < chunks.length; i += PARALLEL) {
     const batch = chunks.slice(i, i + PARALLEL);
     await Promise.all(batch.map(async (chunk) => {
@@ -402,17 +440,70 @@ $('#uploadForm').addEventListener('submit', async (e) => {
   try {
     const isCsv = /\.(csv|tsv|txt)$/i.test(file.name);
     if (isCsv) {
-      // Browser-side chunked upload — no size limit, works on any laptop.
       const n = await chunkedCsvUpload(file, name, headerRow);
       status.textContent = `✓ Imported ${fmtInt(n)} rows`; status.className = 'status ok';
+      showToast(`✓ Imported ${fmtInt(n)} rows`, 'ok');
     } else {
-      // XLSX/other: single multipart request (fine for smaller files).
       status.textContent = 'Uploading & importing…'; status.className = 'status';
       const res = await fetch('/api/upload', { method: 'POST', body: new FormData(e.target) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       status.textContent = `✓ Imported ${fmtInt(data.rowCount)} rows (${data.columns} cols)`; status.className = 'status ok';
+      showToast(`✓ Imported ${fmtInt(data.rowCount)} rows`, 'ok');
     }
+    e.target.reset();
+    loadDatasets(); loadReport();
+  } catch (err) {
+    status.textContent = err.message; status.className = 'status err';
+    showToast(err.message, 'err');
+  } finally { btn.disabled = false; }
+});
+
+(function initDropZones() {
+  document.querySelectorAll('.drop-zone').forEach((zone) => {
+    const input = zone.querySelector('input[type="file"]');
+    if (!input) return;
+    zone.addEventListener('click', () => input.click());
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      if (e.dataTransfer.files.length) {
+        const dt = new DataTransfer();
+        dt.items.add(e.dataTransfer.files[0]);
+        input.files = dt.files;
+        const label = zone.querySelector('.drop-title');
+        if (label) label.textContent = e.dataTransfer.files[0].name;
+      }
+    });
+    input.addEventListener('change', () => {
+      if (input.files[0]) {
+        const label = zone.querySelector('.drop-title');
+        if (label) label.textContent = input.files[0].name;
+      }
+    });
+  });
+})();
+
+// ---- Campaign Analysis merge upload ---------------------------------------
+$('#mergeForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const status = $('#mergeStatus');
+  const btn = $('#mergeBtn');
+  const files = $('#mergeFiles').files;
+  const name = $('#mergeName').value;
+  if (!files.length) { status.textContent = 'Choose at least one file'; status.className = 'status err'; return; }
+  btn.disabled = true;
+  status.textContent = 'Uploading…'; status.className = 'status';
+  try {
+    const fd = new FormData();
+    for (const f of files) fd.append('files', f);
+    if (name) fd.append('name', name);
+    const res = await fetch('/api/upload/merge', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Merge failed');
+    status.textContent = `✓ Merged ${data.fileCount} files → ${fmtInt(data.rowCount)} rows (${data.columns} cols)`;
+    status.className = 'status ok';
     e.target.reset();
     loadDatasets(); loadReport();
   } catch (err) {
@@ -445,10 +536,11 @@ const CRM_PRESETS = {
     application_values: ['1'],
     admission_values: ['Submitted'],
     form_initiated_values: ['1', '2'],
+    duplicate_instance_values: [],
     top_n: 15,
   },
-    LSQ: {
-    crm_type: 'LSQ',  
+  LSQ: {
+    crm_type: 'LSQ',
     report_title: '',
     target: 100,
     deal_type: 'CPS',
@@ -498,37 +590,34 @@ const FIELDS = [
   ['lead_origin_column', 'Lead Origin column', 'text'],
   ['application_values', 'Application values (comma sep; blank = any non-empty)', 'list'],
   ['admission_values', 'Admission values (comma sep)', 'list'],
-    ['form_initiated_values', 'Form-Initiated values (comma sep)', 'list'],
+  ['form_initiated_values', 'Form-Initiated values (comma sep)', 'list'],
   ['duplicate_instance_values', 'Duplicate instance values (comma sep; blank = use uploaded dup files)', 'list'],
   ['top_n', 'Top N rows per table', 'number'],
 ];
 let defaultsCache = null;
+let previewColumns = [];
 
 async function loadSettings() {
-  const { settings, defaults } = await (await fetch('/api/settings')).json();
+  const [settingsData, previewData] = await Promise.all([
+    fetch('/api/settings').then((r) => r.json()).catch(() => ({ settings: {}, defaults: {} })),
+    fetch('/api/preview?limit=8').then((r) => r.json()).catch(() => ({ empty: true })),
+  ]);
+  const { settings, defaults } = settingsData;
   defaultsCache = defaults;
+  previewColumns = previewData.columns || [];
   renderSettings(settings);
-  loadPreview();
+  const crmSel = $('#crmPreset');
+  if (crmSel) crmSel.value = settings.crm_type || '';
+  const topNSel = $('#topNSelect');
+  if (topNSel && settings.top_n) topNSel.value = String(settings.top_n);
+  renderPreview(previewData);
 }
 
-async function loadPreview() {
-  const data = await (await fetch('/api/preview?limit=8')).json();
-  const chips = $('#previewChips');
+function renderPreview(data) {
   const table = $('#previewTable');
-  if (data.empty || !data.columns) {
-    chips.innerHTML = '<span class="muted">No dataset yet — upload one on the Data tab.</span>';
-    table.innerHTML = '';
-    return;
-  }
-  chips.innerHTML = data.columns.map((c) =>
-    `<button type="button" class="chip" data-col="${String(c).replace(/"/g, '&quot;')}">${c}</button>`).join('');
-  chips.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
-    const name = b.dataset.col;
-    navigator.clipboard?.writeText(name).catch(() => {});
-    b.classList.add('copied'); const t = b.textContent; b.textContent = 'copied ✓';
-    setTimeout(() => { b.classList.remove('copied'); b.textContent = t; }, 900);
-  }));
-  const head = `<thead><tr>${data.columns.map((c) => `<th>${c}</th>`).join('')}</tr></thead>`;
+  if (!table) return;
+  if (data.empty || !data.columns) { table.innerHTML = ''; return; }
+  const head = `<thead><tr>${data.columns.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>`;
   const body = `<tbody>${data.rows.map((r) =>
     `<tr>${data.columns.map((c) => `<td title="${String(r[c] ?? '').replace(/"/g, '&quot;')}">${r[c] ?? ''}</td>`).join('')}</tr>`).join('')}</tbody>`;
   table.innerHTML = head + body;
@@ -550,6 +639,17 @@ function renderSettings(s) {
         `<option value="${o}" ${o === current ? 'selected' : ''}>${o}</option>`).join('');
       return `<label class="field"><span>${label}</span>
         <select data-key="${key}" data-type="select">${opts}</select></label>`;
+    }
+    if (key.endsWith('_column') && previewColumns.length) {
+      const current = String(s[key] ?? '');
+      const allCols = current && !previewColumns.includes(current)
+        ? ['', ...previewColumns, current]
+        : ['', ...previewColumns];
+      const opts = allCols.map((col) =>
+        `<option value="${esc(col)}" ${col === current ? 'selected' : ''}>${esc(col) || '— none —'}</option>`
+      ).join('');
+      return `<label class="field"><span>${label}</span>
+        <select data-key="${key}" data-type="text">${opts}</select></label>`;
     }
     const val = type === 'list' ? (s[key] || []).join(', ') : (s[key] ?? '');
     return `<label class="field"><span>${label}</span>
@@ -574,7 +674,7 @@ $('#saveSettings').addEventListener('click', async () => {
   const res = await fetch('/api/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(collectSettings()) });
   status.textContent = res.ok ? '✓ Saved — click Recompute to apply' : 'Save failed';
   status.className = res.ok ? 'status ok' : 'status err';
-  if (res.ok) { loadReport(); loadClients(); }   // refresh heading + client selector label
+  if (res.ok) { loadReport(); loadClients(); }
 });
 
 $('#recomputeBtn').addEventListener('click', async () => {
@@ -588,6 +688,7 @@ $('#recomputeBtn').addEventListener('click', async () => {
 });
 
 $('#resetSettings').addEventListener('click', () => { if (defaultsCache) renderSettings(defaultsCache); });
+
 $('#applyCrmPreset')?.addEventListener('click', () => {
   const sel = $('#crmPreset').value;
   const preset = CRM_PRESETS[sel];
@@ -693,7 +794,6 @@ $('#mapRecompute')?.addEventListener('click', async () => {
   loadReport();
 });
 
-// Bulk: download sample, upload (add/update or replace), clear all.
 $('#mapSample')?.addEventListener('click', () => {
   window.location.href = `/api/mappings/${mapType}/sample`;
 });
@@ -783,17 +883,19 @@ $('#dupClear')?.addEventListener('click', async () => {
   loadDup(); loadReport();
 });
 
-// ---- Clients --------------------------------------------------------------
+// ---- Campaign Analysis Clients -------------------------------------------
 let clientSearchTimer = null;
 
 async function loadClients(q = '') {
-  const data = await (await fetch(`/api/clients${q ? `?q=${encodeURIComponent(q)}` : ''}`)).json();
+  const data = await (await fetch(`/api/clients${q ? `?q=${encodeURIComponent(q)}` : ''}`)).json().catch(() => ({ clients: [], active: null }));
+  if (!data.clients) { data.clients = []; }
   $('#clientName').textContent = (data.active && data.active.name) || '—';
+  const activeId = data.active?.id;
   const list = $('#clientList');
-  list.innerHTML = data.clients.length ? data.clients.map((c) => `<div class="client-item ${c.is_active ? 'active' : ''}" data-id="${c.id}">
+  list.innerHTML = data.clients.length ? data.clients.map((c) => `<div class="client-item ${c.id === activeId ? 'active' : ''}" data-id="${c.id}">
       <span>${esc(c.name)}</span>
       <span class="meta">${fmtInt(c.rows)} rows · ${c.dup_files}/4 dup</span>
-      ${c.is_active ? '' : `<span class="del" data-del="${c.id}" title="delete client">✕</span>`}
+      ${c.id === activeId ? '' : `<span class="del" data-del="${c.id}" title="delete client">✕</span>`}
     </div>`).join('') : '<div class="meta" style="padding:8px">No clients found</div>';
   list.querySelectorAll('.client-item').forEach((b) => b.addEventListener('click', async (e) => {
     if (e.target.closest('[data-del]')) return;
@@ -831,17 +933,875 @@ $('#newClientBtn')?.addEventListener('click', async () => {
   const name = $('#newClientName').value.trim();
   if (!name) return;
   const res = await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-  if (res.ok) {
-    const { id } = await res.json();
-    await fetch(`/api/clients/${id}/activate`, { method: 'POST' });
-    $('#newClientName').value = '';
-    $('#clientMenu').classList.add('hidden');
-    await switchClient();
-  }
+  if (res.ok) { $('#newClientName').value = ''; $('#clientMenu').classList.add('hidden'); await switchClient(); }
 });
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('.client-picker')) $('#clientMenu')?.classList.add('hidden');
+  if (!e.target.closest('#clientPicker')) $('#clientMenu')?.classList.add('hidden');
 });
+
+$('#wdClientBtn')?.addEventListener('click', () => {
+  const menu = $('#wdClientMenu');
+  menu.classList.toggle('hidden');
+  if (!menu.classList.contains('hidden')) { $('#wdClientSearch').value = ''; loadWdClients(); $('#wdClientSearch').focus(); }
+});
+$('#wdClientSearch')?.addEventListener('input', () => {
+  clearTimeout(wdClientSearchTimer);
+  wdClientSearchTimer = setTimeout(() => loadWdClients($('#wdClientSearch').value.trim()), 200);
+});
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#wdClientPicker')) $('#wdClientMenu')?.classList.add('hidden');
+});
+
+// ---- Sidebar --------------------------------------------------------------
+let lastCampaignView = 'report';
+
+function openSidebar() {
+  $('#sidebar').classList.add('open');
+  $('#sidebarOverlay').classList.remove('hidden');
+}
+function closeSidebar() {
+  $('#sidebar').classList.remove('open');
+  $('#sidebarOverlay').classList.add('hidden');
+}
+
+$('#sidebarToggle')?.addEventListener('click', openSidebar);
+$('#sidebarClose')?.addEventListener('click', closeSidebar);
+$('#sidebarOverlay')?.addEventListener('click', closeSidebar);
+
+$$('.sidebar-item').forEach((btn) => btn.addEventListener('click', () => {
+  $$('.sidebar-item').forEach((b) => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  closeSidebar();
+
+  if (btn.dataset.nav === 'weekly-dump') {
+    const activeTab = $('.tab[data-view].is-active');
+    if (activeTab) lastCampaignView = activeTab.dataset.view;
+    $$('.tab[data-view]').forEach((t) => t.classList.remove('is-active'));
+    $$('.view').forEach((v) => v.classList.remove('is-active'));
+    $('#campaignTabs')?.classList.add('hidden');
+    $('#clientPicker')?.classList.add('hidden');
+    $('#datasetPill')?.classList.add('hidden');
+    $('#wdClientPicker')?.classList.remove('hidden');
+    $('#view-weekly-dump').classList.add('is-active');
+    loadWeeklyDump();
+  } else {
+    $$('.view').forEach((v) => v.classList.remove('is-active'));
+    $('#campaignTabs')?.classList.remove('hidden');
+    $('#clientPicker')?.classList.remove('hidden');
+    $('#datasetPill')?.classList.remove('hidden');
+    $('#wdClientPicker')?.classList.add('hidden');
+    const target = $(`.tab[data-view="${lastCampaignView}"]`);
+    if (target) {
+      target.classList.add('is-active');
+      $(`#view-${lastCampaignView}`)?.classList.add('is-active');
+    } else {
+      $('.tab[data-view="report"]')?.classList.add('is-active');
+      $('#view-report')?.classList.add('is-active');
+    }
+  }
+}));
+
+$$('.sidebar-sub-item[data-nav-tab]').forEach((btn) => btn.addEventListener('click', () => {
+  closeSidebar();
+  const tabName = btn.dataset.navTab;
+  // switch to campaign section
+  $$('.sidebar-item').forEach((b) => b.classList.remove('is-active'));
+  $('.sidebar-item[data-nav="campaign"]')?.classList.add('is-active');
+  $$('.sidebar-sub-item').forEach((b) => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  // show campaign views
+  $$('.view').forEach((v) => v.classList.remove('is-active'));
+  $('#campaignTabs')?.classList.remove('hidden');
+  $('#clientPicker')?.classList.remove('hidden');
+  $('#datasetPill')?.classList.remove('hidden');
+  $('#wdClientPicker')?.classList.add('hidden');
+  $('#view-weekly-dump')?.classList.remove('is-active');
+  // activate specific tab
+  $$('.tab[data-view]').forEach((t) => t.classList.remove('is-active'));
+  $(`.tab[data-view="${tabName}"]`)?.classList.add('is-active');
+  $(`#view-${tabName}`)?.classList.add('is-active');
+  if (tabName === 'data') loadDatasets();
+  if (tabName === 'settings') loadSettings();
+  if (tabName === 'mappings') loadMap();
+  if (tabName === 'duplicates') loadDup();
+}));
+
+$$('.sidebar-sub-item[data-wd-sub]').forEach((btn) => btn.addEventListener('click', () => {
+  closeSidebar();
+  const sub = btn.dataset.wdSub;
+  $$('.sidebar-item').forEach((b) => b.classList.remove('is-active'));
+  $('.sidebar-item[data-nav="weekly-dump"]')?.classList.add('is-active');
+  $$('.sidebar-sub-item').forEach((b) => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  // show WD section
+  $$('.tab[data-view]').forEach((t) => t.classList.remove('is-active'));
+  $$('.view').forEach((v) => v.classList.remove('is-active'));
+  $('#campaignTabs')?.classList.add('hidden');
+  $('#clientPicker')?.classList.add('hidden');
+  $('#datasetPill')?.classList.add('hidden');
+  $('#wdClientPicker')?.classList.remove('hidden');
+  $('#view-weekly-dump')?.classList.add('is-active');
+  // activate WD sub-view
+  $$('.tab[data-wd-view]').forEach((t) => t.classList.remove('is-active'));
+  $$('.wd-view').forEach((v) => v.classList.remove('is-active'));
+  $(`.tab[data-wd-view="${sub}"]`)?.classList.add('is-active');
+  $(`#wd-view-${sub}`)?.classList.add('is-active');
+  loadWdClients();
+  if (sub === 'report') loadWdReport();
+  if (sub === 'setup') loadWdSetup();
+  if (sub === 'datasets') loadWdDatasets();
+}));
+
+// ---- Weekly Dump ----------------------------------------------------------
+const WD_FIELDS = [
+  ['fi_column',  'Form Initiated — column',           'text'],
+  ['fi_values',  'Form Initiated — values (comma-sep)', 'list'],
+  ['app_column', 'Application — column',              'text'],
+  ['app_values', 'Application — values (comma-sep)',  'list'],
+  ['adm_column', 'Admission — column',                'text'],
+  ['adm_values', 'Admission — values (comma-sep)',    'list'],
+];
+
+const WD_PRESETS = {
+  NPF: { crm_type: 'NPF' },
+  LSQ: {
+    crm_type: 'LSQ',
+    source_value:     'kollege',
+    medium_column:    'MEDIUM',
+    source_column:    'Source',
+    campaign_column:  'Campaign',
+    lead_type_column: 'LeadType',
+    verified_column:  'VerificationStatus',
+    verified_value:   'Verified',
+    primary_value:    'Primary',
+    secondary_value:  'Secondary',
+    tertiary_value:   'Tertiary',
+    fi_column:   'LeadStage',
+    fi_values:   ['AR- Application Received', 'Offered', 'Offer Accepted'],
+    app_column:  'LeadStage',
+    app_values:  ['AR- Application Received', 'Offered', 'Offer Accepted'],
+    adm_column:  'LeadStage',
+    adm_values:  [],
+  },
+  Client: {
+    crm_type: 'Client',
+    source_value:     'kollegeapply',
+    medium_column:    'Medium',
+    source_column:    'Source',
+    campaign_column:  'Campaign',
+    lead_type_column: 'LeadType',
+    verified_column:  '',
+    verified_value:   '',
+    primary_value:    'Primary',
+    secondary_value:  'Secondary',
+    tertiary_value:   'Tertiary',
+    fi_column:   '',
+    fi_values:   [],
+    app_column:  '',
+    app_values:  [],
+    adm_column:  '',
+    adm_values:  [],
+  },
+  ExtraEdge: {
+    crm_type: 'ExtraEdge',
+    source_value:     'kollegeapply',
+    medium_column:    'Medium',
+    source_column:    'Source',
+    campaign_column:  'Campaign Name',
+    lead_type_column: 'Lead Type',
+    verified_column:  '',
+    verified_value:   '',
+    primary_value:    'Primary',
+    secondary_value:  'Secondary',
+    tertiary_value:   'Tertiary',
+    fi_column:   'Stage',
+    fi_values:   [],
+    app_column:  'Stage',
+    app_values:  [],
+    adm_column:  'Stage',
+    adm_values:  [],
+  },
+};
+
+function renderWdSettingsForm(settings) {
+  const form = $('#wdSettingsForm');
+  if (!form) return;
+  const crm = settings.crm_type || '';
+  if (!crm) {
+    form.innerHTML = '<p class="muted" style="margin:12px 0 0">Select a CRM above to configure.</p>';
+    return;
+  }
+  if (crm === 'NPF') { form.innerHTML = ''; return; }
+  form.innerHTML = `<div class="settings-grid" style="margin-top:1rem">${WD_FIELDS.map(([key, label, type]) => {
+    const raw = settings[key] ?? '';
+    const val = type === 'list' ? (Array.isArray(raw) ? raw.join(', ') : raw) : raw;
+    return `<label class="field"><span>${label}</span>
+      <input class="wd-setting" data-key="${key}" data-type="${type}" type="text" value="${String(val).replace(/"/g, '&quot;')}" /></label>`;
+  }).join('')}</div>`;
+}
+
+function collectWdSettings() {
+  const crm = $('#wdCrmType')?.value || '';
+  const preset = WD_PRESETS[crm] || {};
+  const out = { ...preset, crm_type: crm, tracking_id: $('#wdTrackingId')?.value || '' };
+  $$('.wd-setting').forEach((inp) => {
+    const { key, type } = inp.dataset;
+    out[key] = type === 'list' ? inp.value.split(',').map((x) => x.trim()).filter(Boolean) : inp.value;
+  });
+  return out;
+}
+
+// ---- Weekly Dump Clients --------------------------------------------------
+let wdClientSearchTimer = null;
+
+async function loadWdClients(q = '') {
+  const url = `/api/wd/clients${q ? `?q=${encodeURIComponent(q)}` : ''}`;
+  const data = await fetch(url).then((r) => r.json()).catch(() => ({ clients: [], active: null }));
+  const activeId = data.active?.id;
+  const nameEl = $('#wdClientName');
+  if (nameEl) nameEl.textContent = (data.active && data.active.name) || '—';
+  const list = $('#wdClientList');
+  if (!list) return;
+  list.innerHTML = data.clients.length
+    ? data.clients.map((c) => `<div class="client-item ${c.id === activeId ? 'active' : ''}" data-id="${c.id}">
+        <span>${esc(c.name)}</span>
+        <span class="meta">${fmtInt(c.rows)} rows</span>
+        ${c.id === activeId ? '' : `<span class="del" data-del="${c.id}" title="delete">✕</span>`}
+      </div>`).join('')
+    : '<p class="muted" style="padding:8px 10px;margin:0">No clients yet. Create one below.</p>';
+  list.querySelectorAll('.client-item[data-id]').forEach((b) => b.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-del]')) return;
+    await fetch(`/api/wd/clients/${b.dataset.id}/activate`, { method: 'POST' });
+    $('#wdClientMenu')?.classList.add('hidden');
+    await switchWdClient();
+  }));
+  list.querySelectorAll('[data-del]').forEach((d) => d.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!confirm('Delete this WD client and all its data? This cannot be undone.')) return;
+    await fetch(`/api/wd/clients/${d.dataset.del}`, { method: 'DELETE' });
+    await loadWdClients(q);
+  }));
+}
+
+async function switchWdClient() {
+  await loadWdClients();
+  await loadWdSettings();
+  if ($('#wd-view-datasets').classList.contains('is-active')) await loadWdDatasets();
+  if ($('#wd-view-report').classList.contains('is-active')) await loadWdReport();
+}
+
+async function loadWdDatasets() {
+  const container = $('#wd-view-datasets .card') || $('#wd-view-datasets');
+  if (!container) return;
+  container.innerHTML = '<h2>Datasets</h2><p class="muted">Loading…</p>';
+  const { tree } = await (await fetch('/api/wd/datasets/tree')).json();
+  if (!tree || !tree.length) {
+    container.innerHTML = '<h2>Datasets</h2><p class="muted" style="padding:24px 0;text-align:center">No clients or datasets yet. Create a client in <strong>Setup</strong> and upload data.</p>';
+    return;
+  }
+
+  const html = tree.map((client) => {
+    if (!client.datasets.length) {
+      return `<div class="wd-folder">
+        <div class="wd-folder-head" data-toggle-folder>
+          <span class="wd-folder-arrow">▶</span>
+          <span class="wd-folder-icon">📁</span>
+          <span class="wd-folder-name">${esc(client.clientName)}</span>
+          <span class="muted" style="margin-left:8px;font-size:12px">(no datasets)</span>
+        </div>
+      </div>`;
+    }
+    const dsHtml = client.datasets.map((ds) => {
+      const sheetsHtml = ds.sheets.map((sh) =>
+        `<div class="wd-file" data-view-file data-ds-id="${ds.id}" data-sheet="${esc(sh.name)}">
+          <span class="wd-file-icon">📄</span>
+          <span class="wd-file-name">${esc(sh.name)}</span>
+          <span class="wd-file-rows">${fmtInt(sh.rowCount)} rows</span>
+        </div>`
+      ).join('');
+      return `<div class="wd-dataset">
+        <div class="wd-dataset-head" data-toggle-dataset>
+          <span class="wd-folder-arrow">▶</span>
+          <span class="wd-folder-icon">📦</span>
+          <span class="wd-dataset-name">${esc(ds.name)}</span>
+          <span class="muted" style="margin-left:8px;font-size:12px">${fmtInt(ds.rowCount)} rows · ${new Date(ds.uploadedAt).toLocaleDateString()}</span>
+          ${ds.isActive ? '<span class="wd-active-badge">active</span>' : `<button class="btn ghost sm" data-wd-activate="${ds.id}" style="margin-left:8px">use</button>`}
+          <button class="btn ghost sm" data-wd-del="${ds.id}" style="margin-left:4px">delete</button>
+        </div>
+        <div class="wd-dataset-files" style="display:none">${sheetsHtml}</div>
+      </div>`;
+    }).join('');
+    return `<div class="wd-folder">
+      <div class="wd-folder-head" data-toggle-folder>
+        <span class="wd-folder-arrow">▶</span>
+        <span class="wd-folder-icon">📁</span>
+        <span class="wd-folder-name">${esc(client.clientName)}</span>
+        <span class="muted" style="margin-left:8px;font-size:12px">${client.datasets.length} dataset${client.datasets.length > 1 ? 's' : ''}</span>
+      </div>
+      <div class="wd-folder-body" style="display:none">${dsHtml}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `<h2>Datasets</h2>${html}<div id="wdFileViewer" style="margin-top:20px"></div>`;
+
+  container.querySelectorAll('[data-toggle-folder]').forEach((h) => h.addEventListener('click', () => {
+    const folder = h.closest('.wd-folder');
+    const body = folder.querySelector('.wd-folder-body');
+    const arrow = h.querySelector('.wd-folder-arrow');
+    if (!body) return;
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    arrow.textContent = open ? '▶' : '▼';
+  }));
+
+  container.querySelectorAll('[data-toggle-dataset]').forEach((h) => h.addEventListener('click', (e) => {
+    if (e.target.closest('[data-wd-activate]') || e.target.closest('[data-wd-del]')) return;
+    const ds = h.closest('.wd-dataset');
+    const files = ds.querySelector('.wd-dataset-files');
+    const arrow = h.querySelector('.wd-folder-arrow');
+    if (!files) return;
+    const open = files.style.display !== 'none';
+    files.style.display = open ? 'none' : 'block';
+    arrow.textContent = open ? '▶' : '▼';
+  }));
+
+  container.querySelectorAll('[data-view-file]').forEach((f) => f.addEventListener('click', () => {
+    const dsId = f.dataset.dsId;
+    const sheet = f.dataset.sheet;
+    container.querySelectorAll('[data-view-file]').forEach((x) => x.classList.remove('is-active'));
+    f.classList.add('is-active');
+    viewWdFile(dsId, sheet);
+  }));
+
+  container.querySelectorAll('[data-wd-activate]').forEach((b) => b.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    await fetch(`/api/wd/datasets/${b.dataset.wdActivate}/activate`, { method: 'POST' });
+    loadWdDatasets();
+    loadWdReport();
+  }));
+
+  container.querySelectorAll('[data-wd-del]').forEach((b) => b.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!confirm('Delete this dataset and all its rows?')) return;
+    await fetch(`/api/wd/datasets/${b.dataset.wdDel}`, { method: 'DELETE' });
+    loadWdDatasets();
+    loadWdReport();
+  }));
+}
+
+async function viewWdFile(dsId, sheet) {
+  const viewer = $('#wdFileViewer');
+  if (!viewer) return;
+  viewer.innerHTML = '<p class="muted">Loading…</p>';
+  const url = `/api/wd/datasets/${dsId}/view?sheet=${encodeURIComponent(sheet)}`;
+  const { columns, rows } = await (await fetch(url)).json();
+  if (!rows.length) {
+    viewer.innerHTML = `<div class="card"><h3>${esc(sheet)}</h3><p class="muted">No rows.</p></div>`;
+    return;
+  }
+  const numericCols = new Set(columns.filter((col) =>
+    rows.every((r) => { const v = r[col]; return v === '' || v === null || v === undefined || !isNaN(Number(v)); }) &&
+    rows.some((r) => r[col] !== '' && r[col] !== null && r[col] !== undefined && !isNaN(Number(r[col])))
+  ));
+  const head = columns.map((c) => `<th>${esc(c)}</th>`).join('');
+  const body = rows.map((r) =>
+    `<tr>${columns.map((c) => {
+      const v = r[c] ?? '';
+      return `<td>${numericCols.has(c) ? fmtInt(v) : esc(String(v))}</td>`;
+    }).join('')}</tr>`
+  ).join('');
+  viewer.innerHTML = `<div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px">
+      <h3 style="margin:0">${esc(sheet)}</h3>
+      <span class="muted" style="font-size:13px">${fmtInt(rows.length)} rows</span>
+    </div>
+    <div class="tblwrap"><table class="grid"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+  </div>`;
+}
+
+async function loadWdSettings() {
+  const res = await fetch('/api/wd/settings').catch(() => null);
+  const json = res ? await res.json().catch(() => ({})) : {};
+  const settings = json.settings || {};
+  const sel = $('#wdCrmType');
+  if (sel) sel.value = settings.crm_type || '';
+  const tid = $('#wdTrackingId');
+  if (tid) tid.value = settings.tracking_id || '';
+  renderWdSettingsForm(settings);
+  renderWdUploadSection(settings.crm_type || '');
+}
+
+async function saveWdSettings() {
+  const s = $('#wdSettingsStatus');
+  s.textContent = 'Saving…'; s.className = 'status';
+  const settings = collectWdSettings();
+  const res = await fetch('/api/wd/settings', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(settings),
+  });
+  if (res.ok) {
+    s.textContent = '✓ Saved'; s.className = 'status ok';
+    setTimeout(() => { s.textContent = ''; s.className = 'status'; }, 2500);
+  } else {
+    const err = await res.json().catch(() => ({}));
+    s.textContent = err.error || 'Save failed'; s.className = 'status err';
+  }
+}
+
+// ---- Weekly Dump Report ---------------------------------------------------
+
+async function loadWdReportClients() {
+  const bar = $('#wdReportClientBar');
+  if (!bar) return;
+  const data = await fetch('/api/wd/clients').then((r) => r.json()).catch(() => ({ clients: [], active: null }));
+  if (!data.clients || data.clients.length < 2) { bar.innerHTML = ''; return; }
+  const activeId = data.active?.id;
+  bar.innerHTML = `<div class="card" style="padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span style="font-size:13px;font-weight:600;flex:0 0 auto;color:var(--muted)">Client:</span>
+    <div class="seg">${data.clients.map((c) =>
+      `<button class="seg-btn${c.id === activeId ? ' is-active' : ''}" data-wd-report-client="${c.id}">${esc(c.name)}</button>`
+    ).join('')}</div>
+  </div>`;
+  bar.querySelectorAll('[data-wd-report-client]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const id = Number(btn.dataset.wdReportClient);
+      if (id === activeId) return;
+      await fetch(`/api/wd/clients/${id}/activate`, { method: 'POST' });
+      await switchWdClient();
+    });
+  });
+}
+
+function copyWdTable() {
+  const table = $('#wd-report-body table');
+  if (!table) { showToast('No table to copy', 'warn'); return; }
+  const rows = [];
+  table.querySelectorAll('tbody tr').forEach((tr) => {
+    const cells = [...tr.querySelectorAll('td')].map((td) => td.textContent.trim());
+    rows.push(cells.join('\t'));
+  });
+  if (!rows.length) { showToast('No data to copy', 'warn'); return; }
+  navigator.clipboard.writeText(rows.join('\n'))
+    .then(() => showToast('✓ Table copied to clipboard', 'ok'))
+    .catch(() => showToast('Copy failed', 'err'));
+}
+
+async function loadWdReport() {
+  const container = $('#wd-report-body');
+  if (!container) return;
+  loadWdReportClients();
+  container.innerHTML = '<div class="card"><p class="muted">Loading…</p></div>';
+
+  const data = await fetch('/api/wd/report').then((r) => r.json()).catch(() => ({ empty: true, reason: 'error' }));
+
+  if (data.empty) {
+    const msg = data.reason === 'no_client'
+      ? 'Create a client in <strong>Setup</strong> to get started.'
+      : 'Upload data in <strong>Setup</strong> to build the report.';
+    container.innerHTML = `<div class="card"><p class="muted" style="padding:8px 0">${msg}</p></div>`;
+    return;
+  }
+
+  if (data.report) {
+    renderNpfReport(container, data);
+    return;
+  }
+
+  const { sheets, dataset } = data;
+  if (!sheets || !sheets.length) {
+    container.innerHTML = '<div class="card"><p class="muted">No data in this dataset.</p></div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="card">
+      <div class="report-toolbar" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)">
+        <div>
+          <h2 style="margin:0">Weekly Dump Report</h2>
+          <span class="muted" style="font-size:13px">${esc(dataset.name || '')} · ${new Date(dataset.uploaded_at).toLocaleDateString()}</span>
+        </div>
+        <button class="btn" id="wdCopyBtn" type="button">📋 Copy table</button>
+      </div>
+      <div class="map-bar" style="margin-bottom:16px">
+        <div class="seg" id="wdReportSheetTabs">
+          ${sheets.map((s, i) => `<button class="seg-btn${i === 0 ? ' is-active' : ''}" data-sheet-idx="${i}">${esc(s.name)}</button>`).join('')}
+        </div>
+      </div>
+      <div id="wdReportSheetContent"></div>
+    </div>`;
+
+  renderWdSheet(sheets[0]);
+
+  $$('#wdReportSheetTabs .seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      $$('#wdReportSheetTabs .seg-btn').forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      renderWdSheet(sheets[Number(btn.dataset.sheetIdx)]);
+    });
+  });
+
+  $('#wdCopyBtn')?.addEventListener('click', copyWdTable);
+}
+
+function renderWdKpis(totals) {
+  const kpis = [
+    { label: 'Primary Leads', value: fmtInt(totals.primary_leads || 0), cls: 'primary' },
+    { label: 'Secondary', value: fmtInt(totals.secondary_leads || 0), cls: 'secondary' },
+    { label: 'Tertiary', value: fmtInt(totals.tertiary_leads || 0), cls: '' },
+    { label: 'Form Initiated', value: fmtInt(totals.form_initiated || 0), cls: '' },
+    { label: 'Applications', value: fmtInt(totals.payment_approved || 0), cls: '' },
+    { label: 'Enrolments', value: fmtInt(totals.enrolments || 0), cls: 'good' },
+  ];
+  return `<div class="wd-kpi-grid">${kpis.map((k) => `<div class="wd-kpi ${k.cls}"><div class="label">${k.label}</div><div class="value">${k.value}</div></div>`).join('')}</div>`;
+}
+
+function renderNpfReport(container, data) {
+  const { report, dataset } = data;
+  const { rows, totals } = report;
+
+  if (!rows.length) {
+    container.innerHTML = '<div class="card"><p class="muted" style="padding:8px 0">No data. Upload category files in <strong>Setup</strong>.</p></div>';
+    return;
+  }
+
+  const numCols = [
+    ['primary_leads', 'Primary Leads'],
+    ['secondary_leads', 'Secondary Leads'],
+    ['tertiary_leads', 'Tertiary Leads'],
+    ['total_instances', 'Total Instances'],
+    ['verified_leads', 'Verified Leads'],
+    ['unverified_leads', 'Unverified Leads'],
+    ['form_initiated', 'Form Initiated'],
+    ['payment_approved', 'Payment Approved'],
+    ['enrolments', 'Enrolments'],
+    ['duplicate_leads', 'Duplicate Leads'],
+    ['duplicate_fi', 'Duplicate Form Initiated'],
+    ['duplicate_app', 'Duplicate Application'],
+    ['duplicate_adm', 'Duplicate Admission'],
+  ];
+
+  const totalCells = numCols.map(([k]) => `<td>${fmtInt(totals[k])}</td>`).join('');
+  const headerCells = numCols.map(([, h]) => `<th>${h}</th>`).join('');
+
+  const dataRows = rows.map((r) => `<tr>
+    <td class="txt">${esc(r.tracking_id)}</td>
+    <td class="txt">${esc(r.crm)}</td>
+    <td class="txt">${esc(r.client_name)}</td>
+    <td class="txt">${esc(r.source)}</td>
+    <td class="txt">${esc(r.medium)}</td>
+    <td class="txt">${esc(r.campaign_name)}</td>
+    ${numCols.map(([k]) => `<td>${fmtInt(r[k])}</td>`).join('')}
+  </tr>`).join('');
+
+  container.innerHTML = `
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div>
+          <h2 style="margin:0">Weekly Dump Report</h2>
+          <span class="muted" style="font-size:13px">${esc(dataset.name || '')} · ${new Date(dataset.uploaded_at).toLocaleDateString()}</span>
+        </div>
+        <button class="btn" id="wdNpfCopyBtn" type="button">📋 Copy table</button>
+      </div>
+      <div style="padding:16px 20px 4px">${renderWdKpis(totals)}</div>
+      <div class="tblwrap">
+        <table class="grid wd-npf-tbl">
+          <thead>
+            <tr class="wd-dump-row">
+              <td colspan="5"></td><td style="font-weight:700">Dump</td>${totalCells}
+            </tr>
+            <tr class="wd-total-row">
+              <td colspan="5"></td><td style="font-weight:700">Total</td>${totalCells}
+            </tr>
+            <tr class="wd-col-row">
+              <th>Tracking ID</th><th>CRM</th><th>Client Name</th><th>Source</th><th>Medium</th><th>Campaign Name</th>${headerCells}
+            </tr>
+          </thead>
+          <tbody>${dataRows}</tbody>
+        </table>
+      </div>
+    </div>`;
+  $('#wdNpfCopyBtn')?.addEventListener('click', copyWdTable);
+}
+
+function renderWdSheet(sheet) {
+  const el = $('#wdReportSheetContent');
+  if (!el) return;
+  const { columns, rows } = sheet;
+  if (!rows || !rows.length) {
+    el.innerHTML = '<p class="muted" style="padding:12px 0">No rows in this sheet.</p>';
+    return;
+  }
+
+  // Detect numeric columns (all non-empty values parse as numbers)
+  const numericCols = new Set(columns.filter((col) =>
+    rows.every((r) => { const v = r[col]; return v === '' || v === null || v === undefined || !isNaN(Number(v)); }) &&
+    rows.some((r) => r[col] !== '' && r[col] !== null && r[col] !== undefined && !isNaN(Number(r[col])))
+  ));
+
+  // Totals for numeric columns
+  const totals = {};
+  for (const col of columns) {
+    if (numericCols.has(col)) totals[col] = rows.reduce((s, r) => s + (Number(r[col]) || 0), 0);
+  }
+
+  const head = `<thead><tr>${columns.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead>`;
+  const body = rows.map((r) =>
+    `<tr>${columns.map((c) => {
+      const v = r[c] ?? '';
+      return `<td>${numericCols.has(c) ? fmtInt(v) : esc(String(v))}</td>`;
+    }).join('')}</tr>`
+  ).join('');
+  const totalRow = `<tr class="total">${columns.map((c, i) =>
+    numericCols.has(c) ? `<td>${fmtInt(totals[c])}</td>` : `<td>${i === 0 ? 'TOTAL' : ''}</td>`
+  ).join('')}</tr>`;
+
+  el.innerHTML = `<div class="tblwrap"><table class="grid">${head}<tbody>${body}${totalRow}</tbody></table></div>`;
+}
+
+function loadWeeklyDump() {
+  loadWdClients();
+  loadWdReport();
+}
+
+function loadWdSetup() {
+  loadWdSettings();
+}
+
+function renderWdUploadSection(crm) {
+  const body = $('#wdUploadBody');
+  if (!body) return;
+  if (!crm) {
+    body.innerHTML = '<p class="muted">Select a CRM above to see upload options.</p>';
+    return;
+  }
+  if (crm === 'NPF') {
+    body.innerHTML = `
+      <p class="muted" style="margin-bottom:12px">NPF requires 4 separate uploads — one for each category.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        ${['Leads', 'Form Initiated', 'Application', 'Admission'].map((label, i) => {
+          const cat = ['leads', 'fi', 'apps', 'adm'][i];
+          return `<div style="background:var(--bg-2);border:1px solid var(--line);border-radius:10px;padding:14px">
+            <h3 style="margin-bottom:8px">${label}</h3>
+            <form class="wd-cat-form" data-category="${cat}">
+              <input type="file" accept=".csv,.tsv,.xlsx,.xls" required style="margin-bottom:8px;display:block;font-size:13px" />
+              <div style="display:flex;align-items:center;gap:8px">
+                <button class="btn primary sm" type="submit">Upload</button>
+                <span class="status"></span>
+              </div>
+            </form>
+          </div>`;
+        }).join('')}
+      </div>`;
+    bindNpfUploadHandlers();
+  } else {
+    body.innerHTML = `
+      <p class="muted" style="margin-bottom:12px">Upload a single dump file (CSV or XLSX). XLSX files with multiple sheets are imported automatically.</p>
+      <form id="wdUploadForm">
+        <label class="field">
+          <span>File</span>
+          <input type="file" id="wdFileInput" accept=".csv,.tsv,.xlsx,.xls" required />
+        </label>
+        <label class="field">
+          <span>Name (optional)</span>
+          <input type="text" id="wdUploadName" placeholder="e.g. Week 30" />
+        </label>
+        <button type="submit" class="btn primary" id="wdUploadBtn">Upload</button>
+        <span id="wdUploadStatus" class="status"></span>
+      </form>
+      <div style="margin-top:1.5rem;border-top:1px solid var(--line);padding-top:1.5rem">
+        <h3 style="margin-bottom:8px">Merge multiple files</h3>
+        <p class="muted" style="margin-bottom:12px">Select 2+ CSV/XLSX files — all rows are combined into one dataset (columns are unioned).</p>
+        <form id="wdMergeForm">
+          <label class="field">
+            <span>Files</span>
+            <input type="file" id="wdMergeFiles" multiple accept=".csv,.tsv,.xlsx,.xls" required />
+          </label>
+          <div class="row" style="gap:8px;align-items:center">
+            <input type="text" id="wdMergeName" class="inp" placeholder="Name (optional)" style="flex:1;min-width:140px" />
+            <button class="btn primary" type="submit" id="wdMergeBtn">Merge &amp; upload</button>
+            <span id="wdMergeStatus" class="status"></span>
+          </div>
+        </form>
+      </div>`;
+    bindSingleUploadHandler();
+    bindWdMergeHandler();
+  }
+}
+
+function bindNpfUploadHandlers() {
+  $$('.wd-cat-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cat = form.dataset.category;
+      const file = form.querySelector('input[type="file"]').files[0];
+      const s = form.querySelector('.status');
+      if (!file) { s.textContent = 'Choose a file'; s.className = 'status err'; return; }
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      s.textContent = 'Uploading…'; s.className = 'status';
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('category', cat);
+        const res = await fetch('/api/wd/upload/category', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        s.textContent = `✓ ${fmtInt(data.rowCount)} rows`; s.className = 'status ok';
+        form.reset();
+      } catch (err) {
+        s.textContent = err.message; s.className = 'status err';
+      } finally { btn.disabled = false; }
+    });
+  });
+}
+
+function bindSingleUploadHandler() {
+  const form = $('#wdUploadForm');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const s = $('#wdUploadStatus');
+    const btn = $('#wdUploadBtn');
+    const file = $('#wdFileInput').files[0];
+    const name = $('#wdUploadName').value;
+    if (!file) { s.textContent = 'Choose a file'; s.className = 'status err'; return; }
+    btn.disabled = true;
+    try {
+      const isCsv = /\.(csv|tsv|txt)$/i.test(file.name);
+      if (isCsv) {
+        const n = await wdChunkedUpload(file, name);
+        s.textContent = `✓ Imported ${fmtInt(n)} rows`; s.className = 'status ok';
+      } else {
+        s.textContent = 'Uploading…'; s.className = 'status';
+        const fd = new FormData();
+        fd.append('file', file);
+        if (name) fd.append('name', name);
+        const res = await fetch('/api/wd/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed');
+        s.textContent = `✓ Imported ${fmtInt(data.rowCount)} rows${data.sheetCount > 1 ? ` (${data.sheetCount} sheets)` : ''}`; s.className = 'status ok';
+      }
+      form.reset();
+    } catch (err) {
+      s.textContent = err.message; s.className = 'status err';
+    } finally { btn.disabled = false; }
+  });
+}
+
+function bindWdMergeHandler() {
+  const form = $('#wdMergeForm');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const s = $('#wdMergeStatus');
+    const btn = $('#wdMergeBtn');
+    const files = $('#wdMergeFiles').files;
+    const name = $('#wdMergeName').value;
+    if (!files.length) { s.textContent = 'Choose files'; s.className = 'status err'; return; }
+    btn.disabled = true;
+    s.textContent = 'Uploading…'; s.className = 'status';
+    try {
+      const fd = new FormData();
+      for (const f of files) fd.append('files', f);
+      if (name) fd.append('name', name);
+      const res = await fetch('/api/wd/upload/merge', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Merge failed');
+      s.textContent = `✓ Merged ${data.fileCount} files → ${fmtInt(data.rowCount)} rows`;
+      s.className = 'status ok';
+      form.reset();
+    } catch (err) {
+      s.textContent = err.message; s.className = 'status err';
+    } finally { btn.disabled = false; }
+  });
+}
+
+async function wdChunkedUpload(file, name) {
+  const status = $('#wdUploadStatus');
+  status.textContent = 'Reading file…'; status.className = 'status';
+  const matrix = parseCSV(await file.text());
+  const hIdx = detectHeaderRow(matrix);
+  const headers = (matrix[hIdx] || []).map((h, i) => String(h ?? '').trim() || `Column ${i + 1}`);
+  const rows = [];
+  for (let r = hIdx + 1; r < matrix.length; r++) {
+    const line = matrix[r] || [];
+    if (line.every((c) => String(c ?? '').trim() === '')) continue;
+    const obj = {};
+    for (let c = 0; c < headers.length; c++) obj[headers[c]] = line[c] ?? '';
+    rows.push(obj);
+  }
+  if (!rows.length) throw new Error('No data rows found in file');
+
+  const started = await (await fetch('/api/wd/upload/start', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name || file.name, filename: file.name, headers }),
+  })).json();
+  const datasetId = started.datasetId;
+  if (!datasetId) throw new Error(started.error || 'Could not start upload');
+
+  const CHUNK = 5000;
+  const PARALLEL = 5;
+  let sent = 0;
+  const chunks = [];
+  for (let i = 0; i < rows.length; i += CHUNK) chunks.push(rows.slice(i, i + CHUNK));
+
+  for (let i = 0; i < chunks.length; i += PARALLEL) {
+    const batch = chunks.slice(i, i + PARALLEL);
+    await Promise.all(batch.map(async (chunk) => {
+      const res = await fetch('/api/wd/upload/rows', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ datasetId, rows: chunk }),
+      });
+      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Batch upload failed');
+      sent += chunk.length;
+      status.textContent = `Uploading ${fmtInt(Math.min(sent, rows.length))} / ${fmtInt(rows.length)} rows…`;
+    }));
+  }
+  await fetch('/api/wd/upload/finish', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ datasetId }),
+  });
+  return sent;
+}
+
+$('#wdNewClientBtn')?.addEventListener('click', async () => {
+  const name = $('#wdNewClientName').value.trim();
+  if (!name) return;
+  const res = await fetch('/api/wd/clients', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  if (res.ok) {
+    $('#wdNewClientName').value = '';
+    $('#wdClientMenu')?.classList.add('hidden');
+    await switchWdClient();
+    showToast('✓ Client created', 'ok');
+  } else {
+    const err = await res.json().catch(() => ({}));
+    const s = $('#wdClientStatus');
+    if (s) { s.textContent = err.error || 'Failed to create'; s.className = 'status err'; }
+    else showToast(err.error || 'Failed to create client', 'err');
+  }
+});
+
+$('#wdComputeBtn')?.addEventListener('click', () => {
+  $$('.tab[data-wd-view]').forEach((b) => b.classList.remove('is-active'));
+  $$('.wd-view').forEach((v) => v.classList.remove('is-active'));
+  $('.tab[data-wd-view="report"]')?.classList.add('is-active');
+  $('#wd-view-report')?.classList.add('is-active');
+  loadWdReport();
+});
+
+$('#wdCrmType')?.addEventListener('change', () => {
+  const crm = $('#wdCrmType').value;
+  const preset = WD_PRESETS[crm];
+  if (preset) renderWdSettingsForm(preset);
+  else renderWdSettingsForm({ crm_type: crm });
+  renderWdUploadSection(crm);
+});
+
+$('#wdSaveSettings')?.addEventListener('click', saveWdSettings);
 
 // ---- Boot -----------------------------------------------------------------
 updateMapPlaceholders();

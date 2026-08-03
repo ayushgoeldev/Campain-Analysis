@@ -8,12 +8,69 @@
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+
+  <!-- Sliding sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="/logo.svg" class="sidebar-logo" alt="" />
+      <span class="sidebar-brand-name">Lead Report</span>
+      <button class="sidebar-close-btn" id="sidebarClose" type="button" aria-label="Close">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">
+        <span class="sidebar-section-label">Campaign Analysis</span>
+        <button class="sidebar-item is-active" data-nav="campaign" type="button">
+          <span class="sidebar-icon">📊</span>
+          <span>Campaign Analysis</span>
+        </button>
+        <button class="sidebar-sub-item" data-nav-tab="report" type="button">
+          <span class="sidebar-sub-dot"></span><span>Report</span>
+        </button>
+        <button class="sidebar-sub-item" data-nav-tab="data" type="button">
+          <span class="sidebar-sub-dot"></span><span>Upload Data</span>
+        </button>
+        <button class="sidebar-sub-item" data-nav-tab="settings" type="button">
+          <span class="sidebar-sub-dot"></span><span>Setup</span>
+        </button>
+        <button class="sidebar-sub-item" data-nav-tab="mappings" type="button">
+          <span class="sidebar-sub-dot"></span><span>Mappings</span>
+        </button>
+        <button class="sidebar-sub-item" data-nav-tab="duplicates" type="button">
+          <span class="sidebar-sub-dot"></span><span>Duplicates</span>
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <span class="sidebar-section-label">Weekly Dump</span>
+        <button class="sidebar-item" data-nav="weekly-dump" type="button">
+          <span class="sidebar-icon">📋</span>
+          <span>Weekly Dump</span>
+        </button>
+        <button class="sidebar-sub-item" data-wd-sub="report" type="button">
+          <span class="sidebar-sub-dot"></span><span>Report</span>
+        </button>
+        <button class="sidebar-sub-item" data-wd-sub="setup" type="button">
+          <span class="sidebar-sub-dot"></span><span>Setup</span>
+        </button>
+        <button class="sidebar-sub-item" data-wd-sub="datasets" type="button">
+          <span class="sidebar-sub-dot"></span><span>Datasets</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>Kollegeapply Analytics</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay hidden" id="sidebarOverlay"></div>
+
   <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Open menu">☰</button>
     <div class="brand">
       <img class="brand-logo" src="/logo.svg" alt="Lead Report logo" />
       <h1>Lead&nbsp;Report</h1>
     </div>
-    <nav class="tabs">
+    <nav class="tabs" id="campaignTabs">
       <button class="tab is-active" data-view="report">Report</button>
       <button class="tab" data-view="data">Data</button>
       <button class="tab" data-view="settings">SETUP</button>
@@ -34,6 +91,21 @@
       </div>
     </div>
     <div class="dataset-pill" id="datasetPill">No dataset</div>
+    <!-- WD client picker — shown only in Weekly Dump mode -->
+    <div class="client-picker hidden" id="wdClientPicker">
+      <button class="client-btn" id="wdClientBtn" type="button">
+        <span class="ci-label">Client:</span> <span id="wdClientName">—</span> <span class="caret">▾</span>
+      </button>
+      <div class="client-menu hidden" id="wdClientMenu">
+        <input class="inp" id="wdClientSearch" placeholder="Search clients…" />
+        <div id="wdClientList" class="client-list"></div>
+        <div class="client-new">
+          <input class="inp" id="wdNewClientName" placeholder="New client name" />
+          <button class="btn primary sm" id="wdNewClientBtn" type="button">Create</button>
+          <span id="wdClientStatus" class="status" style="font-size:12px"></span>
+        </div>
+      </div>
+    </div>
     <button class="btn ghost sm logout-btn" id="logoutBtn" type="button">Logout</button>
   </header>
 
@@ -46,15 +118,32 @@
           <span id="reportSub" class="muted"></span>
         </div>
         <div class="report-actions">
+          <div style="display:flex;align-items:center;gap:6px">
+            <label for="topNSelect" style="font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap">Top N:</label>
+            <select id="topNSelect" class="inp" style="width:72px;padding:4px 6px;font-size:13px">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
           <button class="btn" id="expandAll" type="button">Expand all</button>
           <button class="btn" id="collapseAll" type="button">Collapse all</button>
-          <button class="btn" id="downloadXlsx" type="button">⬇ Download Excel</button>
-          <button class="btn primary" id="downloadPdf" type="button">⬇ Download PDF</button>
+          <div class="export-dropdown" id="exportDropdown">
+            <button class="btn" id="exportBtn" type="button">⬇ Export ▾</button>
+            <div class="export-menu hidden" id="exportMenu">
+              <button id="downloadXlsx">📊 Excel (.xlsx)</button>
+              <button id="downloadPdf">📄 PDF</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div id="reportEmpty" class="empty hidden">
-        <p>No data yet. Go to <strong>Data</strong> and upload an export to build the report.</p>
+      <div id="reportEmpty" class="empty-state hidden">
+        <div class="empty-icon">📊</div>
+        <div class="empty-title">No report yet</div>
+        <div class="empty-msg">Go to <strong>Upload Data</strong> to import a CSV or XLSX export, then the report will appear here automatically.</div>
       </div>
 
       <div id="reportBody"></div>
@@ -66,10 +155,12 @@
         <h2>Upload export</h2>
         <p class="muted">CSV or XLSX from meritto (or any CRM). Banner rows are auto-skipped; the header row is detected automatically.</p>
         <form id="uploadForm">
-          <label class="field">
-            <span>File</span>
+          <div class="drop-zone" id="uploadDropZone">
+            <span class="drop-icon">📁</span>
+            <span class="drop-title">Drop file here, or click to browse</span>
+            <span class="drop-sub">CSV, TSV, XLSX, XLS supported</span>
             <input type="file" name="file" id="fileInput" accept=".csv,.tsv,.xlsx,.xls" required />
-          </label>
+          </div>
           <div class="row">
             <label class="field">
               <span>Name (optional)</span>
@@ -82,6 +173,23 @@
           </div>
           <button type="submit" class="btn primary" id="uploadBtn">Upload &amp; build report</button>
           <span id="uploadStatus" class="status"></span>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Merge &amp; upload multiple files</h2>
+        <p class="muted">Select multiple CSV/XLSX files — they'll be merged column-by-column into one dataset. Useful when data is split across multiple exports.</p>
+        <form id="mergeForm">
+          <label class="field">
+            <span>Files (select 2 or more)</span>
+            <input type="file" id="mergeFiles" name="files" multiple accept=".csv,.tsv,.xlsx,.xls" required />
+          </label>
+          <label class="field">
+            <span>Name (optional)</span>
+            <input type="text" name="name" id="mergeName" placeholder="e.g. Week 30 merged" />
+          </label>
+          <button type="submit" class="btn primary" id="mergeBtn">Merge &amp; upload</button>
+          <span id="mergeStatus" class="status"></span>
         </form>
       </div>
 
@@ -160,7 +268,6 @@
     </section>
 
     <!-- SETUP VIEW -->
-       <!-- SETUP VIEW -->
     <section id="view-settings" class="view">
       <div class="card" id="previewCard">
         <button type="button" class="drawer-toggle" id="previewToggle" aria-expanded="true">
@@ -168,8 +275,7 @@
           <span class="chev" aria-hidden="true">▾</span>
         </button>
         <div class="drawer-body" id="previewBody">
-          <p class="muted">The actual headers &amp; data in your active dataset. Click a column name to copy it, then paste it into the matching field below.</p>
-          <div id="previewChips" class="chips"></div>
+          <p class="muted">The actual headers &amp; data in your active dataset. Column fields below show a dropdown of these columns.</p>
           <div class="tblwrap"><table class="grid" id="previewTable"></table></div>
         </div>
       </div>
@@ -195,8 +301,81 @@
         </div>
       </div>
     </section>
+
+    <!-- WEEKLY DUMP VIEW -->
+    <section id="view-weekly-dump" class="view">
+
+      <div class="report-toolbar" style="margin-bottom:20px">
+        <div>
+          <h2>Weekly Dump</h2>
+        </div>
+        <nav class="tabs">
+          <button class="tab is-active" data-wd-view="report">Report</button>
+          <button class="tab" data-wd-view="setup">Setup</button>
+          <button class="tab" data-wd-view="datasets">Datasets</button>
+        </nav>
+      </div>
+
+      <!-- Report sub-view -->
+      <div class="wd-view is-active" id="wd-view-report">
+        <div id="wdReportClientBar" style="margin-bottom:12px"></div>
+        <div id="wd-report-body">
+          <div class="card">
+            <p class="muted" style="padding:8px 0">Go to <strong>Setup</strong> to create a client, select a CRM, and upload data, then click <strong>Compute Report</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Setup sub-view (client + CRM + upload combined) -->
+      <div class="wd-view" id="wd-view-setup">
+        <div class="card">
+          <h2>Setup</h2>
+
+          <div style="margin-bottom:1.5rem">
+            <h3>CRM & Settings</h3>
+            <div class="row" style="margin-bottom:1rem;align-items:center">
+              <label style="font-weight:600;margin-right:.5rem;flex:0 0 auto">CRM:</label>
+              <select id="wdCrmType" class="inp" style="width:auto;min-width:180px">
+                <option value="">— choose CRM —</option>
+                <option value="NPF">NPF (Meritto)</option>
+                <option value="LSQ">LSQ (LeadSquared)</option>
+                <option value="Client">Client</option>
+                <option value="ExtraEdge">ExtraEdge</option>
+              </select>
+            </div>
+            <div class="row" style="margin-bottom:1rem;align-items:center">
+              <label style="font-weight:600;margin-right:.5rem;flex:0 0 auto">Tracking ID:</label>
+              <input class="inp" id="wdTrackingId" placeholder="Enter tracking ID" style="flex:1;min-width:180px" />
+            </div>
+            <div id="wdSettingsForm"></div>
+            <div class="row" style="margin-top:1rem">
+              <button class="btn primary" id="wdSaveSettings">Save</button>
+              <button class="btn primary" id="wdComputeBtn" type="button">Compute Report</button>
+              <span id="wdSettingsStatus" class="status"></span>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--line);padding-top:1.5rem">
+            <h3>Upload</h3>
+            <div id="wdUploadBody">
+              <p class="muted">Select a CRM above to see upload options.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datasets sub-view -->
+      <div class="wd-view" id="wd-view-datasets">
+        <div class="card">
+          <h2>Datasets</h2>
+          <p class="muted" style="padding:24px 0;text-align:center">Loading…</p>
+        </div>
+      </div>
+
+    </section>
   </main>
 
   <script src="/js/dashboard.js" type="module"></script>
+  <div id="toast-container" class="toast-container"></div>
 </body>
 </html>

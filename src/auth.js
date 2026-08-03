@@ -61,6 +61,29 @@ export async function setSessionClientId(req, clientId) {
   ).catch(() => {});
 }
 
+export async function getSessionWdClientId(req) {
+  const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  if (!sessionId) return null;
+  try {
+    const { rows } = await query(
+      `SELECT active_wd_client_id FROM sessions WHERE id = $1 AND created_at > now() - interval '12 hours'`,
+      [sessionId]
+    );
+    return rows[0]?.active_wd_client_id || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function setSessionWdClientId(req, clientId) {
+  const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  if (!sessionId) return;
+  await query(
+    `UPDATE sessions SET active_wd_client_id = $1 WHERE id = $2`,
+    [clientId, sessionId]
+  ).catch(() => {});
+}
+
 export async function isAuthed(req) {
   const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
   if (!sessionId) return false;

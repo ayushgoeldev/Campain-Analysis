@@ -34,8 +34,12 @@ export async function preview(datasetId, limit = 8) {
 }
 
 // Headline metrics: primary counts, duplicate counts, and conversion % for each.
-export async function summary(datasetId, req) {
-  const settings = await getSettings(req);
+// `settings`, `dup`, and `clientObj` are pre-fetched by fullReport to avoid redundant queries.
+export async function summary(datasetId, req, { settings, dup, clientObj } = {}) {
+  if (!settings) settings = await getSettings(req);
+  if (!dup) dup = await duplicateTotals(req, datasetId);
+  if (!clientObj) clientObj = await activeClient(req);
+
   const { rows } = await query(
     `SELECT SUM(prim_flag) AS leads, SUM(fi_flag*prim_flag) AS fi,
             SUM(app_flag*prim_flag) AS apps, SUM(adm_flag*prim_flag) AS adm
@@ -43,16 +47,14 @@ export async function summary(datasetId, req) {
   const r = rows[0] || {};
   const n = (x) => Number(x || 0);
   const leads = n(r.leads), fi = n(r.fi), apps = n(r.apps), adm = n(r.adm);
-  const dup = await duplicateTotals(req, datasetId);
   const target = Number(settings.target || 0);
   const dealType = String(settings.deal_type || 'CPA').toUpperCase() === 'CPS' ? 'CPS' : 'CPA';
   const targetMetric = dealType === 'CPS' ? 'Admissions' : 'Applications';
   const achieved = dealType === 'CPS' ? adm : apps;
-  const client = await activeClient(req);
-  const reportTitle = (settings.report_title && settings.report_title.trim()) || client.name || 'Weekly Report';
+  const reportTitle = (settings.report_title && settings.report_title.trim()) || clientObj.name || 'Weekly Report';
 
   return {
-    report_title: reportTitle, client_name: client.name,
+    report_title: reportTitle, client_name: clientObj.name,
     target, deal_type: dealType, target_metric: targetMetric, target_achieved_count: achieved,
     leads, fi, apps, adm,
     duplicates: dup,
@@ -207,13 +209,18 @@ export const topCourseByMonth = (id, dealType) => topPerMonth(id, 'kapp_course',
 
 // The whole report in one payload.
 export async function fullReport(datasetId, req) {
-  const settings = await getSettings(req);
-  const limit = Number(settings.top_n || 15);
+  // Fetch settings, dup maps, dup totals, and client in parallel — none depends on the others.
+  const [settings, dupMaps, dupTotals, clientObj] = await Promise.all([
+    getSettings(req),
+    duplicatesByMedium(req),
+    duplicateTotals(req, datasetId),
+    activeClient(req),
+  ]);
+  const limit = Number(req._topNOverride || settings.top_n || 15);
   const dealType = String(settings.deal_type || 'CPA').toUpperCase() === 'CPS' ? 'CPS' : 'CPA';
-  const [dupMaps, dupTotals] = [await duplicatesByMedium(req), await duplicateTotals(req, datasetId)];
   const [sum, leadCodes, courses, cities, stages, origin, originMonth, mediumMonth, courseMonth] =
     await Promise.all([
-      summary(datasetId, req),
+      summary(datasetId, req, { settings, dup: dupTotals, clientObj }),
       topBy(datasetId, 'lead_code', { limit, dupMaps, dupTotals, dealType }),
       topBy(datasetId, 'kapp_course', { limit, dealType }),
       topBy(datasetId, 'city', { limit, dealType }),
