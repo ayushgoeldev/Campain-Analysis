@@ -14,10 +14,8 @@ const config = process.env.DATABASE_URL
       database: process.env.PGDATABASE || 'leadreport',
     };
 
-// Managed Postgres (Render/Supabase/Neon) usually needs SSL.
-if (process.env.PGSSL === 'true' || /sslmode=require/.test(process.env.DATABASE_URL || '')) {
-  config.ssl = { rejectUnauthorized: false };
-}
+// Always disable SSL cert verification for managed Postgres (AWS RDS, Neon, Supabase etc.)
+config.ssl = { rejectUnauthorized: false };
 
 export const pool = new pg.Pool(config);
 
