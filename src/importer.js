@@ -253,16 +253,21 @@ export async function recomputeDataset(datasetId, req) {
   const dateOrder = resolveDateOrder(settings, dateSample.rows.map((r) => r.d));
   const ctx = buildContext(settings, courseRows, leadCodeRows, dateOrder);
 
-  const BATCH = 5000;
-  let lastId = 0;
-  let total = 0;
-  for (;;) {
-    const { rows } = await query(
-      `SELECT id, data FROM leads WHERE dataset_id = $1 AND id > $2 ORDER BY id LIMIT $3`,
-      [datasetId, lastId, BATCH]
-    );
-    if (!rows.length) break;
+  // Fetch all IDs first, then process in parallel batches
+  const BATCH = 20000;
+  const PARALLEL = 3;
 
+  const { rows: allRows } = await query(
+    `SELECT id, data FROM leads WHERE dataset_id = $1 ORDER BY id`,
+    [datasetId]
+  );
+
+  const chunks = [];
+  for (let i = 0; i < allRows.length; i += BATCH) {
+    chunks.push(allRows.slice(i, i + BATCH));
+  }
+
+  async function processChunk(rows) {
     const ids = [], rk = [], lc = [], kc = [], ci = [], og = [], mo = [], ls = [], fi = [], ap = [], ad = [], pr = [], du = [];
     for (const r of rows) {
       const d = deriveRow(r.data, ctx);
@@ -285,9 +290,14 @@ export async function recomputeDataset(datasetId, req) {
        WHERE l.id = d.id`,
       [ids, rk, lc, kc, ci, og, mo, ls, fi, ap, ad, pr, du]
     );
+    return rows.length;
+  }
 
-    lastId = rows[rows.length - 1].id;
-    total += rows.length;
+  let total = 0;
+  for (let i = 0; i < chunks.length; i += PARALLEL) {
+    const group = chunks.slice(i, i + PARALLEL);
+    const results = await Promise.all(group.map(processChunk));
+    total += results.reduce((a, b) => a + b, 0);
   }
   return { recomputed: total };
 }
