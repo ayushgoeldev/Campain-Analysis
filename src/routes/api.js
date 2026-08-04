@@ -9,7 +9,17 @@ import { invalidateMappings } from '../mappings.js';
 import { fullReport, resolveDataset, preview } from '../report.js';
 import { reportToXlsx } from '../reportxlsx.js';
 import { importDuplicates, duplicatePreview, duplicatesSummary, clearDuplicates } from '../duplicates.js';
-import { activeClientId, activeClient, activeWdClientId, activeWdClient, listClients, createClient, activateClient, activateWdClient, renameClient, deleteClient } from '../clients.js';
+import { activeClientId, activeClient, activeWdClientId, activeWdClient, listClients, createClient, activateClient, activateWdClient, renameClient, deleteClient, markClientConfigured } from '../clients.js';
+import { requirePermission, hasPermission } from '../permissions.js';
+
+async function logAudit(req, action, { clientName, datasetName, details } = {}) {
+  const username = req.sessionUsername || req.sessionRole || 'unknown';
+  await query(
+    `INSERT INTO audit_log (username, action, client_name, dataset_name, details, created_at)
+     VALUES ($1, $2, $3, $4, $5::jsonb, now())`,
+    [username, action, clientName || null, datasetName || null, details ? JSON.stringify(details) : null]
+  ).catch(() => {});
+}
 
 const router = Router();
 const maxMb = Number(process.env.MAX_UPLOAD_MB || 200);
@@ -36,10 +46,13 @@ router.get('/settings', wrap(async (req, res) => {
   res.json({ settings: await getSettings(req), defaults: await defaultSettings() });
 }));
 
-router.put('/settings', wrap(async (req, res) => {
+router.put('/settings', requirePermission('setup'), wrap(async (req, res) => {
   const saved = await saveSettings(req.body, req);
   const title = (req.body && req.body.report_title || '').trim();
-  if (title) await renameClient(await activeClientId(req), title);
+  const clientId = await activeClientId(req);
+  if (title) await renameClient(clientId, title);
+  // An explicit settings save is one of the ways a client becomes "configured".
+  await markClientConfigured(clientId);
   res.json({ settings: saved });
 }));
 
@@ -50,10 +63,12 @@ router.get('/clients', wrap(async (req, res) => {
   res.json({ clients, active });
 }));
 
-router.post('/clients', wrap(async (req, res) => {
+router.post('/clients', requirePermission('clients-create'), wrap(async (req, res) => {
   const name = (req.body.name || '').trim();
   if (!name) return res.status(400).json({ error: 'Client name is required' });
-  const id = await createClient(name, req, 'campaign');
+  const { crm_type, tracking_id } = req.body || {};
+  const id = await createClient(name, req, 'campaign', { crmType: crm_type, trackingId: tracking_id });
+  await logAudit(req, 'create_client', { clientName: name });
   res.json({ id });
 }));
 
@@ -62,15 +77,31 @@ router.post('/clients/:id/activate', wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
-router.put('/clients/:id', wrap(async (req, res) => {
+router.put('/clients/:id', requirePermission('clients-delete'), wrap(async (req, res) => {
   const name = (req.body.name || '').trim();
   if (!name) return res.status(400).json({ error: 'Client name is required' });
   await renameClient(req.params.id, name);
   res.json({ ok: true });
 }));
 
-router.delete('/clients/:id', wrap(async (req, res) => {
+// Update CRM / Tracking ID for an already-configured client (Client
+// Configuration card "Save" without renaming). Saving here also (re-)marks
+// the client as configured.
+router.put('/clients/:id/config', requirePermission('clients-create'), wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  const { crm_type, tracking_id } = req.body || {};
+  await query(
+    `UPDATE clients SET tracking_id = $1, crm_type = $2 WHERE id = $3`,
+    [tracking_id || null, crm_type || null, id]);
+  await markClientConfigured(id);
+  res.json({ ok: true });
+}));
+
+router.delete('/clients/:id', requirePermission('clients-delete'), wrap(async (req, res) => {
+  const meta = await query('SELECT name FROM clients WHERE id = $1', [Number(req.params.id)]);
+  const clientName = meta.rows[0]?.name || '';
   await deleteClient(req.params.id);
+  await logAudit(req, 'delete_client', { clientName });
   res.json({ ok: true });
 }));
 
@@ -81,10 +112,12 @@ router.get('/wd/clients', wrap(async (req, res) => {
   res.json({ clients, active });
 }));
 
-router.post('/wd/clients', wrap(async (req, res) => {
+router.post('/wd/clients', requirePermission('clients-create'), wrap(async (req, res) => {
   const name = (req.body.name || '').trim();
   if (!name) return res.status(400).json({ error: 'Client name is required' });
-  const id = await createClient(name, req, 'weekly_dump');
+  const { crm_type, tracking_id } = req.body || {};
+  const id = await createClient(name, req, 'weekly_dump', { crmType: crm_type, trackingId: tracking_id });
+  await logAudit(req, 'create_wd_client', { clientName: name });
   res.json({ id });
 }));
 
@@ -93,8 +126,11 @@ router.post('/wd/clients/:id/activate', wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
-router.delete('/wd/clients/:id', wrap(async (req, res) => {
+router.delete('/wd/clients/:id', requirePermission('clients-delete'), wrap(async (req, res) => {
+  const meta = await query('SELECT name FROM clients WHERE id = $1', [Number(req.params.id)]);
+  const clientName = meta.rows[0]?.name || '';
   await deleteClient(req.params.id);
+  await logAudit(req, 'delete_wd_client', { clientName });
   res.json({ ok: true });
 }));
 
@@ -102,9 +138,40 @@ router.delete('/wd/clients/:id', wrap(async (req, res) => {
 router.get('/datasets', wrap(async (req, res) => {
   const cid = await activeClientId(req);
   const { rows } = await query(
-    `SELECT id, name, source_filename, row_count, uploaded_at, is_active
-     FROM datasets WHERE client_id = $1 AND source_type = 'campaign' ORDER BY uploaded_at DESC`, [cid]);
+    `SELECT id, name, source_filename, row_count, uploaded_at, is_active,
+            COALESCE(status, 'active') AS status, uploaded_by
+     FROM datasets WHERE client_id = $1 AND source_type = 'campaign'
+     AND COALESCE(status, 'active') != 'deleted'
+     ORDER BY uploaded_at DESC`, [cid]);
   res.json({ datasets: rows });
+}));
+
+// Dataset management (admin only — all datasets, all clients)
+router.get('/datasets/manage', requirePermission('datasets-manage'), wrap(async (req, res) => {
+  const q = (req.query.q || '').trim();
+  const clientFilter = req.query.client_id ? Number(req.query.client_id) : null;
+  const statusFilter = req.query.status || '';
+  const params = [];
+  const conditions = [];
+  if (q) {
+    params.push(`%${q}%`);
+    const p = params.length;
+    // Search by Dataset Name, Client Name, or CRM (per spec) — previously
+    // only matched dataset/file name, so searching by client or CRM silently
+    // returned nothing.
+    conditions.push(`(d.name ILIKE $${p} OR d.source_filename ILIKE $${p} OR c.name ILIKE $${p} OR c.crm_type ILIKE $${p})`);
+  }
+  if (clientFilter) { params.push(clientFilter); conditions.push(`d.client_id = $${params.length}`); }
+  if (statusFilter) { params.push(statusFilter); conditions.push(`COALESCE(d.status,'active') = $${params.length}`); }
+  const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+  const { rows } = await query(
+    `SELECT d.id, d.name, d.source_filename, d.row_count, d.uploaded_at, d.is_active,
+            COALESCE(d.status,'active') AS status, d.deleted_at, d.uploaded_by,
+            d.source_type, c.id AS client_id, c.name AS client_name, c.crm_type
+     FROM datasets d LEFT JOIN clients c ON c.id = d.client_id
+     ${where} ORDER BY d.uploaded_at DESC`, params);
+  const { rows: clients } = await query(`SELECT id, name FROM clients ORDER BY lower(name)`);
+  res.json({ datasets: rows, clients });
 }));
 
 router.post('/datasets/:id/activate', wrap(async (req, res) => {
@@ -114,13 +181,66 @@ router.post('/datasets/:id/activate', wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
-router.delete('/datasets/:id', wrap(async (req, res) => {
-  await query(`DELETE FROM datasets WHERE id = $1`, [Number(req.params.id)]);
+router.delete('/datasets/:id', requirePermission('datasets-delete'), wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  const meta = await query('SELECT d.name, c.name AS client_name FROM datasets d LEFT JOIN clients c ON c.id=d.client_id WHERE d.id=$1', [id]);
+  const { name: dsName, client_name: clientName } = meta.rows[0] || {};
+  // Soft delete
+  await query(`UPDATE datasets SET status='deleted', deleted_at=now() WHERE id=$1`, [id]);
+  await logAudit(req, 'delete_dataset', { clientName, datasetName: dsName });
   res.json({ ok: true });
 }));
 
+router.post('/datasets/:id/restore', requirePermission('datasets-manage'), wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  await query(`UPDATE datasets SET status='active', deleted_at=NULL WHERE id=$1`, [id]);
+  const meta = await query('SELECT d.name, c.name AS client_name FROM datasets d LEFT JOIN clients c ON c.id=d.client_id WHERE d.id=$1', [id]);
+  const { name: dsName, client_name: clientName } = meta.rows[0] || {};
+  await logAudit(req, 'restore_dataset', { clientName, datasetName: dsName });
+  res.json({ ok: true });
+}));
+
+router.patch('/datasets/:id/archive', requirePermission('datasets-manage'), wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  const { archive } = req.body || {};
+  const status = archive ? 'archived' : 'active';
+  await query(`UPDATE datasets SET status=$1 WHERE id=$2`, [status, id]);
+  res.json({ ok: true });
+}));
+
+router.delete('/datasets/:id/permanent', requirePermission('datasets-manage'), wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  const meta = await query('SELECT d.name, c.name AS client_name FROM datasets d LEFT JOIN clients c ON c.id=d.client_id WHERE d.id=$1', [id]);
+  const { name: dsName, client_name: clientName } = meta.rows[0] || {};
+  await query(`DELETE FROM datasets WHERE id=$1`, [id]);
+  await logAudit(req, 'permanent_delete_dataset', { clientName, datasetName: dsName });
+  res.json({ ok: true });
+}));
+
+router.post('/datasets/bulk', requirePermission('datasets-manage'), wrap(async (req, res) => {
+  const { action, ids } = req.body || {};
+  if (!action || !Array.isArray(ids) || !ids.length) return res.status(400).json({ error: 'action and ids[] required' });
+  const safeIds = ids.map(Number).filter((n) => n > 0);
+  if (!safeIds.length) return res.status(400).json({ error: 'No valid IDs' });
+  const placeholders = safeIds.map((_, i) => `$${i + 1}`).join(',');
+  if (action === 'archive') {
+    await query(`UPDATE datasets SET status='archived' WHERE id IN (${placeholders})`, safeIds);
+  } else if (action === 'delete') {
+    await query(`UPDATE datasets SET status='deleted', deleted_at=now() WHERE id IN (${placeholders})`, safeIds);
+    await logAudit(req, 'bulk_delete_datasets', { details: { count: safeIds.length } });
+  } else if (action === 'restore') {
+    await query(`UPDATE datasets SET status='active', deleted_at=NULL WHERE id IN (${placeholders})`, safeIds);
+  } else if (action === 'permanent') {
+    await query(`DELETE FROM datasets WHERE id IN (${placeholders})`, safeIds);
+    await logAudit(req, 'bulk_permanent_delete_datasets', { details: { count: safeIds.length } });
+  } else {
+    return res.status(400).json({ error: 'Unknown action' });
+  }
+  res.json({ ok: true, affected: safeIds.length });
+}));
+
 // --- Upload merge (campaign analysis, multiple files → one dataset) ---------
-router.post('/upload/merge', upload.array('files', 20), wrap(async (req, res) => {
+router.post('/upload/merge', requirePermission('data'), upload.array('files', 20), wrap(async (req, res) => {
   if (!req.files?.length) return res.status(400).json({ error: 'No files uploaded' });
   const tmpPaths = req.files.map((f) => f.path);
   try {
@@ -139,6 +259,11 @@ router.post('/upload/merge', upload.array('files', 20), wrap(async (req, res) =>
     }));
     const name = (req.body.name || '').trim() || `Merged (${fileData.length} files)`;
     const result = await importRows(mergedRows, { name, filename: name, headers: mergedHeaders }, req);
+    if (result.datasetId && req.sessionUsername) {
+      await query(`UPDATE datasets SET uploaded_by=$1 WHERE id=$2`, [req.sessionUsername, result.datasetId]).catch(() => {});
+    }
+    // A dataset upload is one of the ways a client becomes "configured".
+    await markClientConfigured(await activeClientId(req));
     res.json({ ...result, headers: mergedHeaders, columns: mergedHeaders.length, fileCount: fileData.length });
   } finally {
     tmpPaths.forEach((p) => fs.unlink(p, () => {}));
@@ -146,7 +271,7 @@ router.post('/upload/merge', upload.array('files', 20), wrap(async (req, res) =>
 }));
 
 // --- Upload / import -------------------------------------------------------
-router.post('/upload', upload.single('file'), wrap(async (req, res) => {
+router.post('/upload', requirePermission('data'), upload.single('file'), wrap(async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded (field name: file)' });
   try {
     const headerRow = req.body.headerRow != null && req.body.headerRow !== ''
@@ -158,33 +283,43 @@ router.post('/upload', upload.single('file'), wrap(async (req, res) => {
       filename: req.file.originalname,
       headers,
     }, req);
+    if (result.datasetId && req.sessionUsername) {
+      await query(`UPDATE datasets SET uploaded_by=$1 WHERE id=$2`, [req.sessionUsername, result.datasetId]).catch(() => {});
+    }
+    // A dataset upload is one of the ways a client becomes "configured".
+    await markClientConfigured(await activeClientId(req));
     res.json({ ...result, headers, columns: headers.length });
   } finally {
     fs.unlink(req.file.path, () => {});
   }
 }));
 
-router.post('/upload/start', wrap(async (req, res) => {
+router.post('/upload/start', requirePermission('data'), wrap(async (req, res) => {
   const { name, filename, headers } = req.body || {};
   const datasetId = await startDataset({ name, filename, headers }, req);
+  if (req.sessionUsername) {
+    await query(`UPDATE datasets SET uploaded_by=$1 WHERE id=$2`, [req.sessionUsername, datasetId]).catch(() => {});
+  }
   res.json({ datasetId });
 }));
 
-router.post('/upload/rows', wrap(async (req, res) => {
+router.post('/upload/rows', requirePermission('data'), wrap(async (req, res) => {
   const { datasetId, rows } = req.body || {};
   if (!datasetId || !Array.isArray(rows)) return res.status(400).json({ error: 'datasetId and rows[] required' });
   const inserted = await appendRows(Number(datasetId), rows, req);
   res.json({ inserted });
 }));
 
-router.post('/upload/finish', wrap(async (req, res) => {
+router.post('/upload/finish', requirePermission('data'), wrap(async (req, res) => {
   const { datasetId } = req.body || {};
   if (!datasetId) return res.status(400).json({ error: 'datasetId required' });
   const rowCount = await finishDataset(Number(datasetId));
+  // A dataset upload is one of the ways a client becomes "configured".
+  await markClientConfigured(await activeClientId(req));
   res.json({ ok: true, rowCount });
 }));
 
-router.post('/recompute', wrap(async (req, res) => {
+router.post('/recompute', requirePermission('recompute'), wrap(async (req, res) => {
   const datasetId = await resolveDataset(req.body?.datasetId, req);
   if (!datasetId) return res.status(400).json({ error: 'No dataset to recompute' });
   res.json(await recomputeDataset(datasetId, req));
@@ -249,7 +384,7 @@ router.get('/duplicates/:category', wrap(async (req, res) => {
   res.json(await duplicatePreview(req.params.category, { q, limit: req.query.limit }, req));
 }));
 
-router.post('/duplicates/:category', upload.single('file'), wrap(async (req, res) => {
+router.post('/duplicates/:category', requirePermission('duplicates'), upload.single('file'), wrap(async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded (field name: file)' });
   try {
     const { headers, rows } = parseFile(req.file.path);
@@ -260,7 +395,7 @@ router.post('/duplicates/:category', upload.single('file'), wrap(async (req, res
   }
 }));
 
-router.delete('/duplicates/:category', wrap(async (req, res) => {
+router.delete('/duplicates/:category', requirePermission('duplicates'), wrap(async (req, res) => {
   await clearDuplicates(req.params.category, req);
   res.json({ ok: true });
 }));
@@ -290,7 +425,7 @@ router.get('/mappings', wrap(async (req, res) => {
   res.json({ rows: rows.rows, total: total.rows[0].n, limit, offset });
 }));
 
-router.post('/mappings', wrap(async (req, res) => {
+router.post('/mappings', requirePermission('mappings'), wrap(async (req, res) => {
   const cfg = mapCfg(req.body.type);
   const key = (req.body.key || '').trim();
   const value = (req.body.value || '').trim();
@@ -303,7 +438,7 @@ router.post('/mappings', wrap(async (req, res) => {
   res.json({ id: r.rows[0].id });
 }));
 
-router.put('/mappings/:id', wrap(async (req, res) => {
+router.put('/mappings/:id', requirePermission('mappings'), wrap(async (req, res) => {
   const cfg = mapCfg(req.body.type);
   const key = (req.body.key || '').trim();
   const value = (req.body.value || '').trim();
@@ -319,14 +454,14 @@ router.put('/mappings/:id', wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
-router.delete('/mappings/:id', wrap(async (req, res) => {
+router.delete('/mappings/:id', requirePermission('mappings'), wrap(async (req, res) => {
   const cfg = mapCfg(req.query.type);
   await query(`DELETE FROM ${cfg.table} WHERE id = $1`, [Number(req.params.id)]);
   invalidateMappings();
   res.json({ ok: true });
 }));
 
-router.delete('/mappings/:type/all', wrap(async (req, res) => {
+router.delete('/mappings/:type/all', requirePermission('mappings'), wrap(async (req, res) => {
   const cfg = mapCfg(req.params.type);
   await query(`DELETE FROM ${cfg.table}`);
   invalidateMappings();
@@ -344,7 +479,7 @@ router.get('/mappings/:type/sample', wrap(async (req, res) => {
   res.send(csv);
 }));
 
-router.post('/mappings/:type/upload', upload.single('file'), wrap(async (req, res) => {
+router.post('/mappings/:type/upload', requirePermission('mappings'), upload.single('file'), wrap(async (req, res) => {
   const cfg = mapCfg(req.params.type);
   if (!req.file) return res.status(400).json({ error: 'No file uploaded (field name: file)' });
   try {
@@ -404,7 +539,7 @@ router.post('/wd/datasets/:id/activate', wrap(async (req, res) => {
   res.json({ ok: true });
 }));
 
-router.delete('/wd/datasets/:id', wrap(async (req, res) => {
+router.delete('/wd/datasets/:id', requirePermission('wd-datasets'), wrap(async (req, res) => {
   await query(`DELETE FROM datasets WHERE id = $1 AND source_type = 'weekly_dump'`, [Number(req.params.id)]);
   res.json({ ok: true });
 }));
@@ -682,12 +817,12 @@ router.get('/wd/report', wrap(async (req, res) => {
   const cid = await activeWdClientId(req);
   if (!cid) return res.json({ empty: true, reason: 'no_client' });
 
-  const clientInfo = await query('SELECT name FROM clients WHERE id = $1', [cid]);
+  const clientInfo = await query('SELECT name, tracking_id, crm_type FROM clients WHERE id = $1', [cid]);
   const clientName = clientInfo.rows[0]?.name || '';
   const settingsRes = await query('SELECT config FROM wd_client_settings WHERE client_id = $1', [cid]);
   const wdSettings = settingsRes.rows[0]?.config || {};
-  const crmType = wdSettings.crm_type || '';
-  const trackingId = wdSettings.tracking_id || '';
+  const crmType = clientInfo.rows[0]?.crm_type || wdSettings.crm_type || '';
+  const trackingId = clientInfo.rows[0]?.tracking_id || wdSettings.tracking_id || '';
 
   const dsMeta = await query(
     `SELECT id, name, uploaded_at FROM datasets
@@ -702,12 +837,12 @@ router.get('/wd/report', wrap(async (req, res) => {
 
   if (crmType === 'NPF') {
     const report = buildNpfReport(allRows, { trackingId, crmType, clientName });
-    return res.json({ empty: false, crmType: 'NPF', dataset: { name: ds.name, uploaded_at: ds.uploaded_at }, report });
+    return res.json({ empty: false, crmType: 'NPF', customCrmName: wdSettings.custom_crm_name || '', dataset: { name: ds.name, uploaded_at: ds.uploaded_at }, report });
   }
 
   if (wdSettings.fi_column || wdSettings.medium_column) {
     const report = buildGenericReport(allRows, { trackingId, crmType, clientName, settings: wdSettings });
-    return res.json({ empty: false, crmType, dataset: { name: ds.name, uploaded_at: ds.uploaded_at }, report });
+    return res.json({ empty: false, crmType, customCrmName: wdSettings.custom_crm_name || '', dataset: { name: ds.name, uploaded_at: ds.uploaded_at }, report });
   }
 
   const sheetMap = {};
@@ -723,11 +858,11 @@ router.get('/wd/report', wrap(async (req, res) => {
     const columns = sheetRows.length ? Object.keys(sheetRows[0]) : [];
     return { name, columns, rows: sheetRows };
   });
-  res.json({ empty: false, crmType, dataset: { name: ds.name, uploaded_at: ds.uploaded_at }, sheets });
+  res.json({ empty: false, crmType, customCrmName: wdSettings.custom_crm_name || '', dataset: { name: ds.name, uploaded_at: ds.uploaded_at }, sheets });
 }));
 
 // --- Weekly Dump upload: per-category (NPF 4-file mode) --------------------
-router.post('/wd/upload/category', upload.single('file'), wrap(async (req, res) => {
+router.post('/wd/upload/category', requirePermission('wd-setup'), upload.single('file'), wrap(async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   const cid = await activeWdClientId(req);
   if (!cid) return res.status(400).json({ error: 'No active Weekly Dump client' });
@@ -758,6 +893,11 @@ router.post('/wd/upload/category', upload.single('file'), wrap(async (req, res) 
     await appendWdRows(datasetId, taggedRows);
     const cnt = await query('SELECT count(*)::int AS n FROM leads WHERE dataset_id = $1', [datasetId]);
     await query('UPDATE datasets SET row_count = $1 WHERE id = $2', [cnt.rows[0].n, datasetId]);
+    if (req.sessionUsername) {
+      await query(`UPDATE datasets SET uploaded_by=$1 WHERE id=$2`, [req.sessionUsername, datasetId]).catch(() => {});
+    }
+    // A dataset upload is one of the ways a client becomes "configured".
+    await markClientConfigured(cid);
 
     res.json({ datasetId, rowCount: taggedRows.length, totalRows: cnt.rows[0].n });
   } finally {
@@ -766,7 +906,7 @@ router.post('/wd/upload/category', upload.single('file'), wrap(async (req, res) 
 }));
 
 // --- Weekly Dump upload (XLSX multi-sheet, single request) -----------------
-router.post('/wd/upload', upload.single('file'), wrap(async (req, res) => {
+router.post('/wd/upload', requirePermission('wd-setup'), upload.single('file'), wrap(async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded (field name: file)' });
   const cid = await activeWdClientId(req);
   if (!cid) return res.status(400).json({ error: 'No active Weekly Dump client. Create one in the Clients tab first.' });
@@ -782,6 +922,11 @@ router.post('/wd/upload', upload.single('file'), wrap(async (req, res) => {
     }, req);
     await appendWdRows(datasetId, allRows);
     const rowCount = await finishWdDataset(datasetId);
+    if (req.sessionUsername) {
+      await query(`UPDATE datasets SET uploaded_by=$1 WHERE id=$2`, [req.sessionUsername, datasetId]).catch(() => {});
+    }
+    // A dataset upload is one of the ways a client becomes "configured".
+    await markClientConfigured(cid);
     res.json({ datasetId, rowCount, sheetCount: sheets.length });
   } finally {
     fs.unlink(req.file.path, () => {});
@@ -789,30 +934,35 @@ router.post('/wd/upload', upload.single('file'), wrap(async (req, res) => {
 }));
 
 // --- Weekly Dump upload (chunked, browser-parsed) ---------------------------
-router.post('/wd/upload/start', wrap(async (req, res) => {
+router.post('/wd/upload/start', requirePermission('wd-setup'), wrap(async (req, res) => {
   const cid = await activeWdClientId(req);
   if (!cid) return res.status(400).json({ error: 'No active Weekly Dump client. Create one in the Clients tab first.' });
   const { name, filename, headers } = req.body || {};
   const datasetId = await startWdDataset({ name, filename, headers }, req);
+  if (req.sessionUsername) {
+    await query(`UPDATE datasets SET uploaded_by=$1 WHERE id=$2`, [req.sessionUsername, datasetId]).catch(() => {});
+  }
   res.json({ datasetId });
 }));
 
-router.post('/wd/upload/rows', wrap(async (req, res) => {
+router.post('/wd/upload/rows', requirePermission('wd-setup'), wrap(async (req, res) => {
   const { datasetId, rows } = req.body || {};
   if (!datasetId || !Array.isArray(rows)) return res.status(400).json({ error: 'datasetId and rows[] required' });
   const inserted = await appendWdRows(Number(datasetId), rows);
   res.json({ inserted });
 }));
 
-router.post('/wd/upload/finish', wrap(async (req, res) => {
+router.post('/wd/upload/finish', requirePermission('wd-setup'), wrap(async (req, res) => {
   const { datasetId } = req.body || {};
   if (!datasetId) return res.status(400).json({ error: 'datasetId required' });
   const rowCount = await finishWdDataset(Number(datasetId));
+  // A dataset upload is one of the ways a client becomes "configured".
+  await markClientConfigured(await activeWdClientId(req));
   res.json({ ok: true, rowCount });
 }));
 
 // --- Weekly Dump upload merge (multiple files → one dataset) ----------------
-router.post('/wd/upload/merge', upload.array('files', 20), wrap(async (req, res) => {
+router.post('/wd/upload/merge', requirePermission('wd-setup'), upload.array('files', 20), wrap(async (req, res) => {
   if (!req.files?.length) return res.status(400).json({ error: 'No files uploaded' });
   const cid = await activeWdClientId(req);
   if (!cid) return res.status(400).json({ error: 'No active Weekly Dump client. Create one in the Clients tab first.' });
@@ -835,6 +985,11 @@ router.post('/wd/upload/merge', upload.array('files', 20), wrap(async (req, res)
     const datasetId = await startWdDataset({ name, filename: name, headers: mergedHeaders }, req);
     await appendWdRows(datasetId, mergedRows);
     const rowCount = await finishWdDataset(datasetId);
+    if (req.sessionUsername) {
+      await query(`UPDATE datasets SET uploaded_by=$1 WHERE id=$2`, [req.sessionUsername, datasetId]).catch(() => {});
+    }
+    // A dataset upload is one of the ways a client becomes "configured".
+    await markClientConfigured(cid);
     res.json({ datasetId, rowCount, fileCount: fileData.length });
   } finally {
     tmpPaths.forEach((p) => fs.unlink(p, () => {}));
@@ -845,19 +1000,169 @@ router.post('/wd/upload/merge', upload.array('files', 20), wrap(async (req, res)
 router.get('/wd/settings', wrap(async (req, res) => {
   const cid = await activeWdClientId(req);
   if (!cid) return res.json({ settings: {} });
-  const { rows } = await query('SELECT config FROM wd_client_settings WHERE client_id = $1', [cid]);
-  res.json({ settings: rows[0]?.config || {} });
+  const [settingsRes, clientRes] = await Promise.all([
+    query('SELECT config FROM wd_client_settings WHERE client_id = $1', [cid]),
+    query('SELECT tracking_id, crm_type FROM clients WHERE id = $1', [cid]),
+  ]);
+  const base = settingsRes.rows[0]?.config || {};
+  const client = clientRes.rows[0] || {};
+  // clients table is source of truth for tracking_id/crm_type
+  const settings = { ...base };
+  if (client.tracking_id != null) settings.tracking_id = client.tracking_id;
+  if (client.crm_type != null) settings.crm_type = client.crm_type;
+  res.json({ settings });
 }));
 
-router.put('/wd/settings', wrap(async (req, res) => {
+router.put('/wd/settings', requirePermission('wd-setup'), wrap(async (req, res) => {
   const cid = await activeWdClientId(req);
   if (!cid) return res.status(400).json({ error: 'No active WD client' });
+  const body = req.body || {};
+  // Write tracking_id/crm_type to clients table (admin only)
+  if (hasPermission(req.sessionRole, 'clients-delete')) {
+    await query(
+      `UPDATE clients SET tracking_id=$1, crm_type=$2 WHERE id=$3`,
+      [body.tracking_id || null, body.crm_type || null, cid]
+    ).catch(() => {});
+  }
   await query(
     `INSERT INTO wd_client_settings (client_id, config, updated_at)
      VALUES ($1, $2::jsonb, now())
      ON CONFLICT (client_id) DO UPDATE SET config = EXCLUDED.config, updated_at = now()`,
-    [cid, JSON.stringify(req.body || {})]);
+    [cid, JSON.stringify(body)]);
+  // Saving Weekly Dump setup is one of the ways a client becomes "configured".
+  await markClientConfigured(cid);
   res.json({ ok: true });
+}));
+
+// --- App Settings (singleton, admin-only) -----------------------------------
+router.get('/app-settings', wrap(async (req, res) => {
+  const { rows } = await query('SELECT config FROM app_settings WHERE id = 1');
+  res.json({ settings: rows[0]?.config || {} });
+}));
+
+router.put('/app-settings', requirePermission('app-settings'), wrap(async (req, res) => {
+  const config = req.body || {};
+  await query(
+    `INSERT INTO app_settings (id, config, updated_at) VALUES (1, $1::jsonb, now())
+     ON CONFLICT (id) DO UPDATE SET config = EXCLUDED.config, updated_at = now()`,
+    [JSON.stringify(config)]
+  );
+  res.json({ ok: true, settings: config });
+}));
+
+// --- Bifurcation -----------------------------------------------------------
+// GET: return stored config + parsed data rows
+router.get('/bifurcation', wrap(async (req, res) => {
+  const cfg = await query('SELECT client_col, tracking_col, crm_col, headers FROM bifurcation_config WHERE id = 1');
+  const data = await query('SELECT client_name, tracking_id, crm_type FROM bifurcation_data ORDER BY id');
+  res.json({ config: cfg.rows[0] || null, data: data.rows });
+}));
+
+// POST /bifurcation/upload — accept CSV/XLSX, store raw_rows + headers
+router.post('/bifurcation/upload', requirePermission('bifurcation-manage'), upload.single('file'), wrap(async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  try {
+    const { headers, rows } = parseFile(req.file.path);
+    if (!rows.length) return res.status(400).json({ error: 'No data rows found in file' });
+    await query(
+      `INSERT INTO bifurcation_config (id, headers, raw_rows, updated_at)
+       VALUES (1, $1, $2::jsonb, now())
+       ON CONFLICT (id) DO UPDATE SET headers = EXCLUDED.headers, raw_rows = EXCLUDED.raw_rows, updated_at = now()`,
+      [headers, JSON.stringify(rows)]
+    );
+    res.json({ headers, rowCount: rows.length });
+  } finally {
+    fs.unlink(req.file.path, () => {});
+  }
+}));
+
+// POST /bifurcation/apply — set column mapping, re-parse raw_rows → bifurcation_data, sync clients
+router.post('/bifurcation/apply', requirePermission('bifurcation-manage'), wrap(async (req, res) => {
+  const { client_col, tracking_col, crm_col } = req.body || {};
+  if (!client_col) return res.status(400).json({ error: 'client_col is required' });
+  const cfg = await query('SELECT raw_rows, headers FROM bifurcation_config WHERE id = 1');
+  if (!cfg.rows.length) return res.status(400).json({ error: 'No file uploaded yet' });
+  const rawRows = cfg.rows[0].raw_rows || [];
+  await query(
+    `UPDATE bifurcation_config SET client_col=$1, tracking_col=$2, crm_col=$3, updated_at=now() WHERE id=1`,
+    [client_col, tracking_col || null, crm_col || null]
+  );
+  await query('DELETE FROM bifurcation_data');
+  const parsed = rawRows
+    .map((r) => ({
+      client_name: String(r[client_col] ?? '').trim(),
+      tracking_id: tracking_col ? String(r[tracking_col] ?? '').trim() : '',
+      crm_type:    crm_col      ? String(r[crm_col]     ?? '').trim() : '',
+    }))
+    .filter((r) => r.client_name);
+
+  for (const row of parsed) {
+    await query(
+      'INSERT INTO bifurcation_data (client_name, tracking_id, crm_type) VALUES ($1,$2,$3)',
+      [row.client_name, row.tracking_id, row.crm_type]
+    );
+  }
+
+  // NOTE: bifurcation_data is only a name/tracking/CRM lookup table used to
+  // populate the "Existing Client" dropdown in New Client / Client
+  // Configuration. It must NEVER create rows in the `clients` table or mark
+  // anything as configured — a client only becomes configured when its
+  // configuration is explicitly saved, a dataset is uploaded, or Weekly Dump
+  // setup is saved (see markClientConfigured / ConfiguredClients).
+  //
+  // Existing clients that happen to share a name with a bifurcation row can
+  // still have their CRM / Tracking ID refreshed from the sheet, since that's
+  // just keeping already-configured metadata in sync — it does not add or
+  // reveal any new client.
+  for (const row of parsed) {
+    await query(
+      `UPDATE clients SET tracking_id=$1, crm_type=$2
+       WHERE lower(name) = lower($3) AND is_configured = true`,
+      [row.tracking_id || null, row.crm_type || null, row.client_name]
+    ).catch(() => {});
+  }
+  await logAudit(req, 'bifurcation_apply', { details: { count: parsed.length } });
+  res.json({ applied: parsed.length });
+}));
+
+// GET /bifurcation/lookup?name=... — look up a specific client name
+router.get('/bifurcation/lookup', wrap(async (req, res) => {
+  const name = (req.query.name || '').trim();
+  if (!name) return res.json({ found: false });
+  const { rows } = await query(
+    'SELECT client_name, tracking_id, crm_type FROM bifurcation_data WHERE lower(client_name) = lower($1) LIMIT 1',
+    [name]
+  );
+  if (!rows.length) return res.json({ found: false });
+  res.json({ found: true, ...rows[0] });
+}));
+
+// GET /bifurcation/crm-types — unique CRM types from bifurcation data
+router.get('/bifurcation/crm-types', wrap(async (req, res) => {
+  const { rows } = await query(
+    `SELECT DISTINCT crm_type FROM bifurcation_data WHERE crm_type IS NOT NULL AND crm_type != '' ORDER BY crm_type`
+  );
+  res.json({ crm_types: rows.map((r) => r.crm_type) });
+}));
+
+// --- Audit log (admin-only) -------------------------------------------------
+router.get('/audit-log', requirePermission('audit-log'), wrap(async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 100, 500);
+  const offset = Math.max(Number(req.query.offset) || 0, 0);
+  const q = (req.query.q || '').trim();
+  const params = [];
+  const conditions = [];
+  if (q) {
+    params.push(`%${q}%`);
+    conditions.push(`(username ILIKE $1 OR action ILIKE $1 OR client_name ILIKE $1 OR dataset_name ILIKE $1)`);
+  }
+  const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+  const { rows } = await query(
+    `SELECT id, username, action, client_name, dataset_name, details, created_at
+     FROM audit_log ${where} ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
+    params);
+  const countRes = await query(`SELECT count(*)::int AS n FROM audit_log ${where}`, params);
+  res.json({ entries: rows, total: countRes.rows[0].n, limit, offset });
 }));
 
 export default router;

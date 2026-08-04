@@ -27,17 +27,11 @@
         <button class="sidebar-sub-item" data-nav-tab="report" type="button">
           <span class="sidebar-sub-dot"></span><span>Report</span>
         </button>
-        <button class="sidebar-sub-item" data-nav-tab="data" type="button">
-          <span class="sidebar-sub-dot"></span><span>Upload Data</span>
+        <button class="sidebar-sub-item" data-nav-tab="configuration" data-permission="data" type="button">
+          <span class="sidebar-sub-dot"></span><span>Configuration</span>
         </button>
-        <button class="sidebar-sub-item" data-nav-tab="settings" type="button">
-          <span class="sidebar-sub-dot"></span><span>Setup</span>
-        </button>
-        <button class="sidebar-sub-item" data-nav-tab="mappings" type="button">
+        <button class="sidebar-sub-item" data-nav-tab="mappings" data-permission="mappings" type="button">
           <span class="sidebar-sub-dot"></span><span>Mappings</span>
-        </button>
-        <button class="sidebar-sub-item" data-nav-tab="duplicates" type="button">
-          <span class="sidebar-sub-dot"></span><span>Duplicates</span>
         </button>
       </div>
       <div class="sidebar-section">
@@ -49,11 +43,26 @@
         <button class="sidebar-sub-item" data-wd-sub="report" type="button">
           <span class="sidebar-sub-dot"></span><span>Report</span>
         </button>
-        <button class="sidebar-sub-item" data-wd-sub="setup" type="button">
+        <button class="sidebar-sub-item" data-wd-sub="setup" data-permission="wd-setup" type="button">
           <span class="sidebar-sub-dot"></span><span>Setup</span>
         </button>
-        <button class="sidebar-sub-item" data-wd-sub="datasets" type="button">
+        <button class="sidebar-sub-item" data-wd-sub="datasets" data-permission="wd-datasets" type="button">
           <span class="sidebar-sub-dot"></span><span>Datasets</span>
+        </button>
+      </div>
+      <div class="sidebar-section" data-permission="bifurcation-manage">
+        <span class="sidebar-section-label">Admin</span>
+        <button class="sidebar-item" data-nav="bifurcation" type="button">
+          <span class="sidebar-icon">🗂</span>
+          <span>Bifurcation</span>
+        </button>
+        <button class="sidebar-item" data-nav="dataset-management" data-permission="datasets-manage" type="button">
+          <span class="sidebar-icon">🗄</span>
+          <span>Dataset Management</span>
+        </button>
+        <button class="sidebar-item" data-nav="audit-log" data-permission="audit-log" type="button">
+          <span class="sidebar-icon">📋</span>
+          <span>Audit Log</span>
         </button>
       </div>
     </nav>
@@ -68,14 +77,16 @@
     <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Open menu">☰</button>
     <div class="brand">
       <img class="brand-logo" src="/logo.svg" alt="Lead Report logo" />
-      <h1>Lead&nbsp;Report</h1>
+      <div class="brand-text">
+        <h1>Lead&nbsp;Report</h1>
+        <span class="module-subtitle" id="headerModuleSubtitle">Campaign Analysis</span>
+      </div>
     </div>
     <nav class="tabs" id="campaignTabs">
       <button class="tab is-active" data-view="report">Report</button>
-      <button class="tab" data-view="data">Data</button>
-      <button class="tab" data-view="settings">SETUP</button>
-      <button class="tab" data-view="mappings">Mappings</button>
-      <button class="tab" data-view="duplicates">Duplicates</button>
+      <button class="tab" data-view="configuration" data-permission="data">Configuration</button>
+      <button class="tab" data-view="mappings" data-permission="mappings">Mappings</button>
+      <button class="tab" data-view="bifurcation" data-permission="bifurcation-manage">Bifurcation</button>
     </nav>
     <div class="client-picker" id="clientPicker">
       <button class="client-btn" id="clientBtn" type="button">
@@ -84,10 +95,6 @@
       <div class="client-menu hidden" id="clientMenu">
         <input class="inp" id="clientSearch" placeholder="Search clients…" />
         <div id="clientList" class="client-list"></div>
-        <div class="client-new">
-          <input class="inp" id="newClientName" placeholder="New client name" />
-          <button class="btn primary sm" id="newClientBtn" type="button">Create</button>
-        </div>
       </div>
     </div>
     <div class="dataset-pill" id="datasetPill">No dataset</div>
@@ -99,19 +106,16 @@
       <div class="client-menu hidden" id="wdClientMenu">
         <input class="inp" id="wdClientSearch" placeholder="Search clients…" />
         <div id="wdClientList" class="client-list"></div>
-        <div class="client-new">
-          <input class="inp" id="wdNewClientName" placeholder="New client name" />
-          <button class="btn primary sm" id="wdNewClientBtn" type="button">Create</button>
-          <span id="wdClientStatus" class="status" style="font-size:12px"></span>
-        </div>
       </div>
     </div>
+    <button class="btn ghost sm theme-toggle" id="themeToggle" type="button" title="Toggle theme">🌙</button>
     <button class="btn ghost sm logout-btn" id="logoutBtn" type="button">Logout</button>
   </header>
 
   <main>
     <!-- REPORT VIEW -->
     <section id="view-report" class="view is-active">
+      <div class="module-heading">📈 Campaign Analysis</div>
       <div class="report-toolbar">
         <div>
           <h2 id="reportTitle">Weekly Report</h2>
@@ -149,84 +153,200 @@
       <div id="reportBody"></div>
     </section>
 
-    <!-- DATA VIEW -->
-    <section id="view-data" class="view">
-      <div class="card">
-        <h2>Upload export</h2>
-        <p class="muted">CSV or XLSX from meritto (or any CRM). Banner rows are auto-skipped; the header row is detected automatically.</p>
-        <form id="uploadForm">
-          <div class="drop-zone" id="uploadDropZone">
-            <span class="drop-icon">📁</span>
-            <span class="drop-title">Drop file here, or click to browse</span>
-            <span class="drop-sub">CSV, TSV, XLSX, XLS supported</span>
-            <input type="file" name="file" id="fileInput" accept=".csv,.tsv,.xlsx,.xls" required />
+
+
+    <!-- CONFIGURATION VIEW (merged Data + Setup) -->
+    <section id="view-configuration" class="view">
+
+      <div class="seg config-tabs" id="configTabsSeg">
+        <button class="seg-btn is-active" data-config-tab="client" type="button">Client</button>
+        <button class="seg-btn" data-config-tab="data" type="button">Data</button>
+      </div>
+
+      <!-- ============ TAB: CLIENT ============ -->
+      <div class="config-tab is-active" id="configTab-client">
+
+        <!-- Step 1: Client Configuration (incl. CRM Preset + Tracking ID — merged, not repeated elsewhere) -->
+        <div class="card config-section wizard-step" data-permission="clients-create" id="clientConfigCard">
+          <div class="wizard-step-head">
+            <span class="wizard-step-num">1</span>
+            <span class="wizard-step-title">👤 Client Configuration</span>
           </div>
+          <p class="muted">Pick an existing client from your Bifurcation sheet, or set up a brand-new one, then choose its CRM Preset. Saving here is what makes the client show up in the Client dropdown above.</p>
+
+          <div class="seg" id="clientConfigModeSeg">
+            <button class="seg-btn is-active" data-client-mode="existing" type="button">Existing Client</button>
+            <button class="seg-btn" data-client-mode="new" type="button">New Client</button>
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <label class="field" id="clientConfigExistingField" style="flex:1;min-width:220px">
+              <span>Client (from Bifurcation sheet)</span>
+              <input class="inp" id="clientConfigSearch" list="clientConfigDatalist" placeholder="Search or select a client…" autocomplete="off" />
+              <datalist id="clientConfigDatalist"></datalist>
+            </label>
+            <label class="field hidden" id="clientConfigNewField" style="flex:1;min-width:220px">
+              <span>New client name</span>
+              <input class="inp" id="clientConfigNewName" placeholder="Client name" />
+            </label>
+          </div>
+
           <div class="row">
-            <label class="field">
-              <span>Name (optional)</span>
-              <input type="text" name="name" id="uploadName" placeholder="e.g. Week 30" />
+            <label class="field" style="min-width:180px">
+              <span>CRM Preset</span>
+              <select id="crmPreset" class="inp">
+                <option value="">— choose —</option>
+                <optgroup label="Engine 1">
+                  <option value="NPF">NPF (Meritto)</option>
+                </optgroup>
+                <optgroup label="Engine 2 — LSQ / Others">
+                  <option value="LSQ">LSQ (LeadSquared)</option>
+                  <option value="ExtraEdge">ExtraEdge</option>
+                  <option value="Client">Client CRM</option>
+                  <option value="GoogleSheet">Google Sheet</option>
+                </optgroup>
+              </select>
             </label>
-            <label class="field">
-              <span>Header row (optional)</span>
-              <input type="number" name="headerRow" id="headerRow" min="0" placeholder="auto" />
+            <label class="field" style="min-width:180px">
+              <span>Tracking ID</span>
+              <input class="inp" id="clientConfigTrackingId" placeholder="Auto-filled from Bifurcation sheet" />
+            </label>
+            <label class="field" style="min-width:150px;flex:0 0 auto">
+              <span>Status</span>
+              <span class="status-badge" id="clientConfigStatusBadge">Not configured</span>
             </label>
           </div>
-          <button type="submit" class="btn primary" id="uploadBtn">Upload &amp; build report</button>
-          <span id="uploadStatus" class="status"></span>
-        </form>
-      </div>
 
-      <div class="card">
-        <h2>Merge &amp; upload multiple files</h2>
-        <p class="muted">Select multiple CSV/XLSX files — they'll be merged column-by-column into one dataset. Useful when data is split across multiple exports.</p>
-        <form id="mergeForm">
-          <label class="field">
-            <span>Files (select 2 or more)</span>
-            <input type="file" id="mergeFiles" name="files" multiple accept=".csv,.tsv,.xlsx,.xls" required />
-          </label>
-          <label class="field">
-            <span>Name (optional)</span>
-            <input type="text" name="name" id="mergeName" placeholder="e.g. Week 30 merged" />
-          </label>
-          <button type="submit" class="btn primary" id="mergeBtn">Merge &amp; upload</button>
-          <span id="mergeStatus" class="status"></span>
-        </form>
-      </div>
-
-      <div class="card">
-        <h2>Datasets</h2>
-        <table class="grid" id="datasetsTable">
-          <thead><tr><th>Active</th><th>Name</th><th>Rows</th><th>Uploaded</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- DUPLICATES VIEW -->
-    <section id="view-duplicates" class="view">
-      <div class="card">
-        <h2>Duplicate uploads</h2>
-        <p class="muted">Upload the per-Medium duplicate export for each category. <strong>Duplicate = Secondary + Tertiary</strong>; Medium is mapped to <strong>Kapp Medium</strong> via your Lead Code mappings. These feed the report's Dup columns in Top Lead Codes and the Duplicate KPIs, matched by Kapp Medium.</p>
-
-        <div class="map-bar">
-          <div class="seg">
-            <button class="seg-btn is-active" data-dup="leads">Leads</button>
-            <button class="seg-btn" data-dup="fi">Form Initiated</button>
-            <button class="seg-btn" data-dup="apps">Applications</button>
-            <button class="seg-btn" data-dup="adm">Admissions</button>
+          <div class="row" style="margin-top:.5rem">
+            <button class="btn primary" id="clientConfigSaveBtn" type="button">Save</button>
+            <span id="clientConfigStatus" class="status"></span>
           </div>
-          <span id="dupMeta" class="muted map-count"></span>
         </div>
 
-        <form id="dupForm" class="map-add">
-          <input type="file" id="dupFile" class="inp" accept=".csv,.tsv,.xlsx,.xls" required />
-          <button class="btn primary" id="dupUpload" type="submit">Upload &amp; apply</button>
-          <button class="btn ghost" id="dupClear" type="button">Clear this category</button>
-          <span id="dupStatus" class="status"></span>
-        </form>
+        <!-- Step 2: Dataset Upload -->
+        <div class="card config-section wizard-step">
+          <div class="wizard-step-head">
+            <span class="wizard-step-num">2</span>
+            <span class="wizard-step-title">📤 Dataset Upload</span>
+          </div>
 
-        <div class="tblwrap"><table class="grid" id="dupTable"></table></div>
+          <div style="margin-bottom:1.5rem">
+            <h3 style="margin-bottom:10px">Single Upload</h3>
+            <form id="uploadForm">
+              <div class="drop-zone" id="uploadDropZone">
+                <span class="drop-icon">📁</span>
+                <span class="drop-title">Drop file here, or click to browse</span>
+                <span class="drop-sub">CSV, TSV, XLSX, XLS supported</span>
+                <input type="file" name="file" id="fileInput" accept=".csv,.tsv,.xlsx,.xls" required />
+              </div>
+              <div class="row">
+                <label class="field">
+                  <span>Name (optional)</span>
+                  <input type="text" name="name" id="uploadName" placeholder="e.g. Week 30" />
+                </label>
+                <label class="field">
+                  <span>Header row (optional)</span>
+                  <input type="number" name="headerRow" id="headerRow" min="0" placeholder="auto" />
+                </label>
+              </div>
+              <button type="submit" class="btn primary" id="uploadBtn">Upload &amp; build report</button>
+              <span id="uploadStatus" class="status"></span>
+            </form>
+          </div>
+
+          <div style="border-top:1px solid var(--line);padding-top:1.5rem">
+            <h3 style="margin-bottom:10px">Merge Upload</h3>
+            <p class="muted" style="margin-bottom:12px">Select multiple CSV/XLSX files — they'll be merged column-by-column into one dataset.</p>
+            <form id="mergeForm">
+              <label class="field">
+                <span>Files (select 2 or more)</span>
+                <input type="file" id="mergeFiles" name="files" multiple accept=".csv,.tsv,.xlsx,.xls" required />
+              </label>
+              <label class="field">
+                <span>Name (optional)</span>
+                <input type="text" name="name" id="mergeName" placeholder="e.g. Week 30 merged" />
+              </label>
+              <button type="submit" class="btn primary" id="mergeBtn">Merge &amp; upload</button>
+              <span id="mergeStatus" class="status"></span>
+            </form>
+          </div>
+        </div>
+
+        <!-- Step 3: Duplicates — NPF CRM Preset only -->
+        <div class="card config-section wizard-step hidden" id="dupWizardStep">
+          <div class="wizard-step-head">
+            <span class="wizard-step-num">3</span>
+            <span class="wizard-step-title">📁 Duplicates <span class="muted" style="font-weight:400;font-size:13px">(NPF only)</span></span>
+          </div>
+          <p class="muted">Upload the per-Medium duplicate export for each category. <strong>Duplicate = Secondary + Tertiary</strong>; Medium is mapped to <strong>Kapp Medium</strong> via your Lead Code mappings. These feed the report's Dup columns in Top Lead Codes and the Duplicate KPIs, matched by Kapp Medium.</p>
+
+          <div class="map-bar">
+            <div class="seg">
+              <button class="seg-btn is-active" data-dup="leads">Leads</button>
+              <button class="seg-btn" data-dup="fi">Form Initiated</button>
+              <button class="seg-btn" data-dup="apps">Applications</button>
+              <button class="seg-btn" data-dup="adm">Admissions</button>
+            </div>
+            <span id="dupMeta" class="muted map-count"></span>
+          </div>
+
+          <form id="dupForm" class="map-add">
+            <input type="file" id="dupFile" class="inp" accept=".csv,.tsv,.xlsx,.xls" required />
+            <button class="btn primary" id="dupUpload" type="submit">Upload &amp; apply</button>
+            <button class="btn ghost" id="dupClear" type="button">Clear this category</button>
+            <span id="dupStatus" class="status"></span>
+          </form>
+
+          <div class="tblwrap"><table class="grid" id="dupTable"></table></div>
+        </div>
       </div>
+
+      <!-- ============ TAB: DATA ============ -->
+      <div class="config-tab" id="configTab-data">
+
+        <!-- Step 4: Dataset History -->
+        <div class="card config-section wizard-step">
+          <div class="wizard-step-head">
+            <span class="wizard-step-num">4</span>
+            <span class="wizard-step-title">📁 Dataset History</span>
+          </div>
+          <table class="grid" id="datasetsTable">
+            <thead><tr><th>Active</th><th>Name</th><th>Rows</th><th>Uploaded</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <!-- Step 5: Advanced Configuration (collapsed by default — Column Mapping) -->
+        <div class="card config-section collapsed" data-permission="setup" id="advancedConfigCard">
+          <button type="button" class="drawer-toggle advanced-config-toggle" id="advancedConfigToggle" aria-expanded="false">
+            <span class="wizard-step-head" style="margin:0"><span class="wizard-step-num">5</span><span class="wizard-step-title">⚙ Advanced Configuration</span></span>
+            <span class="chev" aria-hidden="true">▾</span>
+          </button>
+          <div class="drawer-body">
+            <p class="muted">Map your dataset columns to the correct fields. After changing these, click <strong>Recompute</strong> to re-derive the active dataset.</p>
+
+            <div class="card" id="previewCard" style="margin:0 0 1rem;box-shadow:none;border:1px solid var(--line)">
+              <button type="button" class="drawer-toggle" id="previewToggle" aria-expanded="true">
+                <span>Dataset columns &amp; sample rows</span>
+                <span class="chev" aria-hidden="true">▾</span>
+              </button>
+              <div class="drawer-body" id="previewBody">
+                <p class="muted">The actual headers &amp; data in your active dataset. Click a column name to copy it.</p>
+                <div class="tblwrap"><table class="grid" id="previewTable"></table></div>
+              </div>
+            </div>
+
+            <div id="settingsForm" class="settings-grid"></div>
+            <div class="row" style="margin-top:1rem">
+              <button class="btn primary" id="saveSettings">Save</button>
+              <button class="btn" id="recomputeBtn">Recompute active dataset</button>
+              <button class="btn ghost" id="resetSettings">Reset to defaults</button>
+              <span id="settingsStatus" class="status"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </section>
 
     <!-- MAPPINGS VIEW -->
@@ -267,58 +387,25 @@
       </div>
     </section>
 
-    <!-- SETUP VIEW -->
-    <section id="view-settings" class="view">
-      <div class="card" id="previewCard">
-        <button type="button" class="drawer-toggle" id="previewToggle" aria-expanded="true">
-          <span>Dataset columns &amp; sample rows</span>
-          <span class="chev" aria-hidden="true">▾</span>
-        </button>
-        <div class="drawer-body" id="previewBody">
-          <p class="muted">The actual headers &amp; data in your active dataset. Column fields below show a dropdown of these columns.</p>
-          <div class="tblwrap"><table class="grid" id="previewTable"></table></div>
-        </div>
-      </div>
 
-      <div class="card">
-        <h2>SETUP</h2>
-        <p class="muted">Column mappings &amp; rules — the app equivalent of the sheet's Setup tab. After changing these, click <strong>Recompute</strong> to re-derive the active dataset.</p>
-        <div class="row" style="margin-bottom:1rem">
-          <label style="font-weight:600;margin-right:.5rem">CRM Preset:</label>
-          <select id="crmPreset" class="inp" style="width:auto;min-width:140px">
-            <option value="">— choose —</option>
-            <option value="NPF">NPF (Meritto)</option>
-            <option value="LSQ">LSQ (LeadSquared)</option>
-          </select>
-          <button class="btn" id="applyCrmPreset" style="margin-left:.5rem">Apply Preset</button>
-        </div>
-        <div id="settingsForm" class="settings-grid"></div>
-        <div class="row">
-          <button class="btn primary" id="saveSettings">Save</button>
-          <button class="btn" id="recomputeBtn">Recompute active dataset</button>
-          <button class="btn ghost" id="resetSettings">Reset to defaults</button>
-          <span id="settingsStatus" class="status"></span>
-        </div>
-      </div>
-    </section>
 
     <!-- WEEKLY DUMP VIEW -->
     <section id="view-weekly-dump" class="view">
 
+      <div class="module-heading">📁 Weekly Dump</div>
       <div class="report-toolbar" style="margin-bottom:20px">
         <div>
           <h2>Weekly Dump</h2>
         </div>
         <nav class="tabs">
           <button class="tab is-active" data-wd-view="report">Report</button>
-          <button class="tab" data-wd-view="setup">Setup</button>
-          <button class="tab" data-wd-view="datasets">Datasets</button>
+          <button class="tab" data-wd-view="setup" data-permission="wd-setup">Setup</button>
+          <button class="tab" data-wd-view="datasets" data-permission="wd-datasets">Datasets</button>
         </nav>
       </div>
 
       <!-- Report sub-view -->
       <div class="wd-view is-active" id="wd-view-report">
-        <div id="wdReportClientBar" style="margin-bottom:12px"></div>
         <div id="wd-report-body">
           <div class="card">
             <p class="muted" style="padding:8px 0">Go to <strong>Setup</strong> to create a client, select a CRM, and upload data, then click <strong>Compute Report</strong>.</p>
@@ -328,38 +415,87 @@
 
       <!-- Setup sub-view (client + CRM + upload combined) -->
       <div class="wd-view" id="wd-view-setup">
-        <div class="card">
-          <h2>Setup</h2>
 
-          <div style="margin-bottom:1.5rem">
-            <h3>CRM & Settings</h3>
-            <div class="row" style="margin-bottom:1rem;align-items:center">
-              <label style="font-weight:600;margin-right:.5rem;flex:0 0 auto">CRM:</label>
-              <select id="wdCrmType" class="inp" style="width:auto;min-width:180px">
-                <option value="">— choose CRM —</option>
-                <option value="NPF">NPF (Meritto)</option>
-                <option value="LSQ">LSQ (LeadSquared)</option>
-                <option value="Client">Client</option>
-                <option value="ExtraEdge">ExtraEdge</option>
-              </select>
-            </div>
-            <div class="row" style="margin-bottom:1rem;align-items:center">
-              <label style="font-weight:600;margin-right:.5rem;flex:0 0 auto">Tracking ID:</label>
-              <input class="inp" id="wdTrackingId" placeholder="Enter tracking ID" style="flex:1;min-width:180px" />
-            </div>
-            <div id="wdSettingsForm"></div>
-            <div class="row" style="margin-top:1rem">
-              <button class="btn primary" id="wdSaveSettings">Save</button>
-              <button class="btn primary" id="wdComputeBtn" type="button">Compute Report</button>
-              <span id="wdSettingsStatus" class="status"></span>
-            </div>
+        <!-- Client Configuration: Existing/New client + CRM Preset + Tracking ID, merged into one step -->
+        <div class="card config-section wizard-step" data-permission="clients-create" id="wdClientConfigCard">
+          <div class="wizard-step-head">
+            <span class="wizard-step-num">1</span>
+            <span class="wizard-step-title">👤 Client Configuration</span>
+          </div>
+          <p class="muted">Pick an existing client from your Bifurcation sheet, or set up a brand-new one, then choose its CRM Preset.</p>
+
+          <div class="seg" id="wdClientConfigModeSeg">
+            <button class="seg-btn is-active" data-wd-client-mode="existing" type="button">Existing Client</button>
+            <button class="seg-btn" data-wd-client-mode="new" type="button">New Client</button>
           </div>
 
-          <div style="border-top:1px solid var(--line);padding-top:1.5rem">
-            <h3>Upload</h3>
-            <div id="wdUploadBody">
-              <p class="muted">Select a CRM above to see upload options.</p>
-            </div>
+          <div class="row" style="margin-top:12px">
+            <label class="field" id="wdClientConfigExistingField" style="flex:1;min-width:220px">
+              <span>Client (from Bifurcation sheet)</span>
+              <input class="inp" id="wdClientConfigSearch" list="wdClientConfigDatalist" placeholder="Search or select a client…" autocomplete="off" />
+              <datalist id="wdClientConfigDatalist"></datalist>
+            </label>
+            <label class="field hidden" id="wdClientConfigNewField" style="flex:1;min-width:220px">
+              <span>New client name</span>
+              <input class="inp" id="wdNewClientNameSetup" placeholder="Client name" />
+            </label>
+          </div>
+
+          <div class="row" style="margin-bottom:1rem;align-items:flex-end">
+            <label class="field" style="min-width:200px">
+              <span>CRM Preset</span>
+              <select id="wdCrmType" class="inp">
+                <option value="">— choose CRM —</option>
+                <optgroup label="Engine 1">
+                  <option value="NPF">NPF (Meritto)</option>
+                </optgroup>
+                <optgroup label="Engine 2 — LSQ / Others">
+                  <option value="LSQ">LSQ (LeadSquared)</option>
+                  <option value="ExtraEdge">ExtraEdge</option>
+                  <option value="Client">Client CRM</option>
+                  <option value="GoogleSheet">Google Sheet</option>
+                </optgroup>
+              </select>
+            </label>
+            <label class="field" style="min-width:180px">
+              <span>Tracking ID</span>
+              <input class="inp" id="wdTrackingId" placeholder="Auto-filled from client config" />
+            </label>
+            <label class="field" style="min-width:200px">
+              <span>Custom CRM Name <span class="muted" style="font-weight:400">(shown in report)</span></span>
+              <input class="inp" id="wdCustomCrmName" placeholder="e.g. Acme LeadSquared" />
+            </label>
+          </div>
+          <div id="wdSettingsForm"></div>
+          <div class="row" style="margin-top:1rem">
+            <button class="btn primary" id="wdSaveSettings" data-permission="wd-setup">Save</button>
+            <button class="btn primary" id="wdComputeBtn" type="button">Compute Report</button>
+            <span id="wdSettingsStatus" class="status"></span>
+            <span id="wdNewClientStatusSetup" class="status"></span>
+          </div>
+        </div>
+
+        <div class="card config-section wizard-step" data-permission="wd-setup">
+          <div class="wizard-step-head">
+            <span class="wizard-step-num">2</span>
+            <span class="wizard-step-title">📤 Upload Dataset</span>
+          </div>
+          <div id="wdUploadBody">
+            <p class="muted">Select a CRM Preset above to see upload options.</p>
+          </div>
+        </div>
+
+        <!-- Dataset history -->
+        <div class="card config-section wizard-step" id="wdDatasetHistoryCard">
+          <div class="wizard-step-head">
+            <span class="wizard-step-num">3</span>
+            <span class="wizard-step-title">📁 Dataset History</span>
+          </div>
+          <div class="tblwrap">
+            <table class="grid" id="wdDatasetHistoryTable">
+              <thead><tr><th>Name</th><th>Upload Date</th><th>Rows</th><th>Status</th><th>Uploaded By</th><th></th></tr></thead>
+              <tbody><tr><td colspan="6" class="muted" style="text-align:center">No datasets yet</td></tr></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -372,6 +508,131 @@
         </div>
       </div>
 
+    </section>
+
+    <!-- BIFURCATION VIEW -->
+    <section id="view-bifurcation" class="view">
+      <div class="module-heading">🗂 Bifurcation</div>
+      <div class="card">
+        <h2>Bifurcation Sheet</h2>
+        <p class="muted">Upload a master Excel or CSV file with Client Name, Tracking ID, and CRM columns. Select which column is which, then click <strong>Apply</strong> to sync all client dropdowns from this file.</p>
+
+        <div style="margin-bottom:1.5rem">
+          <h3 style="margin-bottom:8px">Upload File</h3>
+          <form id="bifurcationUploadForm" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <input type="file" id="bifurcationFile" accept=".csv,.tsv,.xlsx,.xls" required />
+            <button class="btn primary" type="submit" id="bifurcationUploadBtn">Upload</button>
+            <span id="bifurcationUploadStatus" class="status"></span>
+          </form>
+        </div>
+
+        <div id="bifurcationMappingCard" class="hidden" style="margin-bottom:1.5rem">
+          <h3 style="margin-bottom:10px">Map Columns</h3>
+          <div class="row" style="gap:12px;flex-wrap:wrap;align-items:center">
+            <label class="field" style="min-width:180px">
+              <span>Client Name column *</span>
+              <select id="bifClientCol" class="inp"></select>
+            </label>
+            <label class="field" style="min-width:180px">
+              <span>Tracking ID column</span>
+              <select id="bifTrackingCol" class="inp"></select>
+            </label>
+            <label class="field" style="min-width:180px">
+              <span>CRM column</span>
+              <select id="bifCrmCol" class="inp"></select>
+            </label>
+            <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+              <button class="btn primary" id="bifurcationApplyBtn" type="button">Apply &amp; Sync Clients</button>
+              <span id="bifurcationApplyStatus" class="status" style="margin-left:10px"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="bifurcationDataCard" class="hidden">
+          <h3 style="margin-bottom:8px">Current Mappings</h3>
+          <div class="tblwrap"><table class="grid" id="bifurcationTable">
+            <thead><tr><th>Client Name</th><th>Tracking ID</th><th>CRM</th></tr></thead>
+            <tbody></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DATASET MANAGEMENT VIEW (admin only) -->
+    <section id="view-dataset-management" class="view">
+      <div class="module-heading">⚙ Admin</div>
+      <div class="card">
+        <h2>Dataset Management</h2>
+        <div class="dm-toolbar" id="dmToolbar">
+          <input class="inp" id="dmSearch" placeholder="Search by dataset, client, or CRM…" style="flex:1;min-width:220px" />
+          <select class="inp" id="dmClientFilter" style="width:auto;min-width:160px">
+            <option value="">All Clients</option>
+          </select>
+          <select class="inp" id="dmStatusFilter" style="width:auto;min-width:130px">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+            <option value="deleted">Deleted</option>
+          </select>
+        </div>
+        <div class="dm-bulk-bar hidden" id="dmBulkBar">
+          <span id="dmSelectedCount">0 selected</span>
+          <button class="btn sm" id="dmBulkArchive" type="button">Archive</button>
+          <button class="btn sm" id="dmBulkRestore" type="button">Restore</button>
+          <button class="btn sm danger-btn" id="dmBulkDelete" type="button">Delete</button>
+          <button class="btn sm danger-btn" id="dmBulkPermanent" type="button">Permanent Delete</button>
+          <button class="btn ghost sm" id="dmBulkClear" type="button">Clear selection</button>
+        </div>
+        <div class="tblwrap">
+          <table class="grid" id="dmTable">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="dmSelectAll" /></th>
+                <th>Dataset Name</th>
+                <th>Client</th>
+                <th>CRM</th>
+                <th>Rows</th>
+                <th>Uploaded By</th>
+                <th>Upload Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dmTableBody">
+              <tr><td colspan="9" class="muted" style="text-align:center">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUDIT LOG VIEW (admin only) -->
+    <section id="view-audit-log" class="view">
+      <div class="module-heading">⚙ Admin</div>
+      <div class="card">
+        <h2>Audit Log</h2>
+        <div style="margin-bottom:12px">
+          <input class="inp" id="auditSearch" placeholder="Search by user, action, client…" style="max-width:360px" />
+        </div>
+        <div class="tblwrap">
+          <table class="grid" id="auditTable">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Client</th>
+                <th>Dataset</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <tr><td colspan="6" class="muted" style="text-align:center">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="auditLoadMore" style="text-align:center;margin-top:12px"></div>
+      </div>
     </section>
   </main>
 

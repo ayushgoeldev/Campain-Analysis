@@ -36,22 +36,36 @@ $("#logoutBtn")?.addEventListener("click", async () => {
 
 // ---- Tab navigation -------------------------------------------------------
 $$('.tab[data-view]').forEach((btn) => btn.addEventListener('click', () => {
+  const perm = btn.dataset.permission;
+  if (perm && !canAccess(perm)) return;
   $$('.tab[data-view]').forEach((b) => b.classList.remove('is-active'));
   $$('.view').forEach((v) => v.classList.remove('is-active'));
   btn.classList.add('is-active');
-  $(`#view-${btn.dataset.view}`).classList.add('is-active');
-  if (btn.dataset.view === 'data') loadDatasets();
-  if (btn.dataset.view === 'settings') loadSettings();
+  $(`#view-${btn.dataset.view}`)?.classList.add('is-active');
+  setModuleHeading(CAMPAIGN_TAB_LABELS[btn.dataset.view] || CAMPAIGN_TAB_LABELS.report);
+  if (btn.dataset.view === 'configuration') { loadDatasets(); loadSettings(); loadBifurcationForClientConfig().then(refreshClientConfigStatus); loadDup(); }
   if (btn.dataset.view === 'mappings') loadMap();
-  if (btn.dataset.view === 'duplicates') loadDup();
+  if (btn.dataset.view === 'bifurcation') loadBifurcation();
 }));
 
 // ---- Weekly Dump tab navigation -------------------------------------------
-$$('.tab[data-wd-view]').forEach((btn) => btn.addEventListener('click', () => {
+// Configuration view: Client / Data sub-tabs (item 6 — two focused tabs
+// instead of one long scrolling page).
+$$('.seg-btn[data-config-tab]').forEach((btn) => btn.addEventListener('click', () => {
+  $$('.seg-btn[data-config-tab]').forEach((b) => b.classList.remove('is-active'));
+  btn.classList.add('is-active');
+  const tab = btn.dataset.configTab;
+  $$('.config-tab').forEach((t) => t.classList.remove('is-active'));
+  $(`#configTab-${tab}`)?.classList.add('is-active');
+}));
+
+$$('.tab[data-wd-view]').forEach((btn) => btn.addEventListener('click', () => {  const perm = btn.dataset.permission;
+  if (perm && !canAccess(perm)) return;
   $$('.tab[data-wd-view]').forEach((b) => b.classList.remove('is-active'));
   $$('.wd-view').forEach((v) => v.classList.remove('is-active'));
   btn.classList.add('is-active');
   $(`#wd-view-${btn.dataset.wdView}`).classList.add('is-active');
+  setModuleHeading(btn.dataset.wdView === 'setup' ? 'Weekly Dump · Setup' : btn.dataset.wdView === 'datasets' ? 'Weekly Dump · Datasets' : 'Weekly Dump');
   if (btn.dataset.wdView === 'report') loadWdReport();
   if (btn.dataset.wdView === 'setup') loadWdSetup();
   if (btn.dataset.wdView === 'datasets') loadWdDatasets();
@@ -667,6 +681,12 @@ const FIELDS = [
 let defaultsCache = null;
 let previewColumns = [];
 
+// Duplicates (Card 3) only makes sense for the NPF preset — its 4-category
+// upload maps into NPF-specific Dup columns. Hide it entirely otherwise.
+function toggleDupWizardStep(crmType) {
+  $('#dupWizardStep')?.classList.toggle('hidden', crmType !== 'NPF');
+}
+
 async function loadSettings() {
   const [settingsData, previewData] = await Promise.all([
     fetch('/api/settings').then((r) => r.json()).catch(() => ({ settings: {}, defaults: {} })),
@@ -678,6 +698,7 @@ async function loadSettings() {
   renderSettings(settings);
   const crmSel = $('#crmPreset');
   if (crmSel) crmSel.value = settings.crm_type || '';
+  toggleDupWizardStep(settings.crm_type || '');
   const topNSel = $('#topNSelect');
   if (topNSel && settings.top_n) topNSel.value = String(settings.top_n);
   renderPreview(previewData);
@@ -759,14 +780,70 @@ $('#recomputeBtn').addEventListener('click', async () => {
 
 $('#resetSettings').addEventListener('click', () => { if (defaultsCache) renderSettings(defaultsCache); });
 
-$('#applyCrmPreset')?.addEventListener('click', () => {
+// CRM Preset now lives in Client Configuration (Card 1) — merged in, not a
+// separate "Apply Preset" step. Picking a preset immediately loads its
+// column-mapping defaults into Advanced Configuration; Save (Card 1) persists
+// everything together.
+$('#crmPreset')?.addEventListener('change', () => {
   const sel = $('#crmPreset').value;
   const preset = CRM_PRESETS[sel];
   if (!preset) return;
   renderSettings(preset);
-  $('#settingsStatus').textContent = `${sel} preset loaded — review, then Save + Recompute`;
-  $('#settingsStatus').className = 'status ok';
+  toggleDupWizardStep(sel);
+  if ($('#settingsStatus')) {
+    $('#settingsStatus').textContent = `${sel} preset loaded — review Advanced Configuration, then Save`;
+    $('#settingsStatus').className = 'status ok';
+  }
 });
+
+
+// ============================================================
+// ClientService — single source of truth for all client data
+// All pages use this; never duplicate client loading logic.
+// ============================================================
+const ClientService = {
+  _clients: [],
+  _active: null,
+  _listeners: [],
+
+  async refresh(q = '') {
+    const url = `/api/clients${q ? `?q=${encodeURIComponent(q)}` : ''}`;
+    const data = await fetch(url).then((r) => r.json()).catch(() => ({ clients: [], active: null }));
+    this._clients = data.clients || [];
+    this._active = data.active || null;
+    const activeId = this._active?.id;
+    // Annotate is_active per session
+    this._clients = this._clients.map((c) => ({ ...c, is_active: c.id === activeId }));
+    this._notify();
+    return { clients: this._clients, active: this._active };
+  },
+
+  getClients() { return this._clients; },
+  getActive() { return this._active; },
+
+  subscribe(fn) { this._listeners.push(fn); },
+  _notify() { this._listeners.forEach((fn) => fn(this._clients, this._active)); },
+
+  async activate(id) {
+    await fetch(`/api/clients/${id}/activate`, { method: 'POST' });
+    await this.refresh();
+  },
+
+  async create(name) {
+    const res = await fetch('/api/clients', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || 'Failed to create');
+    await this.refresh();
+    return res;
+  },
+
+  async delete(id) {
+    await fetch(`/api/clients/${id}`, { method: 'DELETE' });
+    await this.refresh();
+  },
+};
 
 // ---- Mappings -------------------------------------------------------------
 let mapType = 'course';
@@ -957,27 +1034,57 @@ $('#dupClear')?.addEventListener('click', async () => {
 let clientSearchTimer = null;
 
 async function loadClients(q = '') {
-  const data = await (await fetch(`/api/clients${q ? `?q=${encodeURIComponent(q)}` : ''}`)).json().catch(() => ({ clients: [], active: null }));
-  if (!data.clients) { data.clients = []; }
-  $('#clientName').textContent = (data.active && data.active.name) || '—';
-  const activeId = data.active?.id;
+  // Always load from ClientService — single source of truth (DB only)
+  const { clients, active } = await ClientService.refresh(q);
+  $('#clientName').textContent = (active && active.name) || '—';
+  const activeId = active?.id;
   const list = $('#clientList');
-  list.innerHTML = data.clients.length ? data.clients.map((c) => `<div class="client-item ${c.id === activeId ? 'active' : ''}" data-id="${c.id}">
+  if (!list) return;
+  const canDelete = canAccess('clients-delete');
+  list.innerHTML = clients.length ? clients.map((c) => `<div class="client-item ${c.id === activeId ? 'active' : ''}" data-id="${c.id}">
       <span>${esc(c.name)}</span>
       <span class="meta">${fmtInt(c.rows)} rows · ${c.dup_files}/4 dup</span>
-      ${c.id === activeId ? '' : `<span class="del" data-del="${c.id}" title="delete client">✕</span>`}
+      ${(c.id !== activeId && canDelete) ? `<span class="del" data-del="${c.id}" title="delete client">✕</span>` : ''}
     </div>`).join('') : '<div class="meta" style="padding:8px">No clients found</div>';
   list.querySelectorAll('.client-item').forEach((b) => b.addEventListener('click', async (e) => {
     if (e.target.closest('[data-del]')) return;
-    await fetch(`/api/clients/${b.dataset.id}/activate`, { method: 'POST' });
+    await ClientService.activate(b.dataset.id);
     $('#clientMenu').classList.add('hidden');
     await switchClient();
   }));
   list.querySelectorAll('[data-del]').forEach((d) => d.addEventListener('click', async (e) => {
     e.stopPropagation();
     if (!confirm('Delete this client and ALL its data (datasets, duplicates, notes)? This cannot be undone.')) return;
-    await fetch(`/api/clients/${d.dataset.del}`, { method: 'DELETE' });
-    loadClients($('#clientSearch').value.trim());
+    await ClientService.delete(d.dataset.del);
+    renderClientDropdown();
+  }));
+}
+
+// Render client dropdown from ClientService cache (no extra fetch)
+function renderClientDropdown() {
+  const clients = ClientService.getClients();
+  const active = ClientService.getActive();
+  const activeId = active?.id;
+  $('#clientName').textContent = (active && active.name) || '—';
+  const list = $('#clientList');
+  if (!list) return;
+  const canDelete = canAccess('clients-delete');
+  list.innerHTML = clients.length ? clients.map((c) => `<div class="client-item ${c.id === activeId ? 'active' : ''}" data-id="${c.id}">
+      <span>${esc(c.name)}</span>
+      <span class="meta">${fmtInt(c.rows)} rows · ${c.dup_files}/4 dup</span>
+      ${(c.id !== activeId && canDelete) ? `<span class="del" data-del="${c.id}" title="delete client">✕</span>` : ''}
+    </div>`).join('') : '<div class="meta" style="padding:8px">No clients found</div>';
+  list.querySelectorAll('.client-item').forEach((b) => b.addEventListener('click', async (e) => {
+    if (e.target.closest('[data-del]')) return;
+    await ClientService.activate(b.dataset.id);
+    $('#clientMenu').classList.add('hidden');
+    await switchClient();
+  }));
+  list.querySelectorAll('[data-del]').forEach((d) => d.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!confirm('Delete this client and ALL its data (datasets, duplicates, notes)? This cannot be undone.')) return;
+    await ClientService.delete(d.dataset.del);
+    renderClientDropdown();
   }));
 }
 
@@ -985,8 +1092,7 @@ async function switchClient() {
   await loadClients();
   await loadReport();
   await loadDatasets();
-  if ($('#view-settings').classList.contains('is-active')) loadSettings();
-  if ($('#view-duplicates').classList.contains('is-active')) loadDup();
+  if ($('#view-configuration').classList.contains('is-active')) { loadDatasets(); loadSettings(); refreshClientConfigStatus(); loadDup(); }
   if ($('#view-mappings').classList.contains('is-active')) loadMap();
 }
 
@@ -999,14 +1105,101 @@ $('#clientSearch')?.addEventListener('input', () => {
   clearTimeout(clientSearchTimer);
   clientSearchTimer = setTimeout(() => loadClients($('#clientSearch').value.trim()), 200);
 });
-$('#newClientBtn')?.addEventListener('click', async () => {
-  const name = $('#newClientName').value.trim();
-  if (!name) return;
-  const res = await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
-  if (res.ok) { $('#newClientName').value = ''; $('#clientMenu').classList.add('hidden'); await switchClient(); }
-});
 document.addEventListener('click', (e) => {
   if (!e.target.closest('#clientPicker')) $('#clientMenu')?.classList.add('hidden');
+});
+
+// ---- Card 1: Client Configuration -----------------------------------------
+// "Existing Client" values come ONLY from the uploaded Bifurcation sheet
+// (never from the clients table) — this is a lookup/autocomplete source,
+// not a list of already-configured clients.
+let clientConfigMode = 'existing';
+let bifurcationLookup = [];
+
+async function loadBifurcationForClientConfig() {
+  const data = await fetch('/api/bifurcation').then((r) => r.json()).catch(() => ({ data: [] }));
+  bifurcationLookup = data.data || [];
+  // The Bifurcation sheet is shared across Campaign and Weekly Dump, so the
+  // same lookup data feeds both "Existing Client" datalists.
+  const opts = bifurcationLookup.map((r) => `<option value="${esc(r.client_name)}"></option>`).join('');
+  const dl = $('#clientConfigDatalist');
+  if (dl) dl.innerHTML = opts;
+  const wdDl = $('#wdClientConfigDatalist');
+  if (wdDl) wdDl.innerHTML = opts;
+}
+
+function findBifurcationMatch(name) {
+  const n = (name || '').trim().toLowerCase();
+  if (!n) return null;
+  return bifurcationLookup.find((r) => (r.client_name || '').trim().toLowerCase() === n) || null;
+}
+
+function currentClientConfigName() {
+  const el = clientConfigMode === 'existing' ? $('#clientConfigSearch') : $('#clientConfigNewName');
+  return (el?.value || '').trim();
+}
+
+// Reflect whether the typed/selected name already matches a configured
+// client (Status badge + autofill CRM/Tracking ID) — driven purely by
+// ConfiguredClients (ClientService), with the Bifurcation sheet only used
+// as a fallback autofill source for names that aren't configured yet.
+function refreshClientConfigStatus() {
+  const name = currentClientConfigName();
+  const badge = $('#clientConfigStatusBadge');
+  const configured = ClientService.getClients().find((c) => c.name.trim().toLowerCase() === name.toLowerCase());
+  if (configured) {
+    if (badge) { badge.textContent = 'Configured'; badge.className = 'status-badge configured'; }
+    if ($('#crmPreset') && configured.crm_type) $('#crmPreset').value = configured.crm_type;
+    if ($('#clientConfigTrackingId') && configured.tracking_id) $('#clientConfigTrackingId').value = configured.tracking_id;
+  } else {
+    if (badge) { badge.textContent = 'Not configured'; badge.className = 'status-badge not-configured'; }
+    if (clientConfigMode === 'existing') {
+      const bif = findBifurcationMatch(name);
+      if (bif) {
+        if (bif.crm_type && $('#crmPreset')) $('#crmPreset').value = bif.crm_type;
+        if (bif.tracking_id && $('#clientConfigTrackingId')) $('#clientConfigTrackingId').value = bif.tracking_id;
+      }
+    }
+  }
+}
+
+$$('#clientConfigModeSeg .seg-btn').forEach((b) => b.addEventListener('click', () => {
+  $$('#clientConfigModeSeg .seg-btn').forEach((x) => x.classList.remove('is-active'));
+  b.classList.add('is-active');
+  clientConfigMode = b.dataset.clientMode;
+  $('#clientConfigExistingField')?.classList.toggle('hidden', clientConfigMode !== 'existing');
+  $('#clientConfigNewField')?.classList.toggle('hidden', clientConfigMode !== 'new');
+  refreshClientConfigStatus();
+}));
+
+$('#clientConfigSearch')?.addEventListener('input', refreshClientConfigStatus);
+$('#clientConfigNewName')?.addEventListener('input', refreshClientConfigStatus);
+
+$('#clientConfigSaveBtn')?.addEventListener('click', async () => {
+  const status = $('#clientConfigStatus');
+  const name = currentClientConfigName();
+  if (!name) {
+    if (status) { status.textContent = clientConfigMode === 'existing' ? 'Select a client' : 'Enter a client name'; status.className = 'status err'; }
+    return;
+  }
+  if (status) { status.textContent = 'Saving…'; status.className = 'status'; }
+  const res = await fetch('/api/clients', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      crm_type: $('#crmPreset')?.value || '',
+      tracking_id: ($('#clientConfigTrackingId')?.value || '').trim(),
+    }),
+  });
+  if (res.ok) {
+    if (status) { status.textContent = '✓ Client configured'; status.className = 'status ok'; }
+    await switchClient();
+    refreshClientConfigStatus();
+    showToast('✓ Client configured — now visible in the client dropdown', 'ok');
+  } else {
+    const err = await res.json().catch(() => ({}));
+    if (status) { status.textContent = err.error || 'Failed'; status.className = 'status err'; }
+  }
 });
 
 $('#wdClientBtn')?.addEventListener('click', () => {
@@ -1034,6 +1227,18 @@ function closeSidebar() {
   $('#sidebarOverlay').classList.add('hidden');
 }
 
+// Header subtitle: "Lead Report" stays fixed, this reflects the current module.
+const CAMPAIGN_TAB_LABELS = {
+  report: 'Campaign Analysis',
+  configuration: 'Campaign Analysis · Configuration',
+  mappings: 'Campaign Analysis · Mappings',
+  bifurcation: 'Campaign Analysis · Bifurcation',
+};
+function setModuleHeading(text) {
+  const el = $('#headerModuleSubtitle');
+  if (el) el.textContent = text;
+}
+
 $('#sidebarToggle')?.addEventListener('click', openSidebar);
 $('#sidebarClose')?.addEventListener('click', closeSidebar);
 $('#sidebarOverlay')?.addEventListener('click', closeSidebar);
@@ -1053,7 +1258,47 @@ $$('.sidebar-item').forEach((btn) => btn.addEventListener('click', () => {
     $('#datasetPill')?.classList.add('hidden');
     $('#wdClientPicker')?.classList.remove('hidden');
     $('#view-weekly-dump').classList.add('is-active');
+    setModuleHeading('Weekly Dump');
     loadWeeklyDump();
+  } else if (btn.dataset.nav === 'bifurcation') {
+    if (!canAccess('bifurcation-manage')) return;
+    const activeTab = $('.tab[data-view].is-active');
+    if (activeTab) lastCampaignView = activeTab.dataset.view;
+    $$('.tab[data-view]').forEach((t) => t.classList.remove('is-active'));
+    $$('.view').forEach((v) => v.classList.remove('is-active'));
+    $('#campaignTabs')?.classList.add('hidden');
+    $('#clientPicker')?.classList.add('hidden');
+    $('#datasetPill')?.classList.add('hidden');
+    $('#wdClientPicker')?.classList.add('hidden');
+    $('#view-bifurcation')?.classList.add('is-active');
+    setModuleHeading('Bifurcation');
+    loadBifurcation();
+  } else if (btn.dataset.nav === 'dataset-management') {
+    if (!canAccess('datasets-manage')) return;
+    const activeTab = $('.tab[data-view].is-active');
+    if (activeTab) lastCampaignView = activeTab.dataset.view;
+    $$('.tab[data-view]').forEach((t) => t.classList.remove('is-active'));
+    $$('.view').forEach((v) => v.classList.remove('is-active'));
+    $('#campaignTabs')?.classList.add('hidden');
+    $('#clientPicker')?.classList.add('hidden');
+    $('#datasetPill')?.classList.add('hidden');
+    $('#wdClientPicker')?.classList.add('hidden');
+    $('#view-dataset-management')?.classList.add('is-active');
+    setModuleHeading('Dataset Management');
+    loadDatasetManagement();
+  } else if (btn.dataset.nav === 'audit-log') {
+    if (!canAccess('audit-log')) return;
+    const activeTab = $('.tab[data-view].is-active');
+    if (activeTab) lastCampaignView = activeTab.dataset.view;
+    $$('.tab[data-view]').forEach((t) => t.classList.remove('is-active'));
+    $$('.view').forEach((v) => v.classList.remove('is-active'));
+    $('#campaignTabs')?.classList.add('hidden');
+    $('#clientPicker')?.classList.add('hidden');
+    $('#datasetPill')?.classList.add('hidden');
+    $('#wdClientPicker')?.classList.add('hidden');
+    $('#view-audit-log')?.classList.add('is-active');
+    setModuleHeading('Audit Log');
+    loadAuditLog();
   } else {
     $$('.view').forEach((v) => v.classList.remove('is-active'));
     $('#campaignTabs')?.classList.remove('hidden');
@@ -1068,10 +1313,13 @@ $$('.sidebar-item').forEach((btn) => btn.addEventListener('click', () => {
       $('.tab[data-view="report"]')?.classList.add('is-active');
       $('#view-report')?.classList.add('is-active');
     }
+    setModuleHeading(CAMPAIGN_TAB_LABELS[lastCampaignView] || CAMPAIGN_TAB_LABELS.report);
   }
 }));
 
 $$('.sidebar-sub-item[data-nav-tab]').forEach((btn) => btn.addEventListener('click', () => {
+  const perm = btn.dataset.permission;
+  if (perm && !canAccess(perm)) return;
   closeSidebar();
   const tabName = btn.dataset.navTab;
   // switch to campaign section
@@ -1090,13 +1338,14 @@ $$('.sidebar-sub-item[data-nav-tab]').forEach((btn) => btn.addEventListener('cli
   $$('.tab[data-view]').forEach((t) => t.classList.remove('is-active'));
   $(`.tab[data-view="${tabName}"]`)?.classList.add('is-active');
   $(`#view-${tabName}`)?.classList.add('is-active');
-  if (tabName === 'data') loadDatasets();
-  if (tabName === 'settings') loadSettings();
+  setModuleHeading(CAMPAIGN_TAB_LABELS[tabName] || CAMPAIGN_TAB_LABELS.report);
+  if (tabName === 'configuration') { loadDatasets(); loadSettings(); loadBifurcationForClientConfig().then(refreshClientConfigStatus); loadDup(); }
   if (tabName === 'mappings') loadMap();
-  if (tabName === 'duplicates') loadDup();
 }));
 
 $$('.sidebar-sub-item[data-wd-sub]').forEach((btn) => btn.addEventListener('click', () => {
+  const perm = btn.dataset.permission;
+  if (perm && !canAccess(perm)) return;
   closeSidebar();
   const sub = btn.dataset.wdSub;
   $$('.sidebar-item').forEach((b) => b.classList.remove('is-active'));
@@ -1116,6 +1365,7 @@ $$('.sidebar-sub-item[data-wd-sub]').forEach((btn) => btn.addEventListener('clic
   $$('.wd-view').forEach((v) => v.classList.remove('is-active'));
   $(`.tab[data-wd-view="${sub}"]`)?.classList.add('is-active');
   $(`#wd-view-${sub}`)?.classList.add('is-active');
+  setModuleHeading(sub === 'setup' ? 'Weekly Dump · Setup' : sub === 'datasets' ? 'Weekly Dump · Datasets' : 'Weekly Dump');
   loadWdClients();
   if (sub === 'report') loadWdReport();
   if (sub === 'setup') loadWdSetup();
@@ -1134,6 +1384,11 @@ const WD_FIELDS = [
   ['adm_values', 'Admission — values (comma-sep)',    'list'],
 ];
 
+// WD_PRESETS: Only TWO calculation engines exist.
+// Engine 1: NPF  — uses NPF/Meritto formulas
+// Engine 2: LSQ  — shared engine for LSQ, ExtraEdge, Client CRM, Google Sheet
+// The custom_crm_name field handles display names (Salesforce, TargetX, etc.)
+// and must NOT affect which engine runs.
 const WD_PRESETS = {
   NPF: { crm_type: 'NPF' },
   LSQ: {
@@ -1157,8 +1412,9 @@ const WD_PRESETS = {
     adm_column:  'LeadStage',
     adm_values:  [],
   },
+  // Client CRM → uses LSQ engine (same calculation logic, different column names)
   Client: {
-    crm_type: 'Client',
+    crm_type: 'LSQ',
     source_value:     'kollegeapply',
     medium_column:    'Medium',
     source_column:    'Source',
@@ -1178,8 +1434,9 @@ const WD_PRESETS = {
     adm_column:  '',
     adm_values:  [],
   },
+  // ExtraEdge → uses LSQ engine
   ExtraEdge: {
-    crm_type: 'ExtraEdge',
+    crm_type: 'LSQ',
     source_value:     'kollegeapply',
     medium_column:    'Medium',
     source_column:    'Source',
@@ -1198,6 +1455,17 @@ const WD_PRESETS = {
     app_values:  [],
     adm_column:  'Stage',
     adm_values:  [],
+  },
+  // No pre-existing Google Sheet formula set exists in this app — this preset
+  // intentionally leaves every field blank so it behaves like "Client" (fully
+  // manual column mapping) until real Google Sheet formulas are defined.
+  // Google Sheet → uses LSQ engine
+  GoogleSheet: {
+    crm_type: 'LSQ',
+    source_value: '', medium_column: '', source_column: '', campaign_column: '', lead_type_column: '',
+    verified_column: '', verified_value: '', primary_value: 'Primary', secondary_value: 'Secondary', tertiary_value: 'Tertiary',
+    secondary_values: ['Secondary'], tertiary_values: ['Tertiary'],
+    fi_column: '', fi_values: [], app_column: '', app_values: [], adm_column: '', adm_values: [],
   },
 };
 
@@ -1221,7 +1489,12 @@ function renderWdSettingsForm(settings) {
 function collectWdSettings() {
   const crm = $('#wdCrmType')?.value || '';
   const preset = WD_PRESETS[crm] || {};
-  const out = { ...preset, crm_type: crm, tracking_id: $('#wdTrackingId')?.value || '' };
+  const out = {
+    ...preset,
+    crm_type: crm,
+    tracking_id: $('#wdTrackingId')?.value || '',
+    custom_crm_name: ($('#wdCustomCrmName')?.value || '').trim(),
+  };
   $$('.wd-setting').forEach((inp) => {
     const { key, type } = inp.dataset;
     out[key] = type === 'list' ? inp.value.split(',').map((x) => x.trim()).filter(Boolean) : inp.value;
@@ -1233,6 +1506,7 @@ function collectWdSettings() {
 let wdClientSearchTimer = null;
 
 async function loadWdClients(q = '') {
+  // WD uses its own client endpoint (separate WD client scope)
   const url = `/api/wd/clients${q ? `?q=${encodeURIComponent(q)}` : ''}`;
   const data = await fetch(url).then((r) => r.json()).catch(() => ({ clients: [], active: null }));
   const activeId = data.active?.id;
@@ -1240,13 +1514,15 @@ async function loadWdClients(q = '') {
   if (nameEl) nameEl.textContent = (data.active && data.active.name) || '—';
   const list = $('#wdClientList');
   if (!list) return;
+  const canDeleteWd = canAccess('clients-delete');
+  // WD dropdown shows only configured clients from DB (wd_clients table)
   list.innerHTML = data.clients.length
     ? data.clients.map((c) => `<div class="client-item ${c.id === activeId ? 'active' : ''}" data-id="${c.id}">
         <span>${esc(c.name)}</span>
         <span class="meta">${fmtInt(c.rows)} rows</span>
-        ${c.id === activeId ? '' : `<span class="del" data-del="${c.id}" title="delete">✕</span>`}
+        ${(c.id !== activeId && canDeleteWd) ? `<span class="del" data-del="${c.id}" title="delete">✕</span>` : ''}
       </div>`).join('')
-    : '<p class="muted" style="padding:8px 10px;margin:0">No clients yet. Create one below.</p>';
+    : '<p class="muted" style="padding:8px 10px;margin:0">No clients yet. Create one in Setup.</p>';
   list.querySelectorAll('.client-item[data-id]').forEach((b) => b.addEventListener('click', async (e) => {
     if (e.target.closest('[data-del]')) return;
     await fetch(`/api/wd/clients/${b.dataset.id}/activate`, { method: 'POST' });
@@ -1262,8 +1538,11 @@ async function loadWdClients(q = '') {
 }
 
 async function switchWdClient() {
+  const clientData = await fetch('/api/wd/clients').then((r) => r.json()).catch(() => ({ clients: [], active: null }));
   await loadWdClients();
   await loadWdSettings();
+  // Auto-fill tracking ID and CRM from bifurcation if fields are empty
+  if (clientData.active?.name) await autoFillWdFromBifurcation(clientData.active.name);
   if ($('#wd-view-datasets').classList.contains('is-active')) await loadWdDatasets();
   if ($('#wd-view-report').classList.contains('is-active')) await loadWdReport();
 }
@@ -1273,22 +1552,17 @@ async function loadWdDatasets() {
   if (!container) return;
   container.innerHTML = '<h2>Datasets</h2><p class="muted">Loading…</p>';
   const { tree } = await (await fetch('/api/wd/datasets/tree')).json();
-  if (!tree || !tree.length) {
-    container.innerHTML = '<h2>Datasets</h2><p class="muted" style="padding:24px 0;text-align:center">No clients or datasets yet. Create a client in <strong>Setup</strong> and upload data.</p>';
+
+  // FIX 1: Only show clients that have at least one uploaded dataset.
+  // Clients only in bifurcation, newly created, or empty placeholders are excluded.
+  const activeTree = (tree || []).filter((c) => c.datasets && c.datasets.length > 0);
+
+  if (!activeTree.length) {
+    container.innerHTML = '<h2>Datasets</h2><p class="muted" style="padding:24px 0;text-align:center">No datasets uploaded yet. Go to <strong>Setup</strong> to create a client and upload data.</p>';
     return;
   }
 
-  const html = tree.map((client) => {
-    if (!client.datasets.length) {
-      return `<div class="wd-folder">
-        <div class="wd-folder-head" data-toggle-folder>
-          <span class="wd-folder-arrow">▶</span>
-          <span class="wd-folder-icon">📁</span>
-          <span class="wd-folder-name">${esc(client.clientName)}</span>
-          <span class="muted" style="margin-left:8px;font-size:12px">(no datasets)</span>
-        </div>
-      </div>`;
-    }
+  const html = activeTree.map((client) => {
     const dsHtml = client.datasets.map((ds) => {
       const sheetsHtml = ds.sheets.map((sh) =>
         `<div class="wd-file" data-view-file data-ds-id="${ds.id}" data-sheet="${esc(sh.name)}">
@@ -1401,10 +1675,29 @@ async function loadWdSettings() {
   const res = await fetch('/api/wd/settings').catch(() => null);
   const json = res ? await res.json().catch(() => ({})) : {};
   const settings = json.settings || {};
+  const isAdmin = canAccess('clients-delete');
   const sel = $('#wdCrmType');
-  if (sel) sel.value = settings.crm_type || '';
+  if (sel) {
+    // FIX 2: Do NOT add CRM types from bifurcation sheet.
+    // Dropdown is fixed in HTML — only the two engines + named presets.
+    // Map saved crm_type to the nearest known preset option.
+    const savedCrm = settings.crm_type || '';
+    const knownPresets = ['NPF', 'LSQ', 'ExtraEdge', 'Client', 'GoogleSheet'];
+    if (knownPresets.includes(savedCrm)) {
+      sel.value = savedCrm;
+    } else if (savedCrm) {
+      // Unknown saved value — map to engine based on name
+      sel.value = /^npf/i.test(savedCrm) ? 'NPF' : 'LSQ';
+    }
+    // FIX 1 (permission): CRM Preset editable by Admin AND User
+    sel.disabled = false;
+  }
   const tid = $('#wdTrackingId');
-  if (tid) tid.value = settings.tracking_id || '';
+  // Tracking ID: Admin only
+  if (tid) { tid.value = settings.tracking_id || ''; tid.readOnly = !isAdmin; }
+  const customCrm = $('#wdCustomCrmName');
+  // Custom CRM Name: editable by Admin AND User
+  if (customCrm) { customCrm.value = settings.custom_crm_name || ''; customCrm.readOnly = false; }
   renderWdSettingsForm(settings);
   renderWdUploadSection(settings.crm_type || '');
 }
@@ -1468,7 +1761,6 @@ function copyWdTable() {
 async function loadWdReport() {
   const container = $('#wd-report-body');
   if (!container) return;
-  loadWdReportClients();
   container.innerHTML = '<div class="card"><p class="muted">Loading…</p></div>';
 
   const data = await fetch('/api/wd/report').then((r) => r.json()).catch(() => ({ empty: true, reason: 'error' }));
@@ -1496,7 +1788,7 @@ async function loadWdReport() {
     <div class="card">
       <div class="report-toolbar" style="margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--line)">
         <div>
-          <h2 style="margin:0">Weekly Dump Report</h2>
+          <h2 style="margin:0">Weekly Dump Report${data.customCrmName ? ` — ${esc(data.customCrmName)}` : ''}</h2>
           <span class="muted" style="font-size:13px">${esc(dataset.name || '')} · ${new Date(dataset.uploaded_at).toLocaleDateString()}</span>
         </div>
         <button class="btn" id="wdCopyBtn" type="button">📋 Copy table</button>
@@ -1576,7 +1868,7 @@ function renderNpfReport(container, data) {
     <div class="card" style="padding:0;overflow:hidden">
       <div style="padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px">
         <div>
-          <h2 style="margin:0">Weekly Dump Report</h2>
+          <h2 style="margin:0">Weekly Dump Report${data.customCrmName ? ` — ${esc(data.customCrmName)}` : ''}</h2>
           <span class="muted" style="font-size:13px">${esc(dataset.name || '')} · ${new Date(dataset.uploaded_at).toLocaleDateString()}</span>
         </div>
         <button class="btn" id="wdNpfCopyBtn" type="button">📋 Copy table</button>
@@ -1644,6 +1936,33 @@ function loadWeeklyDump() {
 
 function loadWdSetup() {
   loadWdSettings();
+  loadWdDatasetHistory();
+  loadBifurcationForClientConfig();
+}
+
+async function loadWdDatasetHistory() {
+  const tbody = $('#wdDatasetHistoryTable tbody');
+  if (!tbody) return;
+  const data = await fetch('/api/wd/datasets').then((r) => r.json()).catch(() => ({ datasets: [] }));
+  const rows = data.datasets || [];
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="muted" style="text-align:center">No datasets yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((d) => `<tr>
+    <td class="txt">${esc(d.name || d.source_filename || 'Untitled')}</td>
+    <td>${new Date(d.uploaded_at).toLocaleDateString()}</td>
+    <td>${fmtInt(d.row_count)}</td>
+    <td><span class="status-badge ${d.is_active ? 'active' : 'archived'}">${d.is_active ? 'Active' : 'Inactive'}</span></td>
+    <td>${esc(d.uploaded_by || '—')}</td>
+    <td>${d.is_active ? '' : `<button class="btn sm ghost" data-wd-activate="${d.id}" type="button">Activate</button>`}</td>
+  </tr>`).join('');
+  tbody.querySelectorAll('[data-wd-activate]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      await fetch(`/api/wd/datasets/${btn.dataset.wdActivate}/activate`, { method: 'POST' });
+      loadWdDatasetHistory();
+    });
+  });
 }
 
 function renderWdUploadSection(crm) {
@@ -1912,25 +2231,53 @@ async function wdChunkedUpload(file, name) {
   return sent;
 }
 
-$('#wdNewClientBtn')?.addEventListener('click', async () => {
-  const name = $('#wdNewClientName').value.trim();
-  if (!name) return;
-  const res = await fetch('/api/wd/clients', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name }),
-  });
-  if (res.ok) {
-    $('#wdNewClientName').value = '';
-    $('#wdClientMenu')?.classList.add('hidden');
+// ---- WD Card 1: Client Configuration (mirrors Campaign's Client Configuration) --
+let wdClientConfigMode = 'existing';
+
+function currentWdClientConfigName() {
+  const el = wdClientConfigMode === 'existing' ? $('#wdClientConfigSearch') : $('#wdNewClientNameSetup');
+  return (el?.value || '').trim();
+}
+
+$$('#wdClientConfigModeSeg .seg-btn').forEach((b) => b.addEventListener('click', () => {
+  $$('#wdClientConfigModeSeg .seg-btn').forEach((x) => x.classList.remove('is-active'));
+  b.classList.add('is-active');
+  wdClientConfigMode = b.dataset.wdClientMode;
+  $('#wdClientConfigExistingField')?.classList.toggle('hidden', wdClientConfigMode !== 'existing');
+  $('#wdClientConfigNewField')?.classList.toggle('hidden', wdClientConfigMode !== 'new');
+}));
+
+$('#wdClientConfigSearch')?.addEventListener('change', async () => {
+  const name = currentWdClientConfigName();
+  if (name) await autoFillWdFromBifurcation(name);
+});
+
+// Save now does double duty (per "merge CRM Configuration into Client
+// Configuration"): if the typed/selected name isn't the currently active WD
+// client, create/configure it first, then persist CRM Preset + Tracking ID +
+// Custom CRM Name + column mapping in one Save action.
+$('#wdSaveSettings')?.addEventListener('click', async () => {
+  const name = currentWdClientConfigName();
+  const status = $('#wdSettingsStatus');
+  if (name && name.toLowerCase() !== ($('#wdClientName')?.textContent || '').trim().toLowerCase()) {
+    if (status) { status.textContent = 'Configuring client…'; status.className = 'status'; }
+    const res = await fetch('/api/wd/clients', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        crm_type: $('#wdCrmType')?.value || '',
+        tracking_id: $('#wdTrackingId')?.value || '',
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (status) { status.textContent = err.error || 'Failed to configure client'; status.className = 'status err'; }
+      return;
+    }
     await switchWdClient();
-    showToast('✓ Client created', 'ok');
-  } else {
-    const err = await res.json().catch(() => ({}));
-    const s = $('#wdClientStatus');
-    if (s) { s.textContent = err.error || 'Failed to create'; s.className = 'status err'; }
-    else showToast(err.error || 'Failed to create client', 'err');
   }
+  await saveWdSettings();
+  showToast('✓ Client configured — now visible in the client dropdown', 'ok');
 });
 
 $('#wdComputeBtn')?.addEventListener('click', () => {
@@ -1943,16 +2290,447 @@ $('#wdComputeBtn')?.addEventListener('click', () => {
 
 $('#wdCrmType')?.addEventListener('change', () => {
   const crm = $('#wdCrmType').value;
+  // FIX 3: Route to correct engine. Non-NPF CRMs all use LSQ engine.
+  // The display name comes from custom_crm_name, not from crm_type.
   const preset = WD_PRESETS[crm];
-  if (preset) renderWdSettingsForm(preset);
-  else renderWdSettingsForm({ crm_type: crm });
+  if (preset) {
+    renderWdSettingsForm(preset);
+  } else {
+    // Unknown CRM value (e.g. from old saved settings) — default to LSQ engine
+    renderWdSettingsForm({ crm_type: 'LSQ' });
+  }
   renderWdUploadSection(crm);
 });
 
-$('#wdSaveSettings')?.addEventListener('click', saveWdSettings);
+// ---- Role-based UI --------------------------------------------------------
+// Mirrors src/permissions.js — update both together.
+const ROLE_PERMISSIONS = {
+  admin: [
+    'report', 'data', 'setup', 'mappings', 'duplicates',
+    'bifurcation', 'app-settings',
+    'wd-report', 'wd-setup', 'wd-datasets',
+    'datasets-delete', 'datasets-manage', 'recompute',
+    'bifurcation-manage', 'clients-create', 'clients-delete',
+    'audit-log', 'export',
+  ],
+  user: [
+    'report', 'data', 'setup', 'mappings', 'duplicates',
+    'recompute', 'wd-report', 'wd-setup',
+    'clients-create', 'export',
+  ],
+};
+
+let currentRole = 'admin';
+
+function canAccess(permission) {
+  const perms = ROLE_PERMISSIONS[currentRole] || ROLE_PERMISSIONS['user'] || [];
+  return perms.includes(permission);
+}
+
+function applyRoleUi(role) {
+  currentRole = role || 'admin';
+  $$('[data-permission]').forEach((el) => {
+    const perm = el.dataset.permission;
+    if (!canAccess(perm)) el.style.display = 'none';
+  });
+  // Make CRM/Tracking ID read-only for non-admin
+  const isAdmin = canAccess('clients-delete');
+  const wdCrm = $('#wdCrmType');
+  const wdTid = $('#wdTrackingId');
+  if (wdCrm) wdCrm.disabled = !isAdmin;
+  if (wdTid) wdTid.readOnly = !isAdmin;
+}
+
+// ---- Theme ----------------------------------------------------------------
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = $('#themeToggle');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('lead_report_theme');
+  applyTheme(saved || 'dark');
+}
+
+$('#themeToggle')?.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('lead_report_theme', next);
+  applyTheme(next);
+});
+
+// ---- Bifurcation ----------------------------------------------------------
+let bifurcationHeaders = [];
+
+function populateBifColSelects(headers, cfg) {
+  const blank = '<option value="">— none —</option>';
+  const opts = headers.map((h) => `<option value="${esc(h)}">${esc(h)}</option>`).join('');
+  ['#bifClientCol', '#bifTrackingCol', '#bifCrmCol'].forEach((sel) => {
+    const el = $(sel);
+    if (!el) return;
+    const isRequired = sel === '#bifClientCol';
+    el.innerHTML = (isRequired ? '' : blank) + opts;
+  });
+  if (cfg) {
+    if (cfg.client_col)   $('#bifClientCol').value   = cfg.client_col;
+    if (cfg.tracking_col) $('#bifTrackingCol').value = cfg.tracking_col;
+    if (cfg.crm_col)      $('#bifCrmCol').value      = cfg.crm_col;
+  }
+}
+
+function renderBifurcationTable(rows) {
+  const tbody = $('#bifurcationTable tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.map((r) =>
+    `<tr><td class="txt">${esc(r.client_name)}</td><td>${esc(r.tracking_id || '')}</td><td>${esc(r.crm_type || '')}</td></tr>`
+  ).join('') || '<tr><td colspan="3" class="muted" style="text-align:center">No mappings yet</td></tr>';
+}
+
+async function loadBifurcation() {
+  const data = await fetch('/api/bifurcation').then((r) => r.json()).catch(() => ({ config: null, data: [] }));
+  if (data.config?.headers?.length) {
+    bifurcationHeaders = data.config.headers;
+    populateBifColSelects(bifurcationHeaders, data.config);
+    $('#bifurcationMappingCard')?.classList.remove('hidden');
+  }
+  if (data.data?.length) {
+    renderBifurcationTable(data.data);
+    $('#bifurcationDataCard')?.classList.remove('hidden');
+  }
+}
+
+$('#bifurcationUploadForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const s = $('#bifurcationUploadStatus');
+  const btn = $('#bifurcationUploadBtn');
+  const file = $('#bifurcationFile').files[0];
+  if (!file) { s.textContent = 'Choose a file'; s.className = 'status err'; return; }
+  btn.disabled = true;
+  s.textContent = 'Uploading…'; s.className = 'status';
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/bifurcation/upload', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    bifurcationHeaders = data.headers;
+    populateBifColSelects(bifurcationHeaders, null);
+    $('#bifurcationMappingCard')?.classList.remove('hidden');
+    s.textContent = `✓ ${fmtInt(data.rowCount)} rows — now map columns below`;
+    s.className = 'status ok';
+  } catch (err) {
+    s.textContent = err.message; s.className = 'status err';
+  } finally { btn.disabled = false; }
+});
+
+$('#bifurcationApplyBtn')?.addEventListener('click', async () => {
+  const s = $('#bifurcationApplyStatus');
+  const clientCol   = $('#bifClientCol')?.value;
+  const trackingCol = $('#bifTrackingCol')?.value;
+  const crmCol      = $('#bifCrmCol')?.value;
+  if (!clientCol) { s.textContent = 'Client Name column is required'; s.className = 'status err'; return; }
+  s.textContent = 'Applying…'; s.className = 'status';
+  try {
+    const res = await fetch('/api/bifurcation/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ client_col: clientCol, tracking_col: trackingCol || null, crm_col: crmCol || null }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Apply failed');
+    s.textContent = `✓ ${data.applied} clients synced`; s.className = 'status ok';
+    await loadBifurcation();
+    // Refresh client dropdowns
+    loadClients();
+    loadWdClients();
+    showToast(`✓ ${data.applied} clients synced from bifurcation`, 'ok');
+  } catch (err) {
+    s.textContent = err.message; s.className = 'status err';
+  }
+});
+
+// ---- WD Setup auto-fill from bifurcation ----------------------------------
+async function autoFillWdFromBifurcation(clientName) {
+  if (!clientName) return;
+  const data = await fetch(`/api/bifurcation/lookup?name=${encodeURIComponent(clientName)}`).then((r) => r.json()).catch(() => ({ found: false }));
+  if (!data.found) return;
+  if (data.tracking_id) {
+    const tid = $('#wdTrackingId');
+    if (tid && !tid.value) tid.value = data.tracking_id;
+  }
+  if (data.crm_type) {
+    const crmSel = $('#wdCrmType');
+    if (crmSel && !crmSel.value) {
+      crmSel.value = data.crm_type;
+      const preset = WD_PRESETS[data.crm_type];
+      if (preset) renderWdSettingsForm(preset);
+      else renderWdSettingsForm({ crm_type: data.crm_type });
+      renderWdUploadSection(data.crm_type);
+    }
+  }
+}
+
+// ---- Dataset Management (admin only) --------------------------------------
+let dmDatasets = [];
+let dmSelected = new Set();
+let dmLastClickIdx = null;
+
+async function loadDatasetManagement() {
+  const q = $('#dmSearch')?.value.trim() || '';
+  const clientId = $('#dmClientFilter')?.value || '';
+  const status = $('#dmStatusFilter')?.value || '';
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (clientId) params.set('client_id', clientId);
+  if (status) params.set('status', status);
+  const data = await fetch(`/api/datasets/manage?${params}`).then((r) => r.json()).catch(() => ({ datasets: [], clients: [] }));
+  // Dataset ids come back from Postgres bigint columns as strings — normalize
+  // to Number here so every later comparison (Set membership, select-all,
+  // shift-select) is driven by one consistent type instead of accidentally
+  // matching (or failing to match) on string vs number.
+  dmDatasets = (data.datasets || []).map((d) => ({ ...d, id: Number(d.id) }));
+  dmSelected.clear();
+  dmLastClickIdx = null;
+  updateDmBulkBar();
+
+  // Populate client filter from ClientService (single source of truth)
+  const cf = $('#dmClientFilter');
+  if (cf) {
+    const allClients = ClientService.getClients().length ? ClientService.getClients() : (data.clients || []);
+    const current = cf.value;
+    cf.innerHTML = '<option value="">All Clients</option>' +
+      allClients.map((c) => `<option value="${c.id}" ${String(c.id) === current ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  }
+
+  renderDmTable();
+}
+
+function renderDmTable() {
+  const tbody = $('#dmTableBody');
+  if (!tbody) return;
+  if (!dmDatasets.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="muted" style="text-align:center">No datasets found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = dmDatasets.map((d, i) => {
+    const statusBadge = `<span class="status-badge ${d.status || 'active'}">${d.status || 'active'}</span>`;
+    const actions = [];
+    if (d.status !== 'archived') actions.push(`<button class="link-btn" data-dm-archive="${d.id}" data-idx="${i}">Archive</button>`);
+    if (d.status === 'archived') actions.push(`<button class="link-btn" data-dm-restore="${d.id}">Restore</button>`);
+    if (d.status === 'deleted') actions.push(`<button class="link-btn" data-dm-restore="${d.id}">Restore</button>`);
+    if (d.status !== 'deleted') actions.push(`<button class="link-btn danger" data-dm-delete="${d.id}">Delete</button>`);
+    if (d.status === 'deleted') actions.push(`<button class="link-btn danger" data-dm-permanent="${d.id}">Perm. Delete</button>`);
+    const isChecked = dmSelected.has(d.id);
+    return `<tr data-dm-row="${i}" class="${isChecked ? 'dm-selected' : ''}">
+      <td><input type="checkbox" class="dm-chk" data-id="${d.id}" data-idx="${i}" ${isChecked ? 'checked' : ''} /></td>
+      <td class="txt">${esc(d.name || d.source_filename || 'Untitled')}</td>
+      <td class="txt">${esc(d.client_name || '—')}</td>
+      <td>${esc(d.crm_type || '—')}</td>
+      <td>${fmtInt(d.row_count)}</td>
+      <td>${esc(d.uploaded_by || '—')}</td>
+      <td>${new Date(d.uploaded_at).toLocaleDateString()}</td>
+      <td>${statusBadge}</td>
+      <td>${actions.join(' ')}</td>
+    </tr>`;
+  }).join('');
+
+  bindDmTableEvents();
+  updateDmSelectAll();
+}
+
+function bindDmTableEvents() {
+  const tbody = $('#dmTableBody');
+  if (!tbody) return;
+
+  // Checkboxes with shift-select
+  tbody.querySelectorAll('.dm-chk').forEach((chk) => {
+    chk.addEventListener('click', (e) => {
+      const idx = Number(chk.dataset.idx);
+      const id = Number(chk.dataset.id);
+      if (e.shiftKey && dmLastClickIdx !== null) {
+        const lo = Math.min(idx, dmLastClickIdx), hi = Math.max(idx, dmLastClickIdx);
+        for (let i = lo; i <= hi; i++) {
+          const did = dmDatasets[i]?.id;
+          if (did) dmSelected.add(did);
+        }
+      } else {
+        if (chk.checked) dmSelected.add(id); else dmSelected.delete(id);
+      }
+      dmLastClickIdx = idx;
+      renderDmTable();
+      updateDmBulkBar();
+    });
+  });
+
+  // Per-row actions
+  tbody.querySelectorAll('[data-dm-archive]').forEach((btn) => btn.addEventListener('click', async () => {
+    await fetch(`/api/datasets/${btn.dataset.dmArchive}/archive`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ archive: true }) });
+    loadDatasetManagement();
+  }));
+  tbody.querySelectorAll('[data-dm-restore]').forEach((btn) => btn.addEventListener('click', async () => {
+    await fetch(`/api/datasets/${btn.dataset.dmRestore}/restore`, { method: 'POST' });
+    loadDatasetManagement();
+  }));
+  tbody.querySelectorAll('[data-dm-delete]').forEach((btn) => btn.addEventListener('click', async () => {
+    if (!confirm('Soft-delete this dataset? It can be restored later.')) return;
+    await fetch(`/api/datasets/${btn.dataset.dmDelete}`, { method: 'DELETE' });
+    loadDatasetManagement();
+  }));
+  tbody.querySelectorAll('[data-dm-permanent]').forEach((btn) => btn.addEventListener('click', async () => {
+    if (!confirm('Permanently delete this dataset? This cannot be undone.')) return;
+    await fetch(`/api/datasets/${btn.dataset.dmPermanent}/permanent`, { method: 'DELETE' });
+    loadDatasetManagement();
+  }));
+}
+
+function updateDmBulkBar() {
+  const bar = $('#dmBulkBar');
+  const cnt = $('#dmSelectedCount');
+  if (!bar) return;
+  if (dmSelected.size > 0) {
+    bar.classList.remove('hidden');
+    if (cnt) cnt.textContent = `${dmSelected.size} selected`;
+  } else {
+    bar.classList.add('hidden');
+  }
+}
+
+function updateDmSelectAll() {
+  const sa = $('#dmSelectAll');
+  if (!sa) return;
+  // Default unchecked — only checked when ALL are explicitly selected
+  sa.checked = dmSelected.size > 0 && dmSelected.size === dmDatasets.length;
+  sa.indeterminate = dmSelected.size > 0 && dmSelected.size < dmDatasets.length;
+  if (dmSelected.size === 0) { sa.checked = false; sa.indeterminate = false; }
+}
+
+$('#dmSelectAll')?.addEventListener('change', (e) => {
+  // Only select all if explicitly checked, never auto-check
+  if (e.target.checked) {
+    dmDatasets.forEach((d) => dmSelected.add(d.id));
+  } else {
+    dmSelected.clear();
+  }
+  renderDmTable();
+  updateDmBulkBar();
+});
+
+let dmSearchTimer = null;
+$('#dmSearch')?.addEventListener('input', () => { clearTimeout(dmSearchTimer); dmSearchTimer = setTimeout(loadDatasetManagement, 250); });
+$('#dmClientFilter')?.addEventListener('change', loadDatasetManagement);
+$('#dmStatusFilter')?.addEventListener('change', loadDatasetManagement);
+
+async function dmBulkAction(action) {
+  const ids = [...dmSelected];
+  if (!ids.length) return;
+  const label = { archive: 'archive', delete: 'soft-delete', restore: 'restore', permanent: 'permanently delete' }[action] || action;
+  if ((action === 'delete' || action === 'permanent') && !confirm(`${label} ${ids.length} dataset(s)?`)) return;
+  await fetch('/api/datasets/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action, ids }) });
+  dmSelected.clear();
+  loadDatasetManagement();
+}
+
+$('#dmBulkArchive')?.addEventListener('click', () => dmBulkAction('archive'));
+$('#dmBulkRestore')?.addEventListener('click', () => dmBulkAction('restore'));
+$('#dmBulkDelete')?.addEventListener('click', () => dmBulkAction('delete'));
+$('#dmBulkPermanent')?.addEventListener('click', () => dmBulkAction('permanent'));
+$('#dmBulkClear')?.addEventListener('click', () => { dmSelected.clear(); renderDmTable(); updateDmBulkBar(); });
+
+// ---- Audit Log (admin only) -----------------------------------------------
+let auditOffset = 0;
+const AUDIT_LIMIT = 100;
+
+async function loadAuditLog(append = false) {
+  if (!append) { auditOffset = 0; }
+  const q = $('#auditSearch')?.value.trim() || '';
+  const params = new URLSearchParams({ limit: AUDIT_LIMIT, offset: auditOffset });
+  if (q) params.set('q', q);
+  const data = await fetch(`/api/audit-log?${params}`).then((r) => r.json()).catch(() => ({ entries: [], total: 0 }));
+  const entries = data.entries || [];
+  const tbody = $('#auditTableBody');
+  if (!tbody) return;
+
+  const rows = entries.map((e) => {
+    const details = e.details ? JSON.stringify(e.details).slice(0, 80) : '';
+    return `<tr>
+      <td>${new Date(e.created_at).toLocaleString()}</td>
+      <td>${esc(e.username)}</td>
+      <td>${esc(e.action)}</td>
+      <td>${esc(e.client_name || '—')}</td>
+      <td class="txt">${esc(e.dataset_name || '—')}</td>
+      <td class="muted" style="font-size:11px">${esc(details)}</td>
+    </tr>`;
+  }).join('');
+
+  if (append) {
+    tbody.insertAdjacentHTML('beforeend', rows);
+  } else {
+    tbody.innerHTML = rows || '<tr><td colspan="6" class="muted" style="text-align:center">No audit entries</td></tr>';
+  }
+
+  auditOffset += entries.length;
+  const more = $('#auditLoadMore');
+  if (more) {
+    if (auditOffset < (data.total || 0)) {
+      more.innerHTML = `<button class="btn ghost sm" id="auditMoreBtn">Load more (${data.total - auditOffset} remaining)</button>`;
+      $('#auditMoreBtn')?.addEventListener('click', () => loadAuditLog(true));
+    } else {
+      more.innerHTML = '';
+    }
+  }
+}
+
+let auditSearchTimer = null;
+$('#auditSearch')?.addEventListener('input', () => { clearTimeout(auditSearchTimer); auditSearchTimer = setTimeout(() => loadAuditLog(false), 300); });
+
+// ---- App Settings ---------------------------------------------------------
+async function loadAppSettings() {
+  const data = await fetch('/api/app-settings').then((r) => r.json()).catch(() => ({ settings: {} }));
+  const s = data.settings || {};
+  const set = (id, val) => { const el = $(id); if (el) el.value = val || ''; };
+  set('#appOrgName', s.org_name);
+  set('#appDefaultCrm', s.default_crm);
+  set('#appReportTitle', s.report_title);
+  set('#appTheme', s.theme);
+  set('#appExportFormat', s.export_format || 'xlsx');
+}
+
+$('#saveAppSettings')?.addEventListener('click', async () => {
+  const s = $('#appSettingsStatus');
+  s.textContent = 'Saving…'; s.className = 'status';
+  const config = {
+    org_name:      $('#appOrgName')?.value.trim() || '',
+    default_crm:   $('#appDefaultCrm')?.value || '',
+    report_title:  $('#appReportTitle')?.value.trim() || '',
+    theme:         $('#appTheme')?.value || '',
+    export_format: $('#appExportFormat')?.value || 'xlsx',
+  };
+  const res = await fetch('/api/app-settings', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(config),
+  });
+  if (res.ok) {
+    s.textContent = '✓ Saved'; s.className = 'status ok';
+    setTimeout(() => { s.textContent = ''; s.className = 'status'; }, 2500);
+  } else {
+    const err = await res.json().catch(() => ({}));
+    s.textContent = err.error || 'Save failed'; s.className = 'status err';
+  }
+});
 
 // ---- Boot -----------------------------------------------------------------
-updateMapPlaceholders();
-loadClients();
-loadReport();
-loadDatasets();
+async function init() {
+  initTheme();
+  const session = await fetch('/api/auth/session').then((r) => r.json()).catch(() => ({ authenticated: false, role: 'admin' }));
+  applyRoleUi(session.role);
+  updateMapPlaceholders();
+  // Boot ClientService first — all dropdowns subscribe to it
+  await ClientService.refresh();
+  renderClientDropdown();
+  loadReport();
+  loadDatasets();
+}
+
+init();

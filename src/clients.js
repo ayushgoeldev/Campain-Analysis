@@ -34,12 +34,17 @@ export async function activeClient(req) {
   return rows[0] || { id, name: 'Default Client' };
 }
 
-export async function listClients(q = '', section = 'campaign') {
+// configuredOnly defaults to true: this is the source of truth for which
+// clients are allowed to appear in client pickers / navigation. A client
+// becomes configured via markClientConfigured() — see below — never merely
+// by existing in the bifurcation sheet.
+export async function listClients(q = '', section = 'campaign', configuredOnly = true) {
   const params = [section];
   let where = 'WHERE c.section = $1';
+  if (configuredOnly) where += ' AND c.is_configured = true';
   if (q) { params.push(`%${q}%`); where += ` AND c.name ILIKE $${params.length}`; }
   const { rows } = await query(
-    `SELECT c.id, c.name,
+    `SELECT c.id, c.name, c.tracking_id, c.crm_type, c.is_configured,
        (SELECT COALESCE(SUM(row_count), 0) FROM datasets d WHERE d.client_id = c.id)::int AS rows,
        (SELECT count(*) FROM duplicate_uploads du WHERE du.client_id = c.id)::int AS dup_files
      FROM clients c ${where}
@@ -47,19 +52,44 @@ export async function listClients(q = '', section = 'campaign') {
   return rows;
 }
 
-export async function createClient(name, req, section = 'campaign') {
-  const ins = await query(
-    'INSERT INTO clients (name, is_active, section) VALUES ($1, false, $2) RETURNING id',
-    [name || 'New Client', section]);
-  const id = ins.rows[0].id;
-  if (section === 'campaign') {
-    const { defaultSettings, saveSettingsFor } = await import('./settings.js');
-    const def = await defaultSettings();
-    await saveSettingsFor(id, { ...def, report_title: name || 'New Client' });
-    await activateClient(id, req);
+// Mark a client as configured. Idempotent — safe to call on every dataset
+// upload / settings save. This is the ONLY place that flips is_configured.
+export async function markClientConfigured(id) {
+  if (!id) return;
+  await query('UPDATE clients SET is_configured = true WHERE id = $1 AND is_configured = false', [Number(id)]);
+}
+
+// Create (or reuse, by case-insensitive name match within the section) a
+// client, optionally set its CRM / Tracking ID, and mark it configured.
+// This backs both "New Client" (brand-new name) and "Create Configuration"
+// (existing name picked from the Bifurcation sheet) — both explicitly
+// configure the client, per the app's client lifecycle.
+export async function createClient(name, req, section = 'campaign', opts = {}) {
+  const cleanName = (name || 'New Client').trim() || 'New Client';
+  const existing = await query(
+    'SELECT id FROM clients WHERE lower(name) = lower($1) AND section = $2', [cleanName, section]);
+  let id;
+  if (existing.rows.length) {
+    id = existing.rows[0].id;
   } else {
-    await activateWdClient(id, req);
+    const ins = await query(
+      'INSERT INTO clients (name, is_active, section) VALUES ($1, false, $2) RETURNING id',
+      [cleanName, section]);
+    id = ins.rows[0].id;
+    if (section === 'campaign') {
+      const { defaultSettings, saveSettingsFor } = await import('./settings.js');
+      const def = await defaultSettings();
+      await saveSettingsFor(id, { ...def, report_title: cleanName });
+    }
   }
+  if (opts.crmType || opts.trackingId) {
+    await query(
+      `UPDATE clients SET tracking_id = COALESCE($1, tracking_id), crm_type = COALESCE($2, crm_type) WHERE id = $3`,
+      [opts.trackingId || null, opts.crmType || null, id]);
+  }
+  await markClientConfigured(id);
+  if (section === 'campaign') await activateClient(id, req);
+  else await activateWdClient(id, req);
   return id;
 }
 

@@ -205,3 +205,91 @@ CREATE INDEX IF NOT EXISTS clients_section ON clients (section);
 -- Session stores a separate active client per section.
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS active_client_id bigint;
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS active_wd_client_id bigint;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS role text NOT NULL DEFAULT 'admin';
+
+-- ---------------------------------------------------------------------------
+-- Application-wide settings (singleton row).
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS app_settings (
+  id         integer PRIMARY KEY DEFAULT 1,
+  config     jsonb   NOT NULL DEFAULT '{}',
+  updated_at timestamptz DEFAULT now(),
+  CONSTRAINT app_settings_singleton CHECK (id = 1)
+);
+
+-- ---------------------------------------------------------------------------
+-- Bifurcation: master mapping of client name → tracking ID + CRM type.
+-- Singleton config row stores uploaded file headers and raw rows;
+-- bifurcation_data stores the parsed mappings after the user applies.
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS bifurcation_config (
+  id           integer PRIMARY KEY DEFAULT 1,
+  client_col   text,
+  tracking_col text,
+  crm_col      text,
+  headers      text[],
+  raw_rows     jsonb,
+  updated_at   timestamptz DEFAULT now(),
+  CONSTRAINT bifurcation_config_singleton CHECK (id = 1)
+);
+
+CREATE TABLE IF NOT EXISTS bifurcation_data (
+  id          bigserial PRIMARY KEY,
+  client_name text NOT NULL,
+  tracking_id text,
+  crm_type    text
+);
+
+-- ---------------------------------------------------------------------------
+-- Feature additions: client config, dataset lifecycle, audit log.
+-- ---------------------------------------------------------------------------
+
+-- Source-of-truth tracking_id and crm_type on clients table
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS tracking_id text;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS crm_type text;
+
+-- Dataset lifecycle (soft delete / archive)
+ALTER TABLE datasets ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'active';
+ALTER TABLE datasets ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
+ALTER TABLE datasets ADD COLUMN IF NOT EXISTS uploaded_by text;
+CREATE INDEX IF NOT EXISTS datasets_status ON datasets (client_id, status);
+
+-- Session username for audit attribution
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS username text;
+
+-- Audit log
+CREATE TABLE IF NOT EXISTS audit_log (
+  id           bigserial PRIMARY KEY,
+  username     text NOT NULL DEFAULT 'unknown',
+  action       text NOT NULL,
+  client_name  text,
+  dataset_name text,
+  details      jsonb,
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS audit_log_created ON audit_log (created_at DESC);
+
+-- ---------------------------------------------------------------------------
+-- Client configuration lifecycle.
+--
+-- A client is "configured" once ANY of the following happens:
+--   - a dataset is uploaded for it
+--   - its settings are explicitly saved (Client Configuration / CRM & Tracking ID)
+--   - its Weekly Dump setup is saved
+--
+-- Only configured clients should appear in client pickers / navigation.
+-- Rows in bifurcation_data are just a name/tracking/CRM lookup table used to
+-- populate the "existing client" dropdown when creating a configuration —
+-- they are NEVER a source of truth for which clients are configured.
+-- ---------------------------------------------------------------------------
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS is_configured boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS clients_configured ON clients (section, is_configured);
+
+-- Backfill: clients that already satisfy the configured definition above,
+-- so upgrading this app doesn't hide clients people are already using.
+UPDATE clients SET is_configured = true
+WHERE is_configured = false AND (
+  EXISTS (SELECT 1 FROM datasets d WHERE d.client_id = clients.id)
+  OR EXISTS (SELECT 1 FROM client_settings cs WHERE cs.client_id = clients.id)
+  OR EXISTS (SELECT 1 FROM wd_client_settings ws WHERE ws.client_id = clients.id)
+);

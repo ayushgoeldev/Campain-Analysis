@@ -19,12 +19,14 @@
   --danger-soft: rgba(255, 107, 107, .14);
   --info: #38bdf8;
   --info-soft: rgba(56, 189, 248, .14);
+  --purple: #a78bfa;
+  --purple-soft: rgba(167, 139, 250, .14);
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .25);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, .3), 0 2px 8px rgba(0, 0, 0, .18);
   --shadow-lg: 0 2px 8px rgba(0, 0, 0, .45), 0 16px 48px rgba(0, 0, 0, .35);
-  --radius: 14px;
-  --radius-sm: 9px;
-  --radius-xs: 6px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
   --trans: all .2s ease;
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 }
@@ -59,6 +61,9 @@ h3 { font-size: 15px; margin: 0 0 10px; font-weight: 700; letter-spacing: .2px; 
 }
 .brand { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
 .brand-logo { width: 42px; height: 42px; display: block; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-text h1 { font-size: 17px; margin: 0; }
+.module-subtitle { font-size: 12px; font-weight: 600; color: var(--accent-2); letter-spacing: .2px; }
 .topbar h1 { color: #f3f6fc; }
 .tabs { display: flex; gap: 4px; }
 .tab {
@@ -108,6 +113,10 @@ h3 { font-size: 15px; margin: 0 0 10px; font-weight: 700; letter-spacing: .2px; 
 main { max-width: 1240px; margin: 0 auto; padding: 24px; }
 .view { display: none; }
 .view.is-active { display: block; animation: fade .2s ease; }
+.module-heading {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); margin-bottom: 10px; padding: 0 2px;
+}
 .wd-view { display: none; }
 .wd-view.is-active { display: block; animation: fade .2s ease; }
 @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
@@ -115,7 +124,7 @@ main { max-width: 1240px; margin: 0 auto; padding: 24px; }
 .card {
   background: linear-gradient(180deg, var(--panel), var(--panel-2));
   border: 1px solid var(--line); border-radius: var(--radius);
-  padding: 20px; margin-bottom: 18px; box-shadow: var(--shadow);
+  padding: 22px 24px; margin-bottom: 20px; box-shadow: var(--shadow);
   transition: transform .2s ease, box-shadow .2s ease;
 }
 .card:hover {
@@ -419,7 +428,7 @@ tr.total td { font-weight: 800; border-top: 2px solid var(--line); color: var(--
 .chip {
   font-size: 12px; padding: 5px 11px; border-radius: 20px; cursor: pointer;
   background: var(--accent-soft); color: var(--accent-2); border: 1px solid rgba(91, 140, 255, .28);
-  font-family: inherit; transition: all .12px ease;
+  font-family: inherit; transition: all .12s ease;
 }
 .chip:hover { background: rgba(91, 140, 255, .24); }
 .chip.copied { background: var(--good); color: #06231a; border-color: var(--good); font-weight: 700; }
@@ -449,7 +458,8 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
   main { padding: 16px; }
 }
 
-/* Print / PDF */
+/* Print / PDF — landscape, expand everything, light ink-on-paper, fit to page.
+   margin:0 on @page suppresses the browser's own date/URL header & footer. */
 @page { size: landscape; margin: 0; }
 @media print {
   .topbar, .tabs, .dataset-pill, .client-picker, .report-actions, #reportEmpty { display: none !important; }
@@ -458,14 +468,17 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
   .report-toolbar { margin-bottom: 8px; }
   .report-toolbar h2, .report-toolbar .muted { color: #000 !important; }
   .card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; background: #fff !important; margin-bottom: 10px; }
+  /* A collapsed drawer is left out of the PDF entirely. */
   .card.collapsed { display: none !important; }
   .drawer-toggle { color: #000 !important; }
   .chev { display: none; }
+  /* Fit wide tables to the page: compact font, wrap numeric cells tightly. */
   table.grid { width: 100%; table-layout: fixed; font-size: 8px; }
   table.grid td, table.grid th { padding: 2px 3px; overflow-wrap: break-word; word-break: normal; }
   table.grid th { background: #eee !important; color: #000 !important; }
   table.grid td, table.grid td .editable { color: #000 !important; }
   table.grid tbody tr:hover { background: none; }
+  /* Give the two note columns real width so text wraps at spaces, not mid-word. */
   table.grid thead th:nth-last-child(2), table.grid thead th:last-child { width: 15%; }
   td.anno { width: auto; max-width: none; vertical-align: top; }
   td.anno .editable { width: auto; max-width: none; overflow-wrap: break-word; word-break: normal; hyphens: none; font-size: 8px; line-height: 1.3; }
@@ -473,6 +486,7 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
   .editable:empty::before { content: ''; }
   .editable { border: none !important; }
   .tblwrap { overflow: visible; }
+  /* Don't print card hover effects */
   .card:hover { transform: none; box-shadow: none; }
 }
 
@@ -562,3 +576,180 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
   transition: opacity .25s;
 }
 .sidebar-overlay.hidden { display: none; }
+
+/* ---- Light theme ---- */
+[data-theme="light"] {
+  --bg: #f0f2f7;
+  --bg-2: #e8ebf3;
+  --panel: #ffffff;
+  --panel-2: #f4f6fb;
+  --ink: #1a2035;
+  --ink-dim: #3a4a68;
+  --muted: #6b7a99;
+  --line: #d4d9e8;
+  --line-soft: #dde2ef;
+  --accent: #4070f0;
+  --accent-2: #3060d8;
+  --accent-soft: rgba(64, 112, 240, .10);
+  --good: #16a06a;
+  --good-soft: rgba(22, 160, 106, .10);
+  --warn: #c97a00;
+  --warn-soft: rgba(201, 122, 0, .10);
+  --danger: #d93030;
+  --danger-soft: rgba(217, 48, 48, .10);
+  --info: #0095cc;
+  --info-soft: rgba(0, 149, 204, .10);
+  --purple: #7c5cf0;
+  --purple-soft: rgba(124, 92, 240, .10);
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.07), 0 2px 6px rgba(0,0,0,.05);
+  --shadow-lg: 0 2px 8px rgba(0,0,0,.12), 0 12px 36px rgba(0,0,0,.09);
+}
+[data-theme="light"] body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(64, 112, 240, .06), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(22, 160, 106, .04), transparent 55%),
+    var(--bg);
+}
+[data-theme="light"] .topbar {
+  background: rgba(250, 251, 254, .88);
+}
+[data-theme="light"] table.grid thead th {
+  background: #f0f3fa;
+}
+[data-theme="light"] .sidebar {
+  background: #ffffff;
+}
+[data-theme="light"] .wd-dump-row td,
+[data-theme="light"] .wd-total-row td {
+  background: #00b050 !important;
+}
+
+/* ---- Theme toggle button ---- */
+.theme-toggle {
+  font-size: 16px; padding: 5px 9px; line-height: 1; flex-shrink: 0;
+}
+
+/* ---- Status badges ---- */
+.status-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+}
+.status-badge.active { background: var(--good-soft); color: var(--good); }
+.status-badge.archived { background: var(--warn-soft); color: var(--warn); }
+.status-badge.deleted { background: var(--danger-soft); color: var(--danger); }
+
+/* ---- Dataset Management toolbar ---- */
+.dm-toolbar {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px;
+}
+.dm-bulk-bar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  background: var(--accent-soft); border: 1px solid rgba(91,140,255,.2);
+  border-radius: var(--radius-sm); padding: 8px 12px; margin-bottom: 10px;
+  font-size: 13px;
+}
+.dm-bulk-bar.hidden { display: none; }
+
+/* ---- WD Dataset History ---- */
+#wdDatasetHistoryCard { margin-top: 0; }
+
+/* Client Configuration cards get the standard .config-section purple accent (see below) */
+
+/* ---- Configuration view sections ---- */
+.config-tabs { margin-bottom: 18px; }
+.config-tab { display: none; }
+.config-tab.is-active { display: block; }
+.config-section { margin-bottom: 16px; border-top: 3px solid var(--purple); }
+.config-section h2 { margin-bottom: 12px; }
+.config-section h3 { 
+  font-size: 14px; font-weight: 600; color: var(--ink-dim); 
+  margin-bottom: 10px; 
+}
+#view-configuration .card { margin-bottom: 16px; }
+
+/* ---- dm-chk default unchecked visual ---- */
+.dm-chk { cursor: pointer; width: 15px; height: 15px; }
+.dm-selected { background: var(--accent-soft) !important; }
+
+/* ---- Configuration wizard steps ---- */
+.wizard-step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.wizard-step-head h2 { margin: 0; }
+.wizard-step-title { font-size: 20px; font-weight: 700; }
+.wizard-step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto;
+  background: var(--purple-soft); color: var(--purple); font-size: 12px; font-weight: 700;
+}
+.advanced-config-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  background: none; border: none; cursor: pointer; padding: 0; font: inherit; color: inherit;
+}
+.status-badge.configured { background: var(--good-soft); color: var(--good); }
+.status-badge.not-configured { background: var(--warn-soft); color: var(--warn); }
+/* ---- Sticky Configuration Action Bar ------------------------------------ */
+.config-action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -4px 16px rgba(0,0,0,.12);
+  margin-top: 24px;
+}
+
+.config-action-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-action-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.config-compute-btn {
+  font-size: 14px;
+  padding: 8px 22px;
+  font-weight: 700;
+  letter-spacing: .01em;
+}
+
+.config-compute-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* ---- Wizard step improvements ------------------------------------------- */
+.wizard-step-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.wizard-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.wizard-step-title {
+  font-weight: 600;
+  font-size: 15px;
+}

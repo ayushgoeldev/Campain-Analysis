@@ -31,11 +31,15 @@ function cookieOptions(req) {
   };
 }
 
-function configuredUser() {
-  const username = process.env.APP_USERNAME;
-  const password = process.env.APP_PASSWORD;
-  if (!username || !password) return null;
-  return { username, password };
+function configuredUsers() {
+  const users = [];
+  const adminUser = process.env.ADMIN_USERNAME || process.env.APP_USERNAME;
+  const adminPass = process.env.ADMIN_PASSWORD || process.env.APP_PASSWORD;
+  if (adminUser && adminPass) users.push({ username: adminUser, password: adminPass, role: 'admin' });
+  const viewUser = process.env.USER_USERNAME;
+  const viewPass = process.env.USER_PASSWORD;
+  if (viewUser && viewPass) users.push({ username: viewUser, password: viewPass, role: 'user' });
+  return users;
 }
 
 export async function getSessionClientId(req) {
@@ -98,37 +102,74 @@ export async function isAuthed(req) {
   }
 }
 
+export async function getSessionRole(req) {
+  const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  if (!sessionId) return null;
+  try {
+    const { rows } = await query(
+      `SELECT role FROM sessions WHERE id = $1 AND created_at > now() - interval '12 hours'`,
+      [sessionId]
+    );
+    return rows[0]?.role || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function requireAuth(req, res, next) {
-  if (await isAuthed(req)) return next();
+  const sessionId = parseCookies(req.headers.cookie)[SESSION_COOKIE];
+  if (sessionId) {
+    try {
+      const { rows } = await query(
+        `SELECT id, role, username FROM sessions WHERE id = $1 AND created_at > now() - interval '12 hours'`,
+        [sessionId]
+      );
+      if (rows.length > 0) {
+        req.sessionRole = rows[0].role || 'admin';
+        req.sessionUsername = rows[0].username || rows[0].role || 'unknown';
+        return next();
+      }
+    } catch {}
+  }
   if (req.path.startsWith('/api/')) return res.status(401).json({ error: 'Login required' });
+  return res.redirect('/login.html');
+}
+
+export async function requireAdmin(req, res, next) {
+  const role = req.sessionRole || (await getSessionRole(req));
+  if (role === 'admin') return next();
+  if (req.path.startsWith('/api/')) return res.status(403).json({ error: 'Admin access required' });
   return res.redirect('/login.html');
 }
 
 export const authRouter = Router();
 
 authRouter.get('/session', async (req, res) => {
-  res.json({ authenticated: await isAuthed(req) });
+  const authenticated = await isAuthed(req);
+  const role = authenticated ? (await getSessionRole(req)) : null;
+  res.json({ authenticated, role });
 });
 
 authRouter.post('/login', async (req, res) => {
   const { username, password } = req.body || {};
-  const user = configuredUser();
-  if (!user) return res.status(503).json({ error: 'Login is not configured' });
-  if (!constantTimeEqual(username, user.username) || !constantTimeEqual(password, user.password)) {
+  const users = configuredUsers();
+  if (!users.length) return res.status(503).json({ error: 'Login is not configured' });
+  const matched = users.find((u) => constantTimeEqual(username, u.username) && constantTimeEqual(password, u.password));
+  if (!matched) {
     return res.status(401).json({ error: 'Invalid ID or password' });
   }
 
   const sessionId = crypto.randomBytes(32).toString('hex');
   try {
     await query(
-      `INSERT INTO sessions (id, created_at) VALUES ($1, now())`,
-      [sessionId]
+      `INSERT INTO sessions (id, created_at, role, username) VALUES ($1, now(), $2, $3)`,
+      [sessionId, matched.role, matched.username]
     );
   } catch {
     return res.status(500).json({ error: 'Failed to create session' });
   }
   res.cookie(SESSION_COOKIE, sessionId, cookieOptions(req));
-  res.json({ ok: true });
+  res.json({ ok: true, role: matched.role });
 });
 
 authRouter.post('/logout', async (req, res) => {
