@@ -1109,23 +1109,111 @@ document.addEventListener('click', (e) => {
   if (!e.target.closest('#clientPicker')) $('#clientMenu')?.classList.add('hidden');
 });
 
-// ---- Card 1: Client Configuration -----------------------------------------
-// "Existing Client" values come ONLY from the uploaded Bifurcation sheet
-// (never from the clients table) — this is a lookup/autocomplete source,
-// not a list of already-configured clients.
-let clientConfigMode = 'existing';
+// ---- Generic searchable dropdown (portal-based) ----------------------------
+// Shared by every "Existing Client" style picker in the app. Renders into a
+// document.body-level portal with `position: fixed`, so it always paints
+// above all other content — no ancestor overflow/transform/z-index can trap
+// or clip it, and it can never appear "behind" the page. Supports full
+// keyboard navigation (ArrowUp/ArrowDown/Enter/Escape) and closes on any
+// click outside the input + dropdown.
+function createSearchableDropdown(inputEl, dropdownEl) {
+  if (!inputEl || !dropdownEl) return null;
+
+  // Move into a body-level portal once. Being appended directly to <body>
+  // means no ancestor card/section can clip or restack it.
+  if (dropdownEl.parentElement !== document.body) {
+    document.body.appendChild(dropdownEl);
+  }
+
+  let items = [];
+  let activeIndex = -1;
+  let onSelectCb = null;
+
+  function position() {
+    const r = inputEl.getBoundingClientRect();
+    dropdownEl.style.left = `${r.left}px`;
+    dropdownEl.style.top = `${r.bottom + 4}px`;
+    dropdownEl.style.width = `${r.width}px`;
+  }
+
+  function onScrollOrResize() { position(); }
+
+  function close() {
+    if (dropdownEl.classList.contains('hidden')) return;
+    dropdownEl.classList.add('hidden');
+    activeIndex = -1;
+    window.removeEventListener('scroll', onScrollOrResize, true);
+    window.removeEventListener('resize', onScrollOrResize);
+  }
+
+  function highlight() {
+    dropdownEl.querySelectorAll('.bif-option[data-idx]').forEach((el) => {
+      el.classList.toggle('active', Number(el.dataset.idx) === activeIndex);
+    });
+    dropdownEl.querySelector('.bif-option.active')?.scrollIntoView({ block: 'nearest' });
+  }
+
+  function select(i) {
+    const item = items[i];
+    if (!item) return;
+    close();
+    onSelectCb && onSelectCb(item);
+  }
+
+  function open(list, renderRow, onSelect) {
+    items = list || [];
+    onSelectCb = onSelect;
+    activeIndex = -1;
+    if (!items.length) {
+      dropdownEl.innerHTML = '<div class="bif-option muted" style="padding:8px 12px;font-size:13px;cursor:default">No matches</div>';
+    } else {
+      dropdownEl.innerHTML = items.map((item, i) => renderRow(item, i)).join('');
+      dropdownEl.querySelectorAll('.bif-option[data-idx]').forEach((opt, i) => {
+        opt.addEventListener('mousedown', (e) => { e.preventDefault(); select(i); });
+        opt.addEventListener('mouseenter', () => { activeIndex = i; highlight(); });
+      });
+    }
+    position();
+    dropdownEl.classList.remove('hidden');
+    window.addEventListener('scroll', onScrollOrResize, true);
+    window.addEventListener('resize', onScrollOrResize);
+  }
+
+  inputEl.addEventListener('keydown', (e) => {
+    if (dropdownEl.classList.contains('hidden')) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (items.length) { activeIndex = (activeIndex + 1) % items.length; highlight(); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (items.length) { activeIndex = (activeIndex - 1 + items.length) % items.length; highlight(); }
+    } else if (e.key === 'Enter') {
+      if (activeIndex >= 0) { e.preventDefault(); select(activeIndex); }
+    } else if (e.key === 'Escape') {
+      close();
+    }
+  });
+
+  // Click outside (input + dropdown) closes it.
+  document.addEventListener('mousedown', (e) => {
+    if (dropdownEl.classList.contains('hidden')) return;
+    if (e.target === inputEl || dropdownEl.contains(e.target)) return;
+    close();
+  });
+
+  return { open, close, position };
+}
+
+// ---- Card 1: Client Configuration (Campaign Analysis) ----------------------
+// Campaign Analysis ONLY configures already-existing clients — it never
+// creates new ones. The searchable dropdown here is sourced from the
+// configured clients list (ClientService), not the raw Bifurcation sheet.
+// Client *creation* lives exclusively in Weekly Dump (see Card 1 below).
 let bifurcationLookup = [];
 
 async function loadBifurcationForClientConfig() {
   const data = await fetch('/api/bifurcation').then((r) => r.json()).catch(() => ({ data: [] }));
   bifurcationLookup = data.data || [];
-  // The Bifurcation sheet is shared across Campaign and Weekly Dump, so the
-  // same lookup data feeds both "Existing Client" datalists.
-  const opts = bifurcationLookup.map((r) => `<option value="${esc(r.client_name)}"></option>`).join('');
-  const dl = $('#clientConfigDatalist');
-  if (dl) dl.innerHTML = opts;
-  const wdDl = $('#wdClientConfigDatalist');
-  if (wdDl) wdDl.innerHTML = opts;
 }
 
 function findBifurcationMatch(name) {
@@ -1135,14 +1223,13 @@ function findBifurcationMatch(name) {
 }
 
 function currentClientConfigName() {
-  const el = clientConfigMode === 'existing' ? $('#clientConfigSearch') : $('#clientConfigNewName');
-  return (el?.value || '').trim();
+  return ($('#clientConfigSearch')?.value || '').trim();
 }
 
-// Reflect whether the typed/selected name already matches a configured
-// client (Status badge + autofill CRM/Tracking ID) — driven purely by
-// ConfiguredClients (ClientService), with the Bifurcation sheet only used
-// as a fallback autofill source for names that aren't configured yet.
+// Reflect whether the typed/selected name matches a configured client
+// (Status badge + autofill CRM/Tracking ID) — driven purely by
+// ConfiguredClients (ClientService). Campaign Analysis never falls back to
+// the Bifurcation sheet for autofill since it cannot create new clients.
 function refreshClientConfigStatus() {
   const name = currentClientConfigName();
   const badge = $('#clientConfigStatusBadge');
@@ -1151,42 +1238,63 @@ function refreshClientConfigStatus() {
     if (badge) { badge.textContent = 'Configured'; badge.className = 'status-badge configured'; }
     if ($('#crmPreset') && configured.crm_type) $('#crmPreset').value = configured.crm_type;
     if ($('#clientConfigTrackingId') && configured.tracking_id) $('#clientConfigTrackingId').value = configured.tracking_id;
-  } else {
-    if (badge) { badge.textContent = 'Not configured'; badge.className = 'status-badge not-configured'; }
-    if (clientConfigMode === 'existing') {
-      const bif = findBifurcationMatch(name);
-      if (bif) {
-        if (bif.crm_type && $('#crmPreset')) $('#crmPreset').value = bif.crm_type;
-        if (bif.tracking_id && $('#clientConfigTrackingId')) $('#clientConfigTrackingId').value = bif.tracking_id;
-      }
-    }
+  } else if (badge) {
+    badge.textContent = 'Not configured';
+    badge.className = 'status-badge not-configured';
   }
 }
 
-$$('#clientConfigModeSeg .seg-btn').forEach((b) => b.addEventListener('click', () => {
-  $$('#clientConfigModeSeg .seg-btn').forEach((x) => x.classList.remove('is-active'));
-  b.classList.add('is-active');
-  clientConfigMode = b.dataset.clientMode;
-  $('#clientConfigExistingField')?.classList.toggle('hidden', clientConfigMode !== 'existing');
-  $('#clientConfigNewField')?.classList.toggle('hidden', clientConfigMode !== 'new');
-  refreshClientConfigStatus();
-}));
+// ---- Campaign Analysis "Existing Client" searchable dropdown --------------
+// Sourced from configured clients only (ClientService), never the
+// Bifurcation sheet and never a client-creation UI.
+const clientConfigInput = document.getElementById('clientConfigSearch');
+const clientConfigDropdownEl = document.getElementById('clientConfigDropdown');
+const clientConfigDropdown = createSearchableDropdown(clientConfigInput, clientConfigDropdownEl);
 
-$('#clientConfigSearch')?.addEventListener('input', refreshClientConfigStatus);
-$('#clientConfigNewName')?.addEventListener('input', refreshClientConfigStatus);
+function renderClientConfigRow(c, i) {
+  return `<div class="bif-option" data-idx="${i}" style="padding:8px 12px;cursor:pointer;font-size:13px">
+    <span style="font-weight:500">${esc(c.name)}</span>
+    ${c.crm_type ? `<span class="muted" style="margin-left:8px;font-size:11px">${esc(c.crm_type)}</span>` : ''}
+  </div>`;
+}
 
+function openClientConfigDropdown() {
+  if (!clientConfigDropdown) return;
+  const q = (clientConfigInput.value || '').trim().toLowerCase();
+  const matches = ClientService.getClients().filter((c) => !q || c.name.toLowerCase().includes(q));
+  clientConfigDropdown.open(matches, renderClientConfigRow, (c) => {
+    clientConfigInput.value = c.name;
+    refreshClientConfigStatus();
+  });
+}
+
+if (clientConfigInput) {
+  clientConfigInput.addEventListener('focus', openClientConfigDropdown);
+  clientConfigInput.addEventListener('input', () => {
+    openClientConfigDropdown();
+    refreshClientConfigStatus();
+  });
+}
+
+// Campaign Analysis Save ONLY updates an already-configured client's CRM
+// Preset / Tracking ID (PUT /clients/:id/config) — it never creates a new
+// client. Client creation is exclusive to Weekly Dump.
 $('#clientConfigSaveBtn')?.addEventListener('click', async () => {
   const status = $('#clientConfigStatus');
   const name = currentClientConfigName();
   if (!name) {
-    if (status) { status.textContent = clientConfigMode === 'existing' ? 'Select a client' : 'Enter a client name'; status.className = 'status err'; }
+    if (status) { status.textContent = 'Select an existing client'; status.className = 'status err'; }
+    return;
+  }
+  const configured = ClientService.getClients().find((c) => c.name.trim().toLowerCase() === name.toLowerCase());
+  if (!configured) {
+    if (status) { status.textContent = 'Select an existing client from the dropdown — new clients are created in Weekly Dump'; status.className = 'status err'; }
     return;
   }
   if (status) { status.textContent = 'Saving…'; status.className = 'status'; }
-  const res = await fetch('/api/clients', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+  const res = await fetch(`/api/clients/${configured.id}/config`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name,
       crm_type: $('#crmPreset')?.value || '',
       tracking_id: ($('#clientConfigTrackingId')?.value || '').trim(),
     }),
@@ -1195,7 +1303,7 @@ $('#clientConfigSaveBtn')?.addEventListener('click', async () => {
     if (status) { status.textContent = '✓ Client configured'; status.className = 'status ok'; }
     await switchClient();
     refreshClientConfigStatus();
-    showToast('✓ Client configured — now visible in the client dropdown', 'ok');
+    showToast('✓ Client configured', 'ok');
   } else {
     const err = await res.json().catch(() => ({}));
     if (status) { status.textContent = err.error || 'Failed'; status.className = 'status err'; }
@@ -1693,12 +1801,13 @@ async function loadWdSettings() {
       }
     }
     sel.value = settings.crm_type || '';
-    sel.disabled = !isAdmin;
+    // CRM Preset can be edited by all users — no admin permission required.
   }
   const tid = $('#wdTrackingId');
   if (tid) { tid.value = settings.tracking_id || ''; tid.readOnly = !isAdmin; }
   const customCrm = $('#wdCustomCrmName');
-  if (customCrm) { customCrm.value = settings.custom_crm_name || ''; customCrm.readOnly = !isAdmin; }
+  // Custom CRM Name can be edited by all users — no admin permission required.
+  if (customCrm) { customCrm.value = settings.custom_crm_name || ''; customCrm.readOnly = false; }
   renderWdSettingsForm(settings);
   renderWdUploadSection(settings.crm_type || '');
 }
@@ -2243,39 +2352,19 @@ function currentWdClientConfigName() {
   return (el?.value || '').trim();
 }
 
-// Build and show the custom searchable dropdown for an input
-function buildBifDropdown(inputEl, dropdownEl, filter, onSelect) {
-  if (!inputEl || !dropdownEl) return;
-  const q = filter.toLowerCase();
-  const matches = bifurcationLookup.filter((r) =>
-    !q || (r.client_name || '').toLowerCase().includes(q)
-  );
-  if (!matches.length) {
-    dropdownEl.innerHTML = '<div class="bif-option muted" style="padding:8px 12px;font-size:13px">No matches in Bifurcation sheet</div>';
-    dropdownEl.classList.remove('hidden');
-    return;
-  }
-  dropdownEl.innerHTML = matches.map((r, i) =>
-    `<div class="bif-option" data-idx="${i}" style="padding:8px 12px;cursor:pointer;font-size:13px">
-      <span style="font-weight:500">${esc(r.client_name)}</span>
-      ${r.crm_type ? `<span class="muted" style="margin-left:8px;font-size:11px">${esc(r.crm_type)}</span>` : ''}
-      ${r.tracking_id ? `<span class="muted" style="margin-left:8px;font-size:11px">ID: ${esc(r.tracking_id)}</span>` : ''}
-    </div>`
-  ).join('');
-  dropdownEl.classList.remove('hidden');
-  dropdownEl.querySelectorAll('.bif-option[data-idx]').forEach((opt, i) => {
-    opt.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      const row = matches[i];
-      inputEl.value = row.client_name;
-      dropdownEl.classList.add('hidden');
-      onSelect(row);
-    });
-    opt.addEventListener('mouseenter', () => {
-      dropdownEl.querySelectorAll('.bif-option').forEach((x) => x.classList.remove('active'));
-      opt.classList.add('active');
-    });
-  });
+// Render a Bifurcation-sheet row as a dropdown option (used by the
+// createSearchableDropdown portal instances below).
+function renderBifRow(r, i) {
+  return `<div class="bif-option" data-idx="${i}" style="padding:8px 12px;cursor:pointer;font-size:13px">
+    <span style="font-weight:500">${esc(r.client_name)}</span>
+    ${r.crm_type ? `<span class="muted" style="margin-left:8px;font-size:11px">${esc(r.crm_type)}</span>` : ''}
+    ${r.tracking_id ? `<span class="muted" style="margin-left:8px;font-size:11px">ID: ${esc(r.tracking_id)}</span>` : ''}
+  </div>`;
+}
+
+function bifMatches(filter) {
+  const q = (filter || '').toLowerCase();
+  return bifurcationLookup.filter((r) => !q || (r.client_name || '').toLowerCase().includes(q));
 }
 
 // Fill WD fields from a bifurcation row — ALWAYS overwrite, never skip
@@ -2311,27 +2400,30 @@ function applyBifRowToWd(row) {
   }
 }
 
-// ---- Existing Client searchable dropdown ----------------------------------
+// ---- Existing Client searchable dropdown (portal-based) -------------------
 const wdExistingInput = document.getElementById('wdClientConfigSearch');
-const wdExistingDropdown = document.getElementById('wdClientConfigDropdown');
+const wdExistingDropdownEl = document.getElementById('wdClientConfigDropdown');
+const wdExistingDropdown = createSearchableDropdown(wdExistingInput, wdExistingDropdownEl);
+
+function openWdExistingDropdown() {
+  if (!wdExistingDropdown) return;
+  wdExistingDropdown.open(bifMatches(wdExistingInput.value), renderBifRow, (row) => {
+    wdExistingInput.value = row.client_name;
+    applyBifRowToWd(row);
+  });
+}
 
 if (wdExistingInput) {
-  wdExistingInput.addEventListener('focus', () => {
-    buildBifDropdown(wdExistingInput, wdExistingDropdown, wdExistingInput.value, (row) => {
-      applyBifRowToWd(row);
-    });
-  });
+  wdExistingInput.addEventListener('focus', openWdExistingDropdown);
 
   wdExistingInput.addEventListener('input', () => {
     wdSelectedBifClient = null; // reset when user types
-    buildBifDropdown(wdExistingInput, wdExistingDropdown, wdExistingInput.value, (row) => {
-      applyBifRowToWd(row);
-    });
+    openWdExistingDropdown();
   });
 
   wdExistingInput.addEventListener('blur', () => {
     setTimeout(() => {
-      if (wdExistingDropdown) wdExistingDropdown.classList.add('hidden');
+      wdExistingDropdown?.close();
       // If user typed a name without selecting from dropdown, still do lookup
       const name = wdExistingInput.value.trim();
       if (name && !wdSelectedBifClient) {
@@ -2345,22 +2437,12 @@ if (wdExistingInput) {
       }
     }, 150);
   });
-
-  wdExistingInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      wdExistingDropdown?.classList.add('hidden');
-      wdExistingInput.blur();
-    }
-    if (e.key === 'ArrowDown') {
-      const first = wdExistingDropdown?.querySelector('.bif-option[data-idx]');
-      if (first) { e.preventDefault(); first.focus(); }
-    }
-  });
 }
 
-// ---- New Client searchable input + bifurcation hint -----------------------
+// ---- New Client searchable input + bifurcation hint (portal-based) --------
 const wdNewInput = document.getElementById('wdNewClientNameSetup');
-const wdNewDropdown = document.getElementById('wdNewClientDropdown');
+const wdNewDropdownEl = document.getElementById('wdNewClientDropdown');
+const wdNewDropdown = createSearchableDropdown(wdNewInput, wdNewDropdownEl);
 const wdNewHint = document.getElementById('wdNewClientHint');
 
 if (wdNewInput) {
@@ -2368,12 +2450,13 @@ if (wdNewInput) {
     const val = wdNewInput.value.trim();
     wdSelectedBifClient = null;
     if (!val) {
-      wdNewDropdown?.classList.add('hidden');
+      wdNewDropdown?.close();
       if (wdNewHint) wdNewHint.style.display = 'none';
       return;
     }
     // Show matching bifurcation entries
-    buildBifDropdown(wdNewInput, wdNewDropdown, val, (row) => {
+    wdNewDropdown?.open(bifMatches(val), renderBifRow, (row) => {
+      wdNewInput.value = row.client_name;
       applyBifRowToWd(row);
       if (wdNewHint) {
         wdNewHint.textContent = `✓ Found in Bifurcation sheet — Tracking ID and CRM auto-filled.`;
@@ -2394,7 +2477,7 @@ if (wdNewInput) {
 
   wdNewInput.addEventListener('blur', () => {
     setTimeout(() => {
-      wdNewDropdown?.classList.add('hidden');
+      wdNewDropdown?.close();
       // Auto-fill from bifurcation if exact match
       const val = wdNewInput.value.trim();
       if (val && !wdSelectedBifClient) {
@@ -2417,6 +2500,8 @@ $$('#wdClientConfigModeSeg .seg-btn').forEach((b) => b.addEventListener('click',
   // Clear fields when switching mode
   if (wdExistingInput) wdExistingInput.value = '';
   if (wdNewInput) wdNewInput.value = '';
+  wdExistingDropdown?.close();
+  wdNewDropdown?.close();
   wdSelectedBifClient = null;
   // Clear tracking ID since it belongs to the previously selected client
   const tid = $('#wdTrackingId');
@@ -2505,12 +2590,13 @@ function applyRoleUi(role) {
     const perm = el.dataset.permission;
     if (!canAccess(perm)) el.style.display = 'none';
   });
-  // Make CRM/Tracking ID read-only for non-admin
+  // Tracking ID stays admin-only. CRM Preset and Custom CRM Name are
+  // editable by all users regardless of role.
   const isAdmin = canAccess('clients-delete');
-  const wdCrm = $('#wdCrmType');
   const wdTid = $('#wdTrackingId');
-  if (wdCrm) wdCrm.disabled = !isAdmin;
   if (wdTid) wdTid.readOnly = !isAdmin;
+  const wdCustomCrm = $('#wdCustomCrmName');
+  if (wdCustomCrm) wdCustomCrm.readOnly = false;
 }
 
 // ---- Theme ----------------------------------------------------------------

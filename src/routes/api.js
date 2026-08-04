@@ -1017,11 +1017,18 @@ router.put('/wd/settings', requirePermission('wd-setup'), wrap(async (req, res) 
   const cid = await activeWdClientId(req);
   if (!cid) return res.status(400).json({ error: 'No active WD client' });
   const body = req.body || {};
-  // Write tracking_id/crm_type to clients table (admin only)
-  if (hasPermission(req.sessionRole, 'clients-delete')) {
+  // CRM Preset can be edited by all users — no admin permission required.
+  // Tracking ID remains admin-only.
+  const isAdmin = hasPermission(req.sessionRole, 'clients-delete');
+  if (isAdmin) {
     await query(
       `UPDATE clients SET tracking_id=$1, crm_type=$2 WHERE id=$3`,
       [body.tracking_id || null, body.crm_type || null, cid]
+    ).catch(() => {});
+  } else {
+    await query(
+      `UPDATE clients SET crm_type=$1 WHERE id=$2`,
+      [body.crm_type || null, cid]
     ).catch(() => {});
   }
   await query(

@@ -172,23 +172,16 @@
             <span class="wizard-step-num">1</span>
             <span class="wizard-step-title">👤 Client Configuration</span>
           </div>
-          <p class="muted">Pick an existing client from your Bifurcation sheet, or set up a brand-new one, then choose its CRM Preset. Saving here is what makes the client show up in the Client dropdown above.</p>
-
-          <div class="seg" id="clientConfigModeSeg">
-            <button class="seg-btn is-active" data-client-mode="existing" type="button">Existing Client</button>
-            <button class="seg-btn" data-client-mode="new" type="button">New Client</button>
-          </div>
+          <p class="muted">Search for one of your already-configured clients, then choose its CRM Preset. Campaign Analysis only configures existing clients — new clients are created from <strong>Weekly Dump</strong>.</p>
 
           <div class="row" style="margin-top:12px">
-            <label class="field" id="clientConfigExistingField" style="flex:1;min-width:220px">
-              <span>Client (from Bifurcation sheet)</span>
-              <input class="inp" id="clientConfigSearch" list="clientConfigDatalist" placeholder="Search or select a client…" autocomplete="off" />
-              <datalist id="clientConfigDatalist"></datalist>
-            </label>
-            <label class="field hidden" id="clientConfigNewField" style="flex:1;min-width:220px">
-              <span>New client name</span>
-              <input class="inp" id="clientConfigNewName" placeholder="Client name" />
-            </label>
+            <div id="clientConfigExistingField" style="flex:1;min-width:220px;position:relative">
+              <label class="field" style="margin-bottom:0">
+                <span>Client (existing, configured clients only)</span>
+                <input class="inp" id="clientConfigSearch" placeholder="Search configured clients…" autocomplete="off" />
+              </label>
+              <div id="clientConfigDropdown" class="bif-dropdown hidden"></div>
+            </div>
           </div>
 
           <div class="row">
@@ -202,7 +195,7 @@
             </label>
             <label class="field" style="min-width:180px">
               <span>Tracking ID</span>
-              <input class="inp" id="clientConfigTrackingId" placeholder="Auto-filled from Bifurcation sheet" />
+              <input class="inp" id="clientConfigTrackingId" placeholder="Auto-filled from client configuration" />
             </label>
             <label class="field" style="min-width:150px;flex:0 0 auto">
               <span>Status</span>

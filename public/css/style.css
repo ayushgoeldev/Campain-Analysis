@@ -687,20 +687,26 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
 }
 .status-badge.configured { background: var(--good-soft); color: var(--good); }
 .status-badge.not-configured { background: var(--warn-soft); color: var(--warn); }
-/* ---- Bifurcation searchable dropdown ------------------------------------ */
+/* ---- Searchable dropdown (portal) ---------------------------------------
+   Rendered into document.body (see createSearchableDropdown in dashboard.js)
+   and positioned with `position: fixed` from the anchor input's bounding
+   rect, so it always paints above every other element on the page — no
+   ancestor stacking context, transform, or overflow:hidden can trap or clip
+   it, and it can never appear "behind" other cards/sections. */
 .bif-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  background: var(--surface);
+  position: fixed;
+  z-index: 10000;
+  background: var(--panel);
+  opacity: 1;
   border: 1px solid var(--line);
-  border-radius: 6px;
-  box-shadow: 0 4px 16px rgba(0,0,0,.18);
-  max-height: 260px;
-  overflow-y: auto;
-  margin-top: 2px;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.32), 0 2px 8px rgba(0,0,0,.16);
+  max-height: 280px;
+  overflow: hidden auto;
+}
+[data-theme="light"] .bif-dropdown {
+  background: var(--panel);
+  box-shadow: 0 12px 32px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.08);
 }
 .bif-dropdown.hidden { display: none; }
 .bif-option {
