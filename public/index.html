@@ -196,15 +196,8 @@
               <span>CRM Preset</span>
               <select id="crmPreset" class="inp">
                 <option value="">— choose —</option>
-                <optgroup label="Engine 1">
-                  <option value="NPF">NPF (Meritto)</option>
-                </optgroup>
-                <optgroup label="Engine 2 — LSQ / Others">
-                  <option value="LSQ">LSQ (LeadSquared)</option>
-                  <option value="ExtraEdge">ExtraEdge</option>
-                  <option value="Client">Client CRM</option>
-                  <option value="GoogleSheet">Google Sheet</option>
-                </optgroup>
+                <option value="NPF">NPF (Meritto)</option>
+                <option value="LSQ">LSQ (LeadSquared)</option>
               </select>
             </label>
             <label class="field" style="min-width:180px">
@@ -429,16 +422,23 @@
             <button class="seg-btn" data-wd-client-mode="new" type="button">New Client</button>
           </div>
 
-          <div class="row" style="margin-top:12px">
-            <label class="field" id="wdClientConfigExistingField" style="flex:1;min-width:220px">
+          <!-- EXISTING CLIENT: custom searchable dropdown from Bifurcation sheet -->
+          <div id="wdClientConfigExistingField" style="margin-top:12px;position:relative">
+            <label class="field" style="flex:1;min-width:220px;margin-bottom:0">
               <span>Client (from Bifurcation sheet)</span>
-              <input class="inp" id="wdClientConfigSearch" list="wdClientConfigDatalist" placeholder="Search or select a client…" autocomplete="off" />
-              <datalist id="wdClientConfigDatalist"></datalist>
+              <input class="inp" id="wdClientConfigSearch" placeholder="Type to search clients…" autocomplete="off" />
             </label>
-            <label class="field hidden" id="wdClientConfigNewField" style="flex:1;min-width:220px">
-              <span>New client name</span>
-              <input class="inp" id="wdNewClientNameSetup" placeholder="Client name" />
+            <div id="wdClientConfigDropdown" class="bif-dropdown hidden"></div>
+          </div>
+
+          <!-- NEW CLIENT: searchable input that checks bifurcation first -->
+          <div id="wdClientConfigNewField" style="margin-top:12px;position:relative;display:none">
+            <label class="field" style="flex:1;min-width:220px;margin-bottom:0">
+              <span>Client name <span class="muted" style="font-weight:400;font-size:12px">(type to search Bifurcation, or enter a brand-new name)</span></span>
+              <input class="inp" id="wdNewClientNameSetup" placeholder="Search or enter new client name…" autocomplete="off" />
             </label>
+            <div id="wdNewClientDropdown" class="bif-dropdown hidden"></div>
+            <p class="muted" id="wdNewClientHint" style="font-size:12px;margin-top:4px;display:none"></p>
           </div>
 
           <div class="row" style="margin-bottom:1rem;align-items:flex-end">
@@ -446,15 +446,11 @@
               <span>CRM Preset</span>
               <select id="wdCrmType" class="inp">
                 <option value="">— choose CRM —</option>
-                <optgroup label="Engine 1">
-                  <option value="NPF">NPF (Meritto)</option>
-                </optgroup>
-                <optgroup label="Engine 2 — LSQ / Others">
-                  <option value="LSQ">LSQ (LeadSquared)</option>
-                  <option value="ExtraEdge">ExtraEdge</option>
-                  <option value="Client">Client CRM</option>
-                  <option value="GoogleSheet">Google Sheet</option>
-                </optgroup>
+                <option value="NPF">NPF (Meritto)</option>
+                <option value="LSQ">LSQ (LeadSquared)</option>
+                <option value="ExtraEdge">ExtraEdge</option>
+                <option value="Client">Client</option>
+                <option value="GoogleSheet">Google Sheet</option>
               </select>
             </label>
             <label class="field" style="min-width:180px">

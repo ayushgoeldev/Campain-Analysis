@@ -687,69 +687,29 @@ td.anno { text-align: left !important; vertical-align: middle; width: 160px; min
 }
 .status-badge.configured { background: var(--good-soft); color: var(--good); }
 .status-badge.not-configured { background: var(--warn-soft); color: var(--warn); }
-/* ---- Sticky Configuration Action Bar ------------------------------------ */
-.config-action-bar {
-  position: sticky;
-  bottom: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 20px;
+/* ---- Bifurcation searchable dropdown ------------------------------------ */
+.bif-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 200;
   background: var(--surface);
-  border-top: 1px solid var(--line);
-  box-shadow: 0 -4px 16px rgba(0,0,0,.12);
-  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  max-height: 260px;
+  overflow-y: auto;
+  margin-top: 2px;
 }
-
-.config-action-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.bif-dropdown.hidden { display: none; }
+.bif-option {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+  transition: background .1s;
 }
-
-.config-action-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.config-compute-btn {
-  font-size: 14px;
-  padding: 8px 22px;
-  font-weight: 700;
-  letter-spacing: .01em;
-}
-
-.config-compute-btn:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-}
-
-/* ---- Wizard step improvements ------------------------------------------- */
-.wizard-step-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.wizard-step-num {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.wizard-step-title {
-  font-weight: 600;
-  font-size: 15px;
-}
+.bif-option:last-child { border-bottom: none; }
+.bif-option:hover,
+.bif-option.active { background: var(--accent-soft); }

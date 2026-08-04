@@ -1384,11 +1384,6 @@ const WD_FIELDS = [
   ['adm_values', 'Admission — values (comma-sep)',    'list'],
 ];
 
-// WD_PRESETS: Only TWO calculation engines exist.
-// Engine 1: NPF  — uses NPF/Meritto formulas
-// Engine 2: LSQ  — shared engine for LSQ, ExtraEdge, Client CRM, Google Sheet
-// The custom_crm_name field handles display names (Salesforce, TargetX, etc.)
-// and must NOT affect which engine runs.
 const WD_PRESETS = {
   NPF: { crm_type: 'NPF' },
   LSQ: {
@@ -1412,9 +1407,8 @@ const WD_PRESETS = {
     adm_column:  'LeadStage',
     adm_values:  [],
   },
-  // Client CRM → uses LSQ engine (same calculation logic, different column names)
   Client: {
-    crm_type: 'LSQ',
+    crm_type: 'Client',
     source_value:     'kollegeapply',
     medium_column:    'Medium',
     source_column:    'Source',
@@ -1434,9 +1428,8 @@ const WD_PRESETS = {
     adm_column:  '',
     adm_values:  [],
   },
-  // ExtraEdge → uses LSQ engine
   ExtraEdge: {
-    crm_type: 'LSQ',
+    crm_type: 'ExtraEdge',
     source_value:     'kollegeapply',
     medium_column:    'Medium',
     source_column:    'Source',
@@ -1459,9 +1452,8 @@ const WD_PRESETS = {
   // No pre-existing Google Sheet formula set exists in this app — this preset
   // intentionally leaves every field blank so it behaves like "Client" (fully
   // manual column mapping) until real Google Sheet formulas are defined.
-  // Google Sheet → uses LSQ engine
   GoogleSheet: {
-    crm_type: 'LSQ',
+    crm_type: 'GoogleSheet',
     source_value: '', medium_column: '', source_column: '', campaign_column: '', lead_type_column: '',
     verified_column: '', verified_value: '', primary_value: 'Primary', secondary_value: 'Secondary', tertiary_value: 'Tertiary',
     secondary_values: ['Secondary'], tertiary_values: ['Tertiary'],
@@ -1542,7 +1534,12 @@ async function switchWdClient() {
   await loadWdClients();
   await loadWdSettings();
   // Auto-fill tracking ID and CRM from bifurcation if fields are empty
-  if (clientData.active?.name) await autoFillWdFromBifurcation(clientData.active.name);
+  // Auto-fill from bifurcation when client switches — always fresh lookup
+  if (clientData.active?.name) {
+    const existingInput = document.getElementById('wdClientConfigSearch');
+    if (existingInput) existingInput.value = clientData.active.name;
+    await autoFillWdFromBifurcation(clientData.active.name);
+  }
   if ($('#wd-view-datasets').classList.contains('is-active')) await loadWdDatasets();
   if ($('#wd-view-report').classList.contains('is-active')) await loadWdReport();
 }
@@ -1552,17 +1549,22 @@ async function loadWdDatasets() {
   if (!container) return;
   container.innerHTML = '<h2>Datasets</h2><p class="muted">Loading…</p>';
   const { tree } = await (await fetch('/api/wd/datasets/tree')).json();
-
-  // FIX 1: Only show clients that have at least one uploaded dataset.
-  // Clients only in bifurcation, newly created, or empty placeholders are excluded.
-  const activeTree = (tree || []).filter((c) => c.datasets && c.datasets.length > 0);
-
-  if (!activeTree.length) {
-    container.innerHTML = '<h2>Datasets</h2><p class="muted" style="padding:24px 0;text-align:center">No datasets uploaded yet. Go to <strong>Setup</strong> to create a client and upload data.</p>';
+  if (!tree || !tree.length) {
+    container.innerHTML = '<h2>Datasets</h2><p class="muted" style="padding:24px 0;text-align:center">No clients or datasets yet. Create a client in <strong>Setup</strong> and upload data.</p>';
     return;
   }
 
-  const html = activeTree.map((client) => {
+  const html = tree.map((client) => {
+    if (!client.datasets.length) {
+      return `<div class="wd-folder">
+        <div class="wd-folder-head" data-toggle-folder>
+          <span class="wd-folder-arrow">▶</span>
+          <span class="wd-folder-icon">📁</span>
+          <span class="wd-folder-name">${esc(client.clientName)}</span>
+          <span class="muted" style="margin-left:8px;font-size:12px">(no datasets)</span>
+        </div>
+      </div>`;
+    }
     const dsHtml = client.datasets.map((ds) => {
       const sheetsHtml = ds.sheets.map((sh) =>
         `<div class="wd-file" data-view-file data-ds-id="${ds.id}" data-sheet="${esc(sh.name)}">
@@ -1672,32 +1674,31 @@ async function viewWdFile(dsId, sheet) {
 }
 
 async function loadWdSettings() {
-  const res = await fetch('/api/wd/settings').catch(() => null);
+  const [res, crmRes] = await Promise.all([
+    fetch('/api/wd/settings').catch(() => null),
+    fetch('/api/bifurcation/crm-types').catch(() => null),
+  ]);
   const json = res ? await res.json().catch(() => ({})) : {};
   const settings = json.settings || {};
+  const crmData = crmRes ? await crmRes.json().catch(() => ({ crm_types: [] })) : { crm_types: [] };
   const isAdmin = canAccess('clients-delete');
   const sel = $('#wdCrmType');
   if (sel) {
-    // FIX 2: Do NOT add CRM types from bifurcation sheet.
-    // Dropdown is fixed in HTML — only the two engines + named presets.
-    // Map saved crm_type to the nearest known preset option.
-    const savedCrm = settings.crm_type || '';
-    const knownPresets = ['NPF', 'LSQ', 'ExtraEdge', 'Client', 'GoogleSheet'];
-    if (knownPresets.includes(savedCrm)) {
-      sel.value = savedCrm;
-    } else if (savedCrm) {
-      // Unknown saved value — map to engine based on name
-      sel.value = /^npf/i.test(savedCrm) ? 'NPF' : 'LSQ';
+    const existing = new Set([...sel.options].map((o) => o.value));
+    for (const ct of crmData.crm_types || []) {
+      if (ct && !existing.has(ct)) {
+        const opt = document.createElement('option');
+        opt.value = ct; opt.textContent = ct;
+        sel.appendChild(opt);
+      }
     }
-    // FIX 1 (permission): CRM Preset editable by Admin AND User
-    sel.disabled = false;
+    sel.value = settings.crm_type || '';
+    sel.disabled = !isAdmin;
   }
   const tid = $('#wdTrackingId');
-  // Tracking ID: Admin only
   if (tid) { tid.value = settings.tracking_id || ''; tid.readOnly = !isAdmin; }
   const customCrm = $('#wdCustomCrmName');
-  // Custom CRM Name: editable by Admin AND User
-  if (customCrm) { customCrm.value = settings.custom_crm_name || ''; customCrm.readOnly = false; }
+  if (customCrm) { customCrm.value = settings.custom_crm_name || ''; customCrm.readOnly = !isAdmin; }
   renderWdSettingsForm(settings);
   renderWdUploadSection(settings.crm_type || '');
 }
@@ -2231,26 +2232,196 @@ async function wdChunkedUpload(file, name) {
   return sent;
 }
 
-// ---- WD Card 1: Client Configuration (mirrors Campaign's Client Configuration) --
+// ---- WD Card 1: Client Configuration — full rewrite ----------------------
 let wdClientConfigMode = 'existing';
+let wdSelectedBifClient = null; // tracks the currently selected bifurcation row
 
 function currentWdClientConfigName() {
-  const el = wdClientConfigMode === 'existing' ? $('#wdClientConfigSearch') : $('#wdNewClientNameSetup');
+  const el = wdClientConfigMode === 'existing'
+    ? $('#wdClientConfigSearch')
+    : $('#wdNewClientNameSetup');
   return (el?.value || '').trim();
 }
 
+// Build and show the custom searchable dropdown for an input
+function buildBifDropdown(inputEl, dropdownEl, filter, onSelect) {
+  if (!inputEl || !dropdownEl) return;
+  const q = filter.toLowerCase();
+  const matches = bifurcationLookup.filter((r) =>
+    !q || (r.client_name || '').toLowerCase().includes(q)
+  );
+  if (!matches.length) {
+    dropdownEl.innerHTML = '<div class="bif-option muted" style="padding:8px 12px;font-size:13px">No matches in Bifurcation sheet</div>';
+    dropdownEl.classList.remove('hidden');
+    return;
+  }
+  dropdownEl.innerHTML = matches.map((r, i) =>
+    `<div class="bif-option" data-idx="${i}" style="padding:8px 12px;cursor:pointer;font-size:13px">
+      <span style="font-weight:500">${esc(r.client_name)}</span>
+      ${r.crm_type ? `<span class="muted" style="margin-left:8px;font-size:11px">${esc(r.crm_type)}</span>` : ''}
+      ${r.tracking_id ? `<span class="muted" style="margin-left:8px;font-size:11px">ID: ${esc(r.tracking_id)}</span>` : ''}
+    </div>`
+  ).join('');
+  dropdownEl.classList.remove('hidden');
+  dropdownEl.querySelectorAll('.bif-option[data-idx]').forEach((opt, i) => {
+    opt.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const row = matches[i];
+      inputEl.value = row.client_name;
+      dropdownEl.classList.add('hidden');
+      onSelect(row);
+    });
+    opt.addEventListener('mouseenter', () => {
+      dropdownEl.querySelectorAll('.bif-option').forEach((x) => x.classList.remove('active'));
+      opt.classList.add('active');
+    });
+  });
+}
+
+// Fill WD fields from a bifurcation row — ALWAYS overwrite, never skip
+function applyBifRowToWd(row) {
+  if (!row) return;
+  wdSelectedBifClient = row;
+
+  // Tracking ID: always set from bifurcation (never cached/default)
+  const tid = $('#wdTrackingId');
+  if (tid) tid.value = row.tracking_id || '';
+
+  // CRM: map to known preset or keep blank
+  const crmSel = $('#wdCrmType');
+  if (crmSel && row.crm_type) {
+    const rawCrm = String(row.crm_type || '').trim();
+    const knownPresets = ['NPF', 'LSQ', 'ExtraEdge', 'Client', 'GoogleSheet'];
+    const match = knownPresets.find((k) => k.toLowerCase() === rawCrm.toLowerCase());
+    const isNpf = /^npf/i.test(rawCrm);
+    crmSel.value = match || (isNpf ? 'NPF' : 'LSQ');
+    // Set custom CRM name to display value if not a standard preset
+    const customEl = $('#wdCustomCrmName');
+    if (customEl) {
+      if (!match) {
+        // Unknown CRM name → put in custom display name field
+        customEl.value = rawCrm;
+      } else if (!customEl.value) {
+        customEl.value = '';
+      }
+    }
+    const preset = WD_PRESETS[crmSel.value];
+    if (preset) renderWdSettingsForm(preset);
+    renderWdUploadSection(crmSel.value);
+  }
+}
+
+// ---- Existing Client searchable dropdown ----------------------------------
+const wdExistingInput = document.getElementById('wdClientConfigSearch');
+const wdExistingDropdown = document.getElementById('wdClientConfigDropdown');
+
+if (wdExistingInput) {
+  wdExistingInput.addEventListener('focus', () => {
+    buildBifDropdown(wdExistingInput, wdExistingDropdown, wdExistingInput.value, (row) => {
+      applyBifRowToWd(row);
+    });
+  });
+
+  wdExistingInput.addEventListener('input', () => {
+    wdSelectedBifClient = null; // reset when user types
+    buildBifDropdown(wdExistingInput, wdExistingDropdown, wdExistingInput.value, (row) => {
+      applyBifRowToWd(row);
+    });
+  });
+
+  wdExistingInput.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (wdExistingDropdown) wdExistingDropdown.classList.add('hidden');
+      // If user typed a name without selecting from dropdown, still do lookup
+      const name = wdExistingInput.value.trim();
+      if (name && !wdSelectedBifClient) {
+        const match = findBifurcationMatch(name);
+        if (match) applyBifRowToWd(match);
+        else {
+          // No match — clear tracking ID since it might be stale
+          const tid = $('#wdTrackingId');
+          if (tid) tid.value = '';
+        }
+      }
+    }, 150);
+  });
+
+  wdExistingInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      wdExistingDropdown?.classList.add('hidden');
+      wdExistingInput.blur();
+    }
+    if (e.key === 'ArrowDown') {
+      const first = wdExistingDropdown?.querySelector('.bif-option[data-idx]');
+      if (first) { e.preventDefault(); first.focus(); }
+    }
+  });
+}
+
+// ---- New Client searchable input + bifurcation hint -----------------------
+const wdNewInput = document.getElementById('wdNewClientNameSetup');
+const wdNewDropdown = document.getElementById('wdNewClientDropdown');
+const wdNewHint = document.getElementById('wdNewClientHint');
+
+if (wdNewInput) {
+  wdNewInput.addEventListener('input', () => {
+    const val = wdNewInput.value.trim();
+    wdSelectedBifClient = null;
+    if (!val) {
+      wdNewDropdown?.classList.add('hidden');
+      if (wdNewHint) wdNewHint.style.display = 'none';
+      return;
+    }
+    // Show matching bifurcation entries
+    buildBifDropdown(wdNewInput, wdNewDropdown, val, (row) => {
+      applyBifRowToWd(row);
+      if (wdNewHint) {
+        wdNewHint.textContent = `✓ Found in Bifurcation sheet — Tracking ID and CRM auto-filled.`;
+        wdNewHint.style.display = 'block';
+      }
+    });
+    // Show hint whether this is new or existing
+    const match = findBifurcationMatch(val);
+    if (wdNewHint) {
+      if (match) {
+        wdNewHint.textContent = `Found in Bifurcation sheet. Selecting will auto-fill Tracking ID and CRM.`;
+      } else {
+        wdNewHint.textContent = `"${val}" is not in the Bifurcation sheet — a brand-new client will be created.`;
+      }
+      wdNewHint.style.display = 'block';
+    }
+  });
+
+  wdNewInput.addEventListener('blur', () => {
+    setTimeout(() => {
+      wdNewDropdown?.classList.add('hidden');
+      // Auto-fill from bifurcation if exact match
+      const val = wdNewInput.value.trim();
+      if (val && !wdSelectedBifClient) {
+        const match = findBifurcationMatch(val);
+        if (match) applyBifRowToWd(match);
+      }
+    }, 150);
+  });
+}
+
+// ---- Mode toggle (Existing / New) ----------------------------------------
 $$('#wdClientConfigModeSeg .seg-btn').forEach((b) => b.addEventListener('click', () => {
   $$('#wdClientConfigModeSeg .seg-btn').forEach((x) => x.classList.remove('is-active'));
   b.classList.add('is-active');
   wdClientConfigMode = b.dataset.wdClientMode;
-  $('#wdClientConfigExistingField')?.classList.toggle('hidden', wdClientConfigMode !== 'existing');
-  $('#wdClientConfigNewField')?.classList.toggle('hidden', wdClientConfigMode !== 'new');
+  const existingField = document.getElementById('wdClientConfigExistingField');
+  const newField = document.getElementById('wdClientConfigNewField');
+  if (existingField) existingField.style.display = wdClientConfigMode === 'existing' ? '' : 'none';
+  if (newField) newField.style.display = wdClientConfigMode === 'new' ? '' : 'none';
+  // Clear fields when switching mode
+  if (wdExistingInput) wdExistingInput.value = '';
+  if (wdNewInput) wdNewInput.value = '';
+  wdSelectedBifClient = null;
+  // Clear tracking ID since it belongs to the previously selected client
+  const tid = $('#wdTrackingId');
+  if (tid) tid.value = '';
 }));
-
-$('#wdClientConfigSearch')?.addEventListener('change', async () => {
-  const name = currentWdClientConfigName();
-  if (name) await autoFillWdFromBifurcation(name);
-});
 
 // Save now does double duty (per "merge CRM Configuration into Client
 // Configuration"): if the typed/selected name isn't the currently active WD
@@ -2259,14 +2430,21 @@ $('#wdClientConfigSearch')?.addEventListener('change', async () => {
 $('#wdSaveSettings')?.addEventListener('click', async () => {
   const name = currentWdClientConfigName();
   const status = $('#wdSettingsStatus');
-  if (name && name.toLowerCase() !== ($('#wdClientName')?.textContent || '').trim().toLowerCase()) {
+  if (!name) {
+    if (status) { status.textContent = 'Enter or select a client name first'; status.className = 'status err'; }
+    return;
+  }
+  const currentActive = ($('#wdClientName')?.textContent || '').trim();
+  if (name.toLowerCase() !== currentActive.toLowerCase()) {
     if (status) { status.textContent = 'Configuring client…'; status.className = 'status'; }
+    // Use tracking ID from bifurcation row if available, else from field
+    const trackingId = wdSelectedBifClient?.tracking_id || $('#wdTrackingId')?.value || '';
     const res = await fetch('/api/wd/clients', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name,
         crm_type: $('#wdCrmType')?.value || '',
-        tracking_id: $('#wdTrackingId')?.value || '',
+        tracking_id: trackingId,
       }),
     });
     if (!res.ok) {
@@ -2290,15 +2468,9 @@ $('#wdComputeBtn')?.addEventListener('click', () => {
 
 $('#wdCrmType')?.addEventListener('change', () => {
   const crm = $('#wdCrmType').value;
-  // FIX 3: Route to correct engine. Non-NPF CRMs all use LSQ engine.
-  // The display name comes from custom_crm_name, not from crm_type.
   const preset = WD_PRESETS[crm];
-  if (preset) {
-    renderWdSettingsForm(preset);
-  } else {
-    // Unknown CRM value (e.g. from old saved settings) — default to LSQ engine
-    renderWdSettingsForm({ crm_type: 'LSQ' });
-  }
+  if (preset) renderWdSettingsForm(preset);
+  else renderWdSettingsForm({ crm_type: crm });
   renderWdUploadSection(crm);
 });
 
@@ -2451,24 +2623,26 @@ $('#bifurcationApplyBtn')?.addEventListener('click', async () => {
 });
 
 // ---- WD Setup auto-fill from bifurcation ----------------------------------
+// Uses in-memory cache (bifurcationLookup) for instant lookup — no extra fetch.
+// ALWAYS overwrites existing values to prevent stale tracking IDs.
 async function autoFillWdFromBifurcation(clientName) {
   if (!clientName) return;
+  // Try cache first (instant)
+  const cached = findBifurcationMatch(clientName);
+  if (cached) {
+    applyBifRowToWd(cached);
+    return;
+  }
+  // Fall back to API if cache is empty (e.g. page just loaded)
   const data = await fetch(`/api/bifurcation/lookup?name=${encodeURIComponent(clientName)}`).then((r) => r.json()).catch(() => ({ found: false }));
-  if (!data.found) return;
-  if (data.tracking_id) {
+  if (!data.found) {
+    // No match — clear tracking ID to prevent stale value
     const tid = $('#wdTrackingId');
-    if (tid && !tid.value) tid.value = data.tracking_id;
+    if (tid) tid.value = '';
+    return;
   }
-  if (data.crm_type) {
-    const crmSel = $('#wdCrmType');
-    if (crmSel && !crmSel.value) {
-      crmSel.value = data.crm_type;
-      const preset = WD_PRESETS[data.crm_type];
-      if (preset) renderWdSettingsForm(preset);
-      else renderWdSettingsForm({ crm_type: data.crm_type });
-      renderWdUploadSection(data.crm_type);
-    }
-  }
+  // ALWAYS overwrite — never skip if field already has a value
+  applyBifRowToWd(data);
 }
 
 // ---- Dataset Management (admin only) --------------------------------------
